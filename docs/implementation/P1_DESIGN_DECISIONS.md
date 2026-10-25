@@ -42,3 +42,28 @@ Revision 9, Baseline v1 hay Decision Register.
 | Yêu cầu bị từ chối không gian | `OUT_OF_SERVICE_AREA`, `UNSUPPORTED_INTER_PROVINCE_ROUTE` trả 422 và **không** lưu `trip_requests` (cột `mode` NOT NULL) | |
 | Bộ lọc log tọa độ | Che mọi số thập phân ≥ 4 chữ số lẻ trong log | Lưới an toàn cho Mục 59.2 |
 | Client OSRM | Kết nối mới mỗi request (`Connection: close`) | Phát hiện keep-alive ~40 ms ở P0 |
+
+## 3. Quyết định "P1: GEOGRAPHY & S1 CLOSURE" (2026-10-26) — cách hiện thực
+
+| Mã | Quyết định của Chủ dự án | Hiện thực | Còn chờ |
+|---|---|---|---|
+| A1 | Ánh xạ địa danh lịch sử sang đơn vị sau cải cách 2025, có nguồn thẩm quyền | `admin_mapping` trong `config/service_area_rules.candidate.v2.yaml` (mã QĐ 19/2025/QĐ-TTg, khoản NQ 1656/NQ-UBTVQH15, mức chắc chắn) → `admin_mapping.csv` | Đối chiếu bản PDF chính thức |
+| A2 | Tách khu đô thị An Khánh khỏi La Phù nếu có bằng chứng hình học | Quy tắc **U3**: polygon `landuse=residential` có tên của các khu đô thị An Khánh trên OSM (cắt theo ranh giới thành phố); Xã An Khánh mới không lấy nguyên khối | Ranh giới La Phù lịch sử: `PENDING_GEOMETRY_EVIDENCE` |
+| A3 | Đối chiếu Mỹ Đình / Gia Lâm / Đông Anh theo phạm vi địa danh | Điểm kiểm tra có tên (SVĐ & Bến xe Mỹ Đình, KTĐC Trâu Quỳ); bảng ánh xạ theo khoản NQ 1656 | Đông Anh |
+| A4 | Điểm gốc node 74132064 (có điều kiện) | Xác minh vai trò `admin_centre` trên file nguồn; phân tích độ nhạy ±20 km × 12 điểm/đơn vị (`ST_GeneratePoints`, seed 1) | Quy tắc xử lý đơn vị chỉ một phần trong 150 km (SF-P1-12) |
+| A5 | Danh sách tỉnh Mục 1 là ví dụ | `province_scope: all_within_range`, chọn từng xã/phường | — |
+| A6 | Không tự xóa/nối/lấp | Chỉ phân loại thành phần (`components.csv`) | Quy tắc cho đảo không đường (SF-P1-13) |
+| A7 | `max_passenger_detour_ratio` = 0,30 khi không nhập | `rules.SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO`, ghi rõ nguồn Mục 6, không thêm vào Baseline | — |
+| A8 | Phố Hiến là điểm đại diện ứng viên | Dùng trong ca 72.2; kiểm tra ngữ cảnh 58,055 km vs 65 km | Không phải ánh xạ chính thức |
+| A9 | Giữ bbox OSRM; vùng không có đường không sẵn sàng phục vụ | Loại đơn vị có điểm đại diện ngoài bbox hoặc không định tuyến được (`excluded_units.csv`) | — |
+
+### Bổ sung kỹ thuật mới (không có trong Revision 9)
+
+| Hạng mục | Nội dung |
+|---|---|
+| Ngưỡng phân tích A6 | Mảnh < 0,01 km² và cách thành phần khác < 10 m → `SLIVER_SUSPECTED`; "không có đường" = điểm OSRM `/nearest` của thành phần nằm ngoài thành phần (> 1 m). Chỉ dùng để phân loại, không phải quy tắc nghiệp vụ |
+| Ngưỡng phân tích A4 | Dải ±20 km, 12 điểm mẫu/đơn vị — chỉ để báo cáo |
+| `boundary_eval --report-name` | Không ghi đè bằng chứng gốc của bundle cũ (tự chặn với bundle quy tắc v1) |
+| `service_area_compare` | So sánh hai phiên bản (diện tích, thành phần, đơn vị, điểm đổi trạng thái trên mọi node `place=*` trong bbox, ảnh hưởng phân loại) |
+| Khảo sát S1 (bản nháp dev) | Bảng `survey_respondents` (kỹ thuật) + `survey_responses` (Mục 54) — migration `0002`; `dataset` TEST/RESEARCH theo cấu hình (`SURVEY_DATASET`, `SURVEY_S1_RELEASED`); thiết kế 2×2×2, xoay khối `(i + 2k) mod 6`; QC3/QC4 chỉ gắn cờ; export CSV; `SurveyClientAddressFilter` xóa địa chỉ client khỏi log truy cập của đường dẫn khảo sát |
+| Export places | Thêm `leisure=stadium`, `amenity=bus_station`, `landuse=residential` để có điểm/polygon có tên làm bằng chứng |

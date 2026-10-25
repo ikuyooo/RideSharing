@@ -1,24 +1,30 @@
 """Build CANDIDATE urban_service_area / total_service_area geometries
-(owner decisions P1-D1 / P1-D3; Revision 9 Section 2.3).
+(owner decisions P1-D1 / P1-D3 and "P1: GEOGRAPHY & S1 CLOSURE"; Revision 9 Section 2.3).
 
 Inputs  : OSM exports from scripts/osm/export_service_area_sources.sh (+ MANIFEST),
-          config/service_area_rules.candidate.yaml, baseline max_total_service_radius_km,
-          OSRM car (road distance from the anchor).
+          a rules file (config/service_area_rules.candidate*.yaml), baseline
+          max_total_service_radius_km, OSRM car (road distance from the anchor).
 Outputs : rows in `service_areas` with status CANDIDATE (never APPROVED), and a
           review bundle in <out>/<service_area_version>/:
-          urban.geojson, total.geojson, units.csv, report.json, REVIEW.md
+          urban.geojson, total.geojson, units.csv, admin_mapping.csv,
+          components.csv, sensitivity.csv, report.json, REVIEW.md, CHECKSUMS.sha256
+
+Analyses (A4 150 km sensitivity, A6 component classification, A9 routing
+coverage) only REPORT; they never modify the geometry.
 
 Deterministic: identical inputs give the identical service_area_version and
 geometry; a rerun reports "unchanged" and a changed geometry under an existing
 version aborts.
 
-Run (compose): docker compose --profile service-area run --rm service-area-build
+Run (compose): docker compose --profile service-area run --rm service-area-build \
+    python -m app.modules.trip.service_area_build --rules /app/config/<rules file>
 """
 
 import argparse
 import csv
 import hashlib
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -32,6 +38,9 @@ from app.core.settings import get_settings
 
 SCHEMA = "sa_build"  # transient working schema, dropped at the end of a run
 OSRM_BATCH = 150     # destinations per /table call (server max-table-size is 200)
+# A6 analysis heuristics (classification only, not business rules).
+SLIVER_MAX_KM2 = 0.01
+SLIVER_MAX_GAP_M = 10.0
 
 
 @dataclass
@@ -39,6 +48,7 @@ class Build:
     manifest: dict[str, str]
     rules: dict[str, Any]
     max_km: float
+    bbox: tuple[float, float, float, float]
     log: list[str] = field(default_factory=list)
     conflicts: list[str] = field(default_factory=list)
 
@@ -64,6 +74,10 @@ def iter_geojsonseq(path: Path) -> Any:
                 yield json.loads(line)
 
 
+def envelope_sql(b: Build) -> str:
+    return "ST_MakeEnvelope({}, {}, {}, {}, 4326)".format(*b.bbox)
+
+
 # --- loading -----------------------------------------------------------------------
 
 
@@ -73,9 +87,11 @@ def load_inputs(conn: Connection, sources: Path, b: Build) -> None:
     conn.execute(text(f"""CREATE TABLE {SCHEMA}.units (
         osm_id bigint PRIMARY KEY, admin_level int NOT NULL, name text NOT NULL, iso text,
         input_valid boolean NOT NULL, geom geometry(MultiPolygon, 4326) NOT NULL)"""))
+    conn.execute(text(f"CREATE INDEX ON {SCHEMA}.units USING gist (geom)"))
     conn.execute(text(f"""CREATE TABLE {SCHEMA}.places (
-        osm_type text NOT NULL, osm_id bigint NOT NULL, name text, place text, amenity text,
-        geom geometry(Point, 4326) NOT NULL, PRIMARY KEY (osm_type, osm_id))"""))
+        osm_type text NOT NULL, osm_id bigint NOT NULL, name text, kind text,
+        geom_full geometry(Geometry, 4326) NOT NULL, geom geometry(Point, 4326) NOT NULL,
+        PRIMARY KEY (osm_type, osm_id))"""))
 
     rows = []
     for f in iter_geojsonseq(sources / "admin_boundaries.geojsonseq"):
@@ -98,21 +114,20 @@ def load_inputs(conn: Connection, sources: Path, b: Build) -> None:
 
     places = []
     for f in iter_geojsonseq(sources / "places.geojsonseq"):
+        if f["geometry"]["type"] not in ("Point", "Polygon", "MultiPolygon"):
+            continue  # closed ways are also exported as LineString; keep the area
         p = f["properties"]
-        places.append({"t": p["@type"], "id": p["@id"], "name": p.get("name"), "place": p.get("place"),
-                       "amenity": p.get("amenity"), "g": json.dumps(f["geometry"])})
-    conn.execute(text(f"""INSERT INTO {SCHEMA}.places (osm_type, osm_id, name, place, amenity, geom)
-        SELECT :t, :id, :name, :place, :amenity, ST_PointOnSurface(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(:g), 4326)))
+        kind = next((f"{k}={p[k]}" for k in ("place", "amenity", "leisure", "landuse") if p.get(k)), None)
+        places.append({"t": p["@type"], "id": p["@id"], "name": p.get("name"), "kind": kind,
+                       "g": json.dumps(f["geometry"])})
+    conn.execute(text(f"""INSERT INTO {SCHEMA}.places (osm_type, osm_id, name, kind, geom_full, geom)
+        SELECT :t, :id, :name, :kind, g, ST_PointOnSurface(g)
+        FROM (SELECT ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(:g), 4326)) AS g) s
         ON CONFLICT DO NOTHING"""), places)
-    b.note(f"loaded places: {len(places)}")
+    b.note(f"loaded places/landmarks: {len(places)}")
 
 
 # --- selection ---------------------------------------------------------------------
-
-
-def province_containing(conn: Connection, point_sql: str, params: dict[str, Any]) -> list[Any]:
-    return conn.execute(text(f"""SELECT u.osm_id, u.name, u.iso FROM {SCHEMA}.units u
-        WHERE u.admin_level = 4 AND ST_Intersects(u.geom, ({point_sql}))"""), params).all()
 
 
 def node_point_sql() -> str:
@@ -138,7 +153,7 @@ def units_in_provinces(conn: Connection, province_ids: list[int]) -> list[Any]:
         ORDER BY u.osm_id"""), {"ids": province_ids}).all()
 
 
-def select_urban(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]]:
+def select_urban(conn: Connection, city: Any, b: Build) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     rules = b.rules["urban"]
     units = units_in_provinces(conn, [city.osm_id])
     chosen: dict[int, dict[str, Any]] = {}
@@ -152,11 +167,26 @@ def select_urban(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]]:
             b.conflicts.append(f"urban rule U2: '{wanted}' matched {len(matches)} units inside the city (expected 1)")
         for u in matches:
             chosen[u.osm_id] = {"osm_id": u.osm_id, "name": u.name, "province": u.province, "rule": "U2 named commune"}
-    b.note(f"urban: {len(units)} level-6 units in city, selected {len(chosen)}")
-    return sorted(chosen.values(), key=lambda r: r["osm_id"])
+    areas = []
+    for area in rules.get("include_osm_areas", []):
+        osm_type, osm_id = area["osm"].split("/")
+        row = conn.execute(text(f"""SELECT p.name, p.kind, ST_GeometryType(p.geom_full) AS gtype,
+                ST_Area(ST_Intersection(p.geom_full, c.geom)::geography) / 1e6 AS km2_in_city,
+                (SELECT u.name FROM {SCHEMA}.units u WHERE u.admin_level = 6 AND ST_Intersects(u.geom, p.geom) LIMIT 1) AS unit
+            FROM {SCHEMA}.places p, {SCHEMA}.units c
+            WHERE p.osm_type = :t AND p.osm_id = :id AND c.osm_id = :city"""),
+            {"t": osm_type, "id": int(osm_id), "city": city.osm_id}).mappings().one_or_none()
+        if row is None or row["gtype"] not in ("ST_Polygon", "ST_MultiPolygon") or not row["km2_in_city"]:
+            b.conflicts.append(f"urban rule U3: {area['osm']} ({area.get('label')}) not found as a polygon inside the city")
+            continue
+        areas.append({"osm": area["osm"], "label": area.get("label"), "osm_name": row["name"], "kind": row["kind"],
+                      "km2_in_city": round(row["km2_in_city"], 4), "containing_unit": row["unit"],
+                      "rule": "U3 OSM urban-development polygon", "note": area.get("note")})
+    b.note(f"urban: {len(units)} level-6 units in city, selected {len(chosen)} units + {len(areas)} OSM areas")
+    return sorted(chosen.values(), key=lambda r: r["osm_id"]), areas
 
 
-def select_provinces(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]]:
+def map_neighbours(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]]:
     provinces = [{"neighbour": "(city)", "osm_id": city.osm_id, "name": city.name, "iso": city.iso, "evidence": "city"}]
     for n in b.rules["total"]["neighbours"]:
         if n["by"] == "province_iso":
@@ -164,7 +194,8 @@ def select_provinces(conn: Connection, city: Any, b: Build) -> list[dict[str, An
                                 {"iso": n["iso3166_2"]}).all()
             evidence = f"admin_level=4 unit with ISO3166-2={n['iso3166_2']}"
         else:
-            rows = province_containing(conn, node_point_sql(), {"node": n["osm_node"]})
+            rows = conn.execute(text(f"""SELECT u.osm_id, u.name, u.iso FROM {SCHEMA}.units u
+                WHERE u.admin_level = 4 AND ST_Intersects(u.geom, ({node_point_sql()}))"""), {"node": n["osm_node"]}).all()
             evidence = f"admin_level=4 unit containing node/{n['osm_node']}"
         if len(rows) != 1:
             b.conflicts.append(f"neighbour '{n['name']}': {evidence} matched {len(rows)} provinces (expected 1)")
@@ -174,7 +205,7 @@ def select_provinces(conn: Connection, city: Any, b: Build) -> list[dict[str, An
     unique: dict[int, dict[str, Any]] = {}
     for p in provinces:
         unique.setdefault(p["osm_id"], p | {"neighbours": []})["neighbours"].append(p["neighbour"])
-    b.note("provinces for total area: " + "; ".join(f"{p['name']} <- {', '.join(p['neighbours'])}" for p in unique.values()))
+    b.note("Section 1 neighbours -> provinces: " + "; ".join(f"{p['name']} <- {', '.join(p['neighbours'])}" for p in unique.values()))
     return list(unique.values())
 
 
@@ -195,101 +226,194 @@ def road_distances(osrm_url: str, anchor: tuple[float, float], points: list[tupl
     return out
 
 
-def select_total(conn: Connection, provinces: list[dict[str, Any]], osrm_url: str, b: Build) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def anchor_point(conn: Connection, b: Build) -> tuple[float, float, str]:
     anchor_id = b.rules["total"]["anchor"]["osm_node"]
-    anchor = conn.execute(text(f"SELECT ST_X(geom), ST_Y(geom), name FROM {SCHEMA}.places WHERE osm_type='node' AND osm_id=:n"),
-                          {"n": anchor_id}).one_or_none()
-    if anchor is None:
+    row = conn.execute(text(f"SELECT ST_X(geom), ST_Y(geom), name FROM {SCHEMA}.places WHERE osm_type='node' AND osm_id=:n"),
+                       {"n": anchor_id}).one_or_none()
+    if row is None:
         raise SystemExit(f"anchor node/{anchor_id} not found in places export")
-    b.note(f"anchor: node/{anchor_id} '{anchor[2]}' ({anchor[0]:.5f}, {anchor[1]:.5f}) - ANCHOR_DEFINITION_REQUIRED")
+    return float(row[0]), float(row[1]), str(row[2])
 
-    all_provinces = conn.execute(text(f"SELECT osm_id FROM {SCHEMA}.units WHERE admin_level = 4")).scalars().all()
-    selected_ids = {p["osm_id"] for p in provinces}
-    # The routing graph only covers the P0 clip bbox; a unit outside it cannot be
-    # routed (OSRM would snap it to the bbox edge), so it is excluded and reported.
-    min_lon, min_lat, max_lon, max_lat = (float(x) for x in b.manifest["bbox"].split(","))
-    units, outside_extract = [], {}
-    for u in units_in_provinces(conn, list(all_provinces)):
+
+def select_total(conn: Connection, provinces: list[dict[str, Any]], osrm_url: str, b: Build
+                 ) -> tuple[list[dict[str, Any]], dict[str, Any], dict[int, dict[str, Any]]]:
+    lon, lat, name = anchor_point(conn, b)
+    b.note(f"anchor: node/{b.rules['total']['anchor']['osm_node']} '{name}' ({lon:.5f}, {lat:.5f})")
+    scope = b.rules["total"].get("province_scope", "listed")
+    all_provinces = list(conn.execute(text(f"SELECT osm_id FROM {SCHEMA}.units WHERE admin_level = 4")).scalars())
+    selected_ids = set(all_provinces) if scope == "all_within_range" else {p["osm_id"] for p in provinces}
+    min_lon, min_lat, max_lon, max_lat = b.bbox
+    routed, outside_extract = [], []
+    for u in units_in_provinces(conn, all_provinces):
         if min_lon <= u.lon <= max_lon and min_lat <= u.lat <= max_lat:
-            units.append(u)
+            routed.append(u)
         elif u.province_id in selected_ids:
-            outside_extract[u.province] = outside_extract.get(u.province, 0) + 1
-    dists = road_distances(osrm_url, (anchor[0], anchor[1]), [(u.lon, u.lat) for u in units])
-    chosen, outside_scope = [], {}
-    unreachable = 0
-    for u, (km, snap_m) in zip(units, dists, strict=True):
+            outside_extract.append({"osm_id": u.osm_id, "name": u.name, "province": u.province,
+                                    "reason": "representative point outside the routing extract bbox (A9)"})
+    dists = road_distances(osrm_url, (lon, lat), [(u.lon, u.lat) for u in routed])
+    info: dict[int, dict[str, Any]] = {}
+    chosen, unroutable, outside_scope = [], [], {}
+    for u, (km, snap_m) in zip(routed, dists, strict=True):
+        info[u.osm_id] = {"name": u.name, "province": u.province, "road_km": km, "snap_m": snap_m}
         if km is None:
-            unreachable += u.province_id in selected_ids
+            if u.province_id in selected_ids:
+                unroutable.append({"osm_id": u.osm_id, "name": u.name, "province": u.province,
+                                   "reason": "no OSRM car route from the anchor (A9)"})
             continue
         if km > b.max_km:
             continue
-        row = {"osm_id": u.osm_id, "name": u.name, "province": u.province, "road_km": round(km, 3),
-               "snap_m": round(snap_m, 1), "rule": f"T road distance <= {b.max_km} km"}
-        if u.province_id in selected_ids:
-            chosen.append(row)
+        if u.province_id not in selected_ids:
+            outside_scope[u.province] = outside_scope.get(u.province, 0) + 1
+            continue
+        chosen.append({"osm_id": u.osm_id, "name": u.name, "province": u.province, "road_km": round(km, 3),
+                       "snap_m": round(snap_m, 1), "rule": f"T representative point road distance <= {b.max_km} km"})
+    by_province: dict[str, int] = {}
+    for c in chosen:
+        by_province[c["province"]] = by_province.get(c["province"], 0) + 1
+    b.note(f"total ({scope}): {len(chosen)} units; by province {by_province}; unroutable {len(unroutable)}; "
+           f"outside routing extract {len(outside_extract)}")
+    stats = {"anchor": {"osm_node": b.rules["total"]["anchor"]["osm_node"], "name": name, "lon": lon, "lat": lat},
+             "province_scope": scope, "units_routed": len(routed), "units_by_province": by_province,
+             "excluded_outside_routing_extract": outside_extract, "excluded_unroutable": unroutable,
+             "units_in_range_outside_scope": outside_scope}
+    return sorted(chosen, key=lambda r: r["osm_id"]), stats, info
+
+
+# --- analyses (report only) ------------------------------------------------------------
+
+
+def sensitivity_150(conn: Connection, info: dict[int, dict[str, Any]], chosen_ids: set[int], osrm_url: str,
+                    b: Build) -> list[dict[str, Any]]:
+    """A4: sample points inside units whose representative-point distance is near the
+    limit, to show units that are only partly within (or beyond) the road limit."""
+    band = float(b.rules["total"].get("sensitivity_band_km", 0))
+    n = int(b.rules["total"].get("sensitivity_points_per_unit", 0))
+    if not band or not n:
+        return []
+    near = [uid for uid, i in info.items() if i["road_km"] is not None and abs(i["road_km"] - b.max_km) <= band]
+    samples: list[tuple[int, float, float]] = []
+    for uid in near:
+        pts = conn.execute(text(f"""SELECT ST_X(g), ST_Y(g) FROM (
+            SELECT (ST_Dump(ST_GeneratePoints(ST_Intersection(geom, {envelope_sql(b)}), :n, 1))).geom AS g
+            FROM {SCHEMA}.units WHERE osm_id = :id) s"""), {"n": n, "id": uid}).all()
+        samples.extend((uid, x, y) for x, y in pts)
+    lon, lat, _ = anchor_point(conn, b)
+    dists = road_distances(osrm_url, (lon, lat), [(x, y) for _, x, y in samples])
+    per_unit: dict[int, list[float | None]] = {}
+    for (uid, _, _), (km, _) in zip(samples, dists, strict=True):
+        per_unit.setdefault(uid, []).append(km)
+    rows = []
+    for uid, kms in sorted(per_unit.items()):
+        ok = [k for k in kms if k is not None]
+        within = sum(k <= b.max_km for k in ok)
+        included = uid in chosen_ids
+        if included and within < len(kms):
+            verdict = "INCLUDED_PARTLY_BEYOND_LIMIT"
+        elif not included and within > 0:
+            verdict = "EXCLUDED_PARTLY_WITHIN_LIMIT"
         else:
-            outside_scope.setdefault(u.province, 0)
-            outside_scope[u.province] += 1
-    b.note(f"total: {len(chosen)} level-6 units within {b.max_km} km in selected provinces; "
-           f"{unreachable} unroutable; excluded as outside the routing extract: {outside_extract or 'none'}; "
-           f"other provinces with units in range: {outside_scope or 'none'}")
-    stats = {"anchor": {"osm_node": anchor_id, "name": anchor[2], "lon": anchor[0], "lat": anchor[1]},
-             "units_routed": len(units), "unroutable_in_scope": unreachable,
-             "excluded_outside_routing_extract": outside_extract,
-             "units_in_range_outside_listed_provinces": outside_scope}
-    return sorted(chosen, key=lambda r: r["osm_id"]), stats
+            verdict = "CONSISTENT"
+        rows.append({"osm_id": uid, "name": info[uid]["name"], "province": info[uid]["province"],
+                     "included": included, "rep_point_km": round(info[uid]["road_km"], 3), "samples": len(kms),
+                     "samples_within": within, "samples_unroutable": len(kms) - len(ok),
+                     "sample_min_km": round(min(ok), 3) if ok else None, "sample_max_km": round(max(ok), 3) if ok else None,
+                     "verdict": verdict})
+    b.note(f"A4 sensitivity: {len(rows)} units within ±{band} km sampled at {n} points; "
+           + ", ".join(f"{v}: {sum(r['verdict'] == v for r in rows)}" for v in
+                       ("CONSISTENT", "INCLUDED_PARTLY_BEYOND_LIMIT", "EXCLUDED_PARTLY_WITHIN_LIMIT")))
+    return rows
 
 
-# --- geometry, checks, persistence ---------------------------------------------------
+def classify_components(conn: Connection, version: str, area_type: str, unit_ids: list[int], osrm_url: str,
+                        b: Build, osm_areas: list[str] | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """A6: classify every disjoint component of a stored candidate geometry."""
+    conn.execute(text(f"DROP TABLE IF EXISTS {SCHEMA}.comps"))
+    conn.execute(text(f"""CREATE TABLE {SCHEMA}.comps AS
+        SELECT row_number() OVER (ORDER BY ST_Area(d.geom) DESC) AS idx, d.geom AS g
+        FROM (SELECT (ST_Dump(geom)).geom FROM public.service_areas
+              WHERE area_type = :a AND service_area_version = :v) d"""), {"a": area_type, "v": version})
+    rows = conn.execute(text(f"""SELECT c.idx, ST_Area(c.g::geography) / 1e6 AS km2,
+            ST_NumInteriorRings(c.g) AS holes,
+            ST_X(ST_PointOnSurface(c.g)) AS lon, ST_Y(ST_PointOnSurface(c.g)) AS lat,
+            (SELECT count(*) FROM {SCHEMA}.units u WHERE u.osm_id = ANY(:ids) AND u.geom && c.g
+                AND ST_Area(ST_Intersection(u.geom, c.g)) >= 0.999 * ST_Area(u.geom)) AS whole_units,
+            (SELECT string_agg(DISTINCT u.name, ', ') FROM {SCHEMA}.units u
+                WHERE u.osm_id = ANY(:ids) AND ST_Intersects(u.geom, ST_PointOnSurface(c.g))) AS unit_names,
+            COALESCE((SELECT min(ST_Distance(c.g::geography, o.g::geography)) FROM {SCHEMA}.comps o
+                WHERE o.idx <> c.idx AND ST_DWithin(c.g, o.g, 0.5)), 1e9) AS gap_m,
+            EXISTS (SELECT 1 FROM {SCHEMA}.places p WHERE p.osm_type || '/' || p.osm_id = ANY(:areas)
+                AND ST_Intersects(p.geom_full, ST_PointOnSurface(c.g))) AS is_osm_area
+        FROM {SCHEMA}.comps c ORDER BY c.idx"""), {"ids": unit_ids, "areas": osm_areas or []}).mappings().all()
+    main_holes = conn.execute(text(f"""SELECT count(*) AS n,
+            count(*) FILTER (WHERE ST_Area(r.geom::geography) / 1e6 < :sliver) AS tiny
+        FROM (SELECT (ST_DumpRings(g)).* FROM {SCHEMA}.comps WHERE idx = 1) r WHERE r.path[1] > 0"""),
+        {"sliver": SLIVER_MAX_KM2}).mappings().one()
+    out = []
+    for r in rows:
+        snapped = httpx.get(f"{b_osrm(osrm_url)}/nearest/v1/driving/{r['lon']:.6f},{r['lat']:.6f}",
+                            headers={"Connection": "close"}, timeout=10).json()
+        loc = snapped["waypoints"][0]["location"] if snapped.get("code") == "Ok" else None
+        road_inside = bool(loc) and conn.execute(text(
+            f"SELECT ST_DWithin(g::geography, ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography, 1) FROM {SCHEMA}.comps WHERE idx = :i"),
+            {"x": loc[0], "y": loc[1], "i": r["idx"]}).scalar_one()
+        if r["idx"] == 1:
+            category = "MAIN_BODY"
+        elif r["whole_units"] > 0:
+            category = "SEPARATED_WHOLE_UNIT (valid administrative geometry)"
+        elif r["is_osm_area"]:
+            category = "U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)"
+        elif r["km2"] < SLIVER_MAX_KM2 and r["gap_m"] < SLIVER_MAX_GAP_M:
+            category = "SLIVER_SUSPECTED (overlay / data artefact)"
+        else:
+            category = "UNIT_PART_SEPARATED (island / exclave of a unit)"
+        if not road_inside and r["idx"] != 1:
+            category += " + NO_ROUTABLE_ROAD_INSIDE"
+        out.append({"area_type": area_type, "component": r["idx"], "km2": round(r["km2"], 6), "holes": r["holes"],
+                    "whole_units": r["whole_units"], "units_at_point": r["unit_names"],
+                    "gap_to_nearest_component_m": None if r["gap_m"] >= 1e9 else round(r["gap_m"], 1),
+                    "road_inside": road_inside, "category": category})
+    summary: dict[str, Any] = {"components": len(out), "main_body_holes": main_holes["n"],
+                               "main_body_tiny_holes_suspected_gaps": main_holes["tiny"]}
+    for c in out:
+        key = c["category"]
+        summary[key] = summary.get(key, 0) + 1
+    b.note(f"A6 {area_type}: {summary}")
+    return out, summary
 
 
-def union_sql(ids_param: str) -> str:
-    return (f"SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(geom)), 3)) FROM {SCHEMA}.units "
-            f"WHERE osm_id = ANY(:{ids_param})")
+def b_osrm(url: str) -> str:
+    return url.rstrip("/")
 
 
-def geometry_checks(conn: Connection, urban_ids: list[int], total_ids: list[int]) -> dict[str, Any]:
-    row = conn.execute(text(f"""WITH u AS ({union_sql('u')}), t AS ({union_sql('t')})
-        SELECT ST_IsValid((SELECT * FROM u)) AS urban_valid, ST_IsValid((SELECT * FROM t)) AS total_valid,
-               ST_NumGeometries((SELECT * FROM u)) AS urban_parts, ST_NumGeometries((SELECT * FROM t)) AS total_parts,
-               ST_Area((SELECT * FROM u)::geography) / 1e6 AS urban_km2, ST_Area((SELECT * FROM t)::geography) / 1e6 AS total_km2,
-               ST_CoveredBy((SELECT * FROM u), (SELECT * FROM t)) AS urban_within_total,
-               (SELECT sum(ST_Area(geom::geography)) / 1e6 FROM {SCHEMA}.units WHERE osm_id = ANY(:u)) AS urban_units_km2,
-               (SELECT sum(ST_Area(geom::geography)) / 1e6 FROM {SCHEMA}.units WHERE osm_id = ANY(:t)) AS total_units_km2
-    """), {"u": urban_ids, "t": total_ids}).mappings().one()
-    checks = dict(row)
-    # Overlap between selected units = sum of unit areas - area of their union.
-    checks["urban_overlap_km2"] = checks["urban_units_km2"] - checks["urban_km2"]
-    checks["total_overlap_km2"] = checks["total_units_km2"] - checks["total_km2"]
-    return {k: (round(v, 4) if isinstance(v, float) else v) for k, v in checks.items()}
+def routing_coverage(conn: Connection, total_ids: list[int], b: Build) -> list[dict[str, Any]]:
+    """A9: included units whose polygon extends beyond the routing extract."""
+    rows = conn.execute(text(f"""SELECT osm_id, name,
+            ST_Area(ST_Difference(geom, {envelope_sql(b)})::geography) / 1e6 AS outside_km2,
+            ST_Area(geom::geography) / 1e6 AS km2
+        FROM {SCHEMA}.units WHERE osm_id = ANY(:ids)
+          AND NOT ST_CoveredBy(geom, {envelope_sql(b)})"""), {"ids": total_ids}).mappings().all()
+    return [{"osm_id": r["osm_id"], "name": r["name"], "outside_bbox_km2": round(r["outside_km2"], 4),
+             "unit_km2": round(r["km2"], 3)} for r in rows]
 
 
-def compute_version(b: Build, urban_ids: list[int], total_ids: list[int], anchor_id: int) -> str:
-    material = {
-        "manifest": b.manifest,  # source/routing extract MD5s, export MD5s, bbox
-        "rules": b.rules,
-        "max_total_service_radius_km": b.max_km,
-        "anchor": anchor_id,
-        "urban_unit_ids": urban_ids,
-        "total_unit_ids": total_ids,
-    }
-    digest = hashlib.sha256(json.dumps(material, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    return f"sa-cand-{digest[:12]}"
-
-
-def persist(conn: Connection, version: str, area_type: str, ids: list[int], source: dict[str, Any], b: Build) -> str:
-    inserted = conn.execute(text(f"""INSERT INTO public.service_areas (area_type, service_area_version, status, geom, source_json)
-        SELECT :area_type, :version, 'CANDIDATE', ({union_sql('ids')}), CAST(:source AS jsonb)
-        ON CONFLICT (area_type, service_area_version) DO NOTHING"""),
-        {"area_type": area_type, "version": version, "ids": ids, "source": json.dumps(source, ensure_ascii=False)}).rowcount
-    if inserted:
-        return "inserted"
-    same = conn.execute(text(f"""SELECT ST_Equals(geom, ({union_sql('ids')})) FROM public.service_areas
-        WHERE area_type = :area_type AND service_area_version = :version"""),
-        {"area_type": area_type, "version": version, "ids": ids}).scalar_one()
-    if not same:
-        raise SystemExit(f"{area_type} {version} already stored with a different geometry - import is not stable")
-    return "unchanged (ST_Equals)"
+def resolve_admin_mapping(conn: Connection, city: Any, urban_ids: set[int], b: Build) -> list[dict[str, Any]]:
+    out = []
+    for m in b.rules.get("admin_mapping", []):
+        names = re.findall(r"(?:Phường|Xã) [^+/(]+?(?=\s*(?:\(|\+|/|$))", m["unit"])
+        resolved = []
+        for name in names:
+            rows = conn.execute(text(f"""SELECT u.osm_id FROM {SCHEMA}.units u, {SCHEMA}.units c
+                WHERE c.osm_id = :city AND u.admin_level = 6 AND u.name = :n
+                  AND ST_Intersects(c.geom, ST_PointOnSurface(u.geom))"""), {"city": city.osm_id, "n": name.strip()}).scalars().all()
+            scope = "city"
+            if not rows:  # e.g. Phường Phố Hiến lies in Hưng Yên, not in the city
+                rows = conn.execute(text(f"SELECT osm_id FROM {SCHEMA}.units WHERE admin_level = 6 AND name = :n"),
+                                    {"n": name.strip()}).scalars().all()
+                scope = "any province (name may be ambiguous)" if len(rows) > 1 else "outside the city"
+            resolved.append({"name": name.strip(), "osm_relations": list(rows), "search_scope": scope,
+                             "in_urban_selection": any(r in urban_ids for r in rows)})
+        out.append(m | {"resolved_units": resolved})
+    return out
 
 
 def check_locations(conn: Connection, version: str, b: Build) -> list[dict[str, Any]]:
@@ -325,8 +449,76 @@ def check_locations(conn: Connection, version: str, b: Build) -> list[dict[str, 
     return results
 
 
-def write_bundle(conn: Connection, out: Path, version: str, report: dict[str, Any],
-                 urban: list[dict[str, Any]], total: list[dict[str, Any]]) -> None:
+# --- geometry, persistence -----------------------------------------------------------
+
+
+def geometry_sql(kind: str) -> str:
+    """kind 'units': union of admin units; 'urban': units + U3 areas clipped to the city."""
+    units = f"SELECT geom AS g FROM {SCHEMA}.units WHERE osm_id = ANY(:ids)"
+    if kind == "urban":
+        units += (f" UNION ALL SELECT ST_CollectionExtract(ST_Intersection(p.geom_full, c.geom), 3) FROM {SCHEMA}.places p, "
+                  f"{SCHEMA}.units c WHERE c.osm_id = :city AND p.osm_type || '/' || p.osm_id = ANY(:areas)")
+    return f"SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(g)), 3)) FROM ({units}) s"
+
+
+def compute_version(b: Build, urban_ids: list[int], urban_areas: list[str], total_ids: list[int], anchor_id: int) -> str:
+    material = {
+        "manifest": b.manifest,  # source/routing extract MD5s, export MD5s, bbox
+        "rules": b.rules,
+        "max_total_service_radius_km": b.max_km,
+        "anchor": anchor_id,
+        "urban_unit_ids": urban_ids,
+        "urban_osm_areas": urban_areas,
+        "total_unit_ids": total_ids,
+    }
+    digest = hashlib.sha256(json.dumps(material, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    return f"sa-cand-{digest[:12]}"
+
+
+def persist(conn: Connection, version: str, area_type: str, geom_sql: str, params: dict[str, Any],
+            source: dict[str, Any]) -> str:
+    inserted = conn.execute(text(f"""INSERT INTO public.service_areas (area_type, service_area_version, status, geom, source_json)
+        SELECT :area_type, :version, 'CANDIDATE', ({geom_sql}), CAST(:source AS jsonb)
+        ON CONFLICT (area_type, service_area_version) DO NOTHING"""),
+        params | {"area_type": area_type, "version": version, "source": json.dumps(source, ensure_ascii=False)}).rowcount
+    if inserted:
+        return "inserted"
+    same = conn.execute(text(f"""SELECT ST_Equals(geom, ({geom_sql})) FROM public.service_areas
+        WHERE area_type = :area_type AND service_area_version = :version"""),
+        params | {"area_type": area_type, "version": version}).scalar_one()
+    if not same:
+        raise SystemExit(f"{area_type} {version} already stored with a different geometry - import is not stable")
+    return "unchanged (ST_Equals)"
+
+
+def geometry_checks(conn: Connection, version: str) -> dict[str, Any]:
+    row = conn.execute(text("""WITH u AS (SELECT geom FROM service_areas WHERE area_type='URBAN' AND service_area_version=:v),
+                                    t AS (SELECT geom FROM service_areas WHERE area_type='TOTAL' AND service_area_version=:v)
+        SELECT ST_IsValid((SELECT geom FROM u)) AS urban_valid, ST_IsValid((SELECT geom FROM t)) AS total_valid,
+               ST_NumGeometries((SELECT geom FROM u)) AS urban_parts, ST_NumGeometries((SELECT geom FROM t)) AS total_parts,
+               ST_Area((SELECT geom FROM u)::geography) / 1e6 AS urban_km2, ST_Area((SELECT geom FROM t)::geography) / 1e6 AS total_km2,
+               ST_CoveredBy((SELECT geom FROM u), (SELECT geom FROM t)) AS urban_within_total"""), {"v": version}).mappings().one()
+    return {k: (round(v, 4) if isinstance(v, float) else v) for k, v in row.items()}
+
+
+# --- outputs ------------------------------------------------------------------------------
+
+
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    if not rows:
+        path.write_text("", encoding="utf-8")
+        return
+    fieldnames: list[str] = []
+    for r in rows:  # union of keys, first-seen order (rows may carry optional fields)
+        fieldnames.extend(k for k in r if k not in fieldnames)
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=fieldnames)
+        w.writeheader()
+        for r in rows:
+            w.writerow({k: (json.dumps(v, ensure_ascii=False) if isinstance(v, list | dict) else v) for k, v in r.items()})
+
+
+def write_bundle(conn: Connection, out: Path, version: str, report: dict[str, Any]) -> None:
     out.mkdir(parents=True, exist_ok=True)
     for area_type, name in (("URBAN", "urban"), ("TOTAL", "total")):
         geom = conn.execute(text("""SELECT ST_AsGeoJSON(geom, 6) FROM public.service_areas
@@ -335,78 +527,120 @@ def write_bundle(conn: Connection, out: Path, version: str, report: dict[str, An
             "area_type": area_type, "service_area_version": version, "status": "CANDIDATE",
             "approval": "PENDING_OWNER_APPROVAL"}}]}
         (out / f"{name}.geojson").write_text(json.dumps(fc, ensure_ascii=False), encoding="utf-8")
-    with (out / "units.csv").open("w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=["area_type", "osm_relation", "name", "province", "rule", "road_km", "snap_m"])
-        w.writeheader()
-        for area_type, rows in (("URBAN", urban), ("TOTAL", total)):
-            for r in rows:
-                w.writerow({"area_type": area_type, "osm_relation": r["osm_id"], "name": r["name"], "province": r["province"],
-                            "rule": r["rule"], "road_km": r.get("road_km", ""), "snap_m": r.get("snap_m", "")})
+    units = ([{"area_type": "URBAN", **u} for u in report["urban_units"]]
+             + [{"area_type": "URBAN_OSM_AREA", "osm_id": a["osm"], "name": a["osm_name"], "province": "",
+                 "rule": a["rule"]} for a in report["urban_areas"]]
+             + [{"area_type": "TOTAL", **t} for t in report["total_units"]])
+    write_csv(out / "units.csv", [{k: u.get(k, "") for k in ("area_type", "osm_id", "name", "province", "rule", "road_km", "snap_m")}
+                                  for u in units])
+    write_csv(out / "excluded_units.csv", report["total_stats"]["excluded_outside_routing_extract"]
+              + report["total_stats"]["excluded_unroutable"])
+    write_csv(out / "admin_mapping.csv", report["admin_mapping"])
+    write_csv(out / "components.csv", report["components"])
+    write_csv(out / "sensitivity_150km.csv", report["sensitivity"])
+    write_csv(out / "routing_coverage.csv", report["routing_coverage"])
     (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     (out / "REVIEW.md").write_text(render_review(report), encoding="utf-8")
+    sums = []
+    for f in sorted(out.iterdir()):
+        if f.name != "CHECKSUMS.sha256" and f.is_file() and f.name != "REVIEW.md":
+            sums.append(f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {f.name}")
+    (out / "CHECKSUMS.sha256").write_text("\n".join(sums) + "\n", encoding="utf-8")
+
+
+def _table(headers: list[str], rows: list[list[Any]]) -> list[str]:
+    return ["| " + " | ".join(headers) + " |", "|" + "---|" * len(headers),
+            *["| " + " | ".join("" if v is None else str(v) for v in r) + " |" for r in rows]]
 
 
 def render_review(r: dict[str, Any]) -> str:
-    c = r["checks"]
+    c, ts = r["checks"], r["total_stats"]
+    comp_summary = r["component_summary"]
     lines = [
         f"# Service-area candidate `{r['service_area_version']}` — review bundle",
         "",
-        "**Status: CANDIDATE — PENDING_OWNER_APPROVAL (P1-D1 / P1-D3). Not GEOMETRY_APPROVED.**",
-        "Generated by `app.modules.trip.service_area_build`; do not edit by hand (rerun instead).",
+        "**Status: CANDIDATE — PENDING_OWNER_APPROVAL. Not GEOMETRY_APPROVED.**",
+        f"Rules: `{r['rules_file']}` (`{r['rules']['rules_id']}`). Generated by `app.modules.trip.service_area_build`; "
+        "do not edit by hand. File checksums: `CHECKSUMS.sha256`.",
         "",
-        "## 1. Selected units",
-        f"- Urban: {len(r['urban_units'])} admin_level=6 units — full list in `units.csv` (area_type=URBAN).",
-        f"- Total: {len(r['total_units'])} admin_level=6 units — full list in `units.csv` (area_type=TOTAL).",
-        "- Urban units by rule: " + ", ".join(f"{k}: {v}" for k, v in r["urban_by_rule"].items()),
-        "- Named communes (rule U2): " + ", ".join(u["name"] + f" (r{u['osm_id']})" for u in r["urban_units"] if u["rule"].startswith("U2")),
+        "## 1. Administrative mapping (A1/A3)",
         "",
-        "Provinces used for the total area:",
+        *_table(["Revision 9 name", "Current unit(s)", "QĐ19 code(s)", "NQ1656", "Confidence", "OSM relation(s)", "In urban", "Note"],
+                [[m["r9_name"], m["unit"], m.get("qd19_code"), m.get("nq1656"), m["confidence"],
+                  "; ".join(f"{u['name']}: {', '.join(f'r{i}' for i in u['osm_relations']) or 'NOT FOUND'}" for u in m["resolved_units"]),
+                  "; ".join(f"{u['name']}={u['in_urban_selection']}" for u in m["resolved_units"]), m.get("note", "")]
+                 for m in r["admin_mapping"]]),
         "",
-        "| Revision 9 name(s) | Current OSM unit | ISO | Evidence |",
-        "|---|---|---|---|",
-        *[f"| {', '.join(p['neighbours'])} | {p['name']} (r{p['osm_id']}) | {p['iso'] or ''} | {p['evidence']} |" for p in r["provinces"]],
+        "## 2. Selected areas",
+        f"- Urban: {len(r['urban_units'])} units (" + ", ".join(f"{k}: {v}" for k, v in r["urban_by_rule"].items())
+        + f") + {len(r['urban_areas'])} OSM urban-development polygons (U3).",
+        f"- Total ({ts['province_scope']}): {len(r['total_units'])} units; by province: {ts['units_by_province']}.",
         "",
-        "## 2. Candidate GeoJSON",
-        "`urban.geojson`, `total.geojson` (EPSG:4326, 6 decimals).",
+        "U3 polygons:",
         "",
-        "## 3. OSM source and traceability",
+        *_table(["OSM", "Label", "OSM name", "km² in city", "Lies in unit", "Note"],
+                [[a["osm"], a["label"], a["osm_name"], a["km2_in_city"], a["containing_unit"], a.get("note") or ""]
+                 for a in r["urban_areas"]]),
+        "",
+        "Section 1 neighbour names → current provinces (documentation; scope is not limited to them):",
+        "",
+        *_table(["Revision 9 name(s)", "Current OSM unit", "ISO", "Evidence"],
+                [[", ".join(p["neighbours"]), f"{p['name']} (r{p['osm_id']})", p["iso"] or "", p["evidence"]] for p in r["provinces"]]),
+        "",
+        "## 3. Source and traceability",
         *[f"- {k}: `{v}`" for k, v in r["manifest"].items()],
-        f"- rules file: `{r['rules_file']}` (rules_id `{r['rules']['rules_id']}`, status `{r['rules']['status']}`)",
+        f"- anchor: node/{ts['anchor']['osm_node']} '{ts['anchor']['name']}' ({ts['anchor']['lon']:.7f}, {ts['anchor']['lat']:.7f})",
         f"- max_total_service_radius_km (baseline): {r['max_km']}",
         "",
-        "## 4. Polygon construction rules",
-        "- Units are OSM `boundary=administrative` relations exported from the unclipped Geofabrik source "
-        "(the P0 bbox clip leaves boundary relations that cross the bbox incomplete); geometry repaired with `ST_MakeValid`, polygons only.",
-        "- Units whose `ST_PointOnSurface` lies outside the routing-extract bbox are not routed and are excluded from the total area.",
-        "- A unit belongs to a province when its `ST_PointOnSurface` lies in the province polygon.",
-        "- **Urban**: U1 = every `Phường …` unit of the city; U2 = the communes listed in the rules, matched by exact name inside the city.",
-        f"- **Total**: units of the listed provinces whose `ST_PointOnSurface` is within {r['max_km']} km by OSRM car road distance from the anchor "
-        f"(node/{r['total_stats']['anchor']['osm_node']} '{r['total_stats']['anchor']['name']}'). **ANCHOR_DEFINITION_REQUIRED.**",
-        "- Area = `ST_Union` of the selected units.",
+        "## 4. Rules",
+        "- Units: OSM `boundary=administrative` relations from the unclipped Geofabrik source; `ST_MakeValid`, polygons only.",
+        "- Unit ↔ province by `ST_PointOnSurface`.",
+        "- **Urban**: U1 every `Phường …` of the city; U2 named communes; U3 listed OSM urban-development polygons (clipped to the city).",
+        f"- **Total**: units (scope `{ts['province_scope']}`) whose `ST_PointOnSurface` is within {r['max_km']} km OSRM car road distance "
+        "from the anchor; units whose point is outside the routing bbox or unroutable are excluded (A9).",
         "",
-        "Geometry checks:",
+        "## 5. Topology checks (A6)",
         "",
-        "| Check | Value |",
-        "|---|---|",
-        *[f"| {k} | {v} |" for k, v in c.items()],
+        *_table(["Check", "Value"], [[k, v] for k, v in c.items()]),
         "",
-        "## 5. Boundary locations",
+        "Component classification (no geometry was modified):",
         "",
-        "| Location | OSM | Expected urban | Actual urban | In total | Containing unit / province | Result |",
-        "|---|---|---|---|---|---|---|",
-        *[f"| {t['label']} | {t.get('osm') or '—'} | {t.get('expected_urban')} | {t.get('in_urban', '—')} | {t.get('in_total', '—')} | "
-          f"{t.get('unit', '—')} / {t.get('province', '—')} | **{t['result']}** {t.get('detail', '')} |" for t in r["locations"]],
+        *_table(["Area", "Category", "Count"],
+                [[area, k, v] for area, s in comp_summary.items() for k, v in s.items() if k not in ("components",)]),
         "",
-        "## 6. service_area_version",
-        "`sa-cand-` + first 12 hex of SHA-256 over: the export MANIFEST (source and routing-extract MD5s, export MD5s, bbox), the parsed rules, "
-        "max_total_service_radius_km, anchor, and the sorted selected unit ids. "
-        "Same inputs → same version; a rerun verifies the stored geometry with `ST_Equals`.",
+        "Non-main components are listed in `components.csv`.",
+        "",
+        "## 6. 150 km limit sensitivity (A4)",
+        f"Units within ±{r['rules']['total'].get('sensitivity_band_km')} km of the limit, sampled at "
+        f"{r['rules']['total'].get('sensitivity_points_per_unit')} deterministic points each (`ST_GeneratePoints`, seed 1). "
+        "**Checking only the representative point does not prove every point of a unit is within 150 km.**",
+        "",
+        *_table(["Verdict", "Units"], [[v, sum(x["verdict"] == v for x in r["sensitivity"])] for v in
+                                        ("CONSISTENT", "INCLUDED_PARTLY_BEYOND_LIMIT", "EXCLUDED_PARTLY_WITHIN_LIMIT")]),
+        "",
+        "Details: `sensitivity_150km.csv`.",
+        "",
+        "## 7. Routing coverage (A9)",
+        f"- Excluded, representative point outside the routing bbox: {len(ts['excluded_outside_routing_extract'])}",
+        f"- Excluded, no OSRM route: {len(ts['excluded_unroutable'])}",
+        f"- Included units whose polygon extends beyond the routing bbox: {len(r['routing_coverage'])} "
+        f"({round(sum(x['outside_bbox_km2'] for x in r['routing_coverage']), 3)} km² outside) — `routing_coverage.csv`",
+        "- Full list of exclusions with reasons: `excluded_units.csv`.",
+        "",
+        "## 8. Boundary locations",
+        "",
+        *_table(["Location", "OSM", "Expected urban", "Actual urban", "In total", "Unit / province", "Result"],
+                [[t["label"], t.get("osm") or "—", t.get("expected_urban"), t.get("in_urban", "—"), t.get("in_total", "—"),
+                  f"{t.get('unit', '—')} / {t.get('province', '—')}", f"**{t['result']}** {t.get('detail', '')}"]
+                 for t in r["locations"]]),
+        "",
+        "## 9. Version",
+        "`sa-cand-` + first 12 hex of SHA-256 over the export MANIFEST, the parsed rules, max_total_service_radius_km, "
+        "anchor, and the selected unit ids / OSM areas.",
         f"- This run: `{r['service_area_version']}`; persistence: {r['persist']}",
         "",
-        "## 7. Open conflicts / insufficient data",
+        "## 10. Open conflicts / insufficient data",
         *([f"- {x}" for x in r["conflicts"]] or ["- none detected by the pipeline"]),
-        f"- Units in range of the anchor but in provinces not listed in Section 1: {r['total_stats']['units_in_range_outside_listed_provinces'] or 'none'}",
-        f"- Units of listed provinces excluded because they lie outside the routing extract bbox: {r['total_stats']['excluded_outside_routing_extract'] or 'none'}",
         "",
     ]
     return "\n".join(lines)
@@ -421,34 +655,54 @@ def main() -> None:
 
     settings = get_settings()
     rules = yaml.safe_load(args.rules.read_text(encoding="utf-8"))
-    b = Build(manifest=read_manifest(args.sources / "MANIFEST"), rules=rules,
+    manifest = read_manifest(args.sources / "MANIFEST")
+    bbox = tuple(float(x) for x in manifest["bbox"].split(","))
+    b = Build(manifest=manifest, rules=rules, bbox=bbox,  # type: ignore[arg-type]
               max_km=float(get_config_baseline()["spatial_and_service_areas"]["max_total_service_radius_km"]))
 
     engine = create_engine(settings.database_url)
     with engine.begin() as conn:
         load_inputs(conn, args.sources, b)
         city = select_city(conn, b)
-        urban = select_urban(conn, city, b)
-        provinces = select_provinces(conn, city, b)
-        total, total_stats = select_total(conn, provinces, settings.osrm_car_url, b)
+        urban, urban_areas = select_urban(conn, city, b)
+        provinces = map_neighbours(conn, city, b)
+        total, total_stats, info = select_total(conn, provinces, settings.osrm_car_url, b)
         urban_ids = [u["osm_id"] for u in urban]
+        area_keys = [a["osm"] for a in urban_areas]
         total_ids = [t["osm_id"] for t in total]
         missing = sorted(set(urban_ids) - set(total_ids))
         if missing:
             b.conflicts.append(f"{len(missing)} urban units are not in the total area (road distance rule): {missing}")
-        version = compute_version(b, urban_ids, total_ids, rules["total"]["anchor"]["osm_node"])
+        version = compute_version(b, urban_ids, area_keys, total_ids, rules["total"]["anchor"]["osm_node"])
         source = {"manifest": b.manifest, "rules_id": rules["rules_id"], "rules_status": rules["status"]}
         persist_result = {
-            "URBAN": persist(conn, version, "URBAN", urban_ids, source, b),
-            "TOTAL": persist(conn, version, "TOTAL", total_ids, source, b),
+            "URBAN": persist(conn, version, "URBAN", geometry_sql("urban"),
+                             {"ids": urban_ids, "areas": area_keys, "city": city.osm_id}, source),
+            "TOTAL": persist(conn, version, "TOTAL", geometry_sql("units"), {"ids": total_ids}, source),
         }
-        checks = geometry_checks(conn, urban_ids, total_ids)
+        checks = geometry_checks(conn, version)
         if not checks["urban_within_total"]:
             b.conflicts.append("urban area is not fully covered by the total area")
-        for area in ("urban", "total"):
-            if checks[f"{area}_parts"] > 1:
-                b.conflicts.append(f"{area} area consists of {checks[f'{area}_parts']} disjoint polygons "
-                                   "(selected units are not contiguous)")
+        components, summaries = [], {}
+        for area_type, ids, areas in (("URBAN", urban_ids, area_keys), ("TOTAL", total_ids, [])):
+            comps, summary = classify_components(conn, version, area_type, ids, settings.osrm_car_url, b, areas)
+            components.extend(c for c in comps if c["component"] != 1)
+            summaries[area_type] = summary
+            if summary["components"] > 1:
+                b.conflicts.append(f"{area_type.lower()} area has {summary['components']} disjoint components "
+                                   "(classified in components.csv; nothing removed)")
+        sensitivity = sensitivity_150(conn, info, set(total_ids), settings.osrm_car_url, b)
+        partial = [s for s in sensitivity if s["verdict"] != "CONSISTENT"]
+        if partial:
+            b.conflicts.append(f"{len(partial)} units near the 150 km limit are only partly on the selected side (A4)")
+        coverage = routing_coverage(conn, total_ids, b)
+        mapping = resolve_admin_mapping(conn, city, set(urban_ids), b)
+        for m in mapping:
+            if m["confidence"] in ("PENDING", "LOW"):
+                b.conflicts.append(f"admin mapping '{m['r9_name']}': confidence {m['confidence']} - {m.get('note', '')}")
+            for u in m["resolved_units"]:
+                if not u["osm_relations"]:
+                    b.conflicts.append(f"admin mapping '{m['r9_name']}': unit '{u['name']}' not found in OSM")
         locations = check_locations(conn, version, b)
         for loc in locations:
             if loc["result"] != "AS_EXPECTED":
@@ -461,11 +715,13 @@ def main() -> None:
         report = {
             "service_area_version": version, "status": "CANDIDATE", "approval": "PENDING_OWNER_APPROVAL",
             "manifest": b.manifest, "rules_file": str(args.rules.name), "rules": rules, "max_km": b.max_km,
-            "provinces": provinces, "urban_units": urban, "urban_by_rule": by_rule, "total_units": total,
-            "total_stats": total_stats, "checks": checks, "locations": locations, "persist": persist_result,
+            "provinces": provinces, "urban_units": urban, "urban_areas": urban_areas, "urban_by_rule": by_rule,
+            "total_units": total, "total_stats": total_stats, "checks": checks, "component_summary": summaries,
+            "components": components, "sensitivity": sensitivity, "routing_coverage": coverage,
+            "admin_mapping": mapping, "locations": locations, "persist": persist_result,
             "conflicts": b.conflicts, "log": b.log,
         }
-        write_bundle(conn, args.out / version, version, report, urban, total)
+        write_bundle(conn, args.out / version, version, report)
         conn.execute(text(f"DROP SCHEMA {SCHEMA} CASCADE"))
     b.note(f"service_area_version={version} persist={persist_result} -> {args.out / version}")
 

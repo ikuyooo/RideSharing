@@ -133,7 +133,9 @@ def create_trip_request(
         latest_arrival=body.latest_arrival,
         budget_min=body.budget_min,
         budget_max=body.budget_max,
-        max_passenger_detour_ratio=body.max_passenger_detour_ratio,
+        max_passenger_detour_ratio=(body.max_passenger_detour_ratio
+                                    if body.max_passenger_detour_ratio is not None
+                                    else rules.SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO),
         max_in_vehicle_time_s=body.max_in_vehicle_time_s,
         max_walk_m=body.max_walk_m,
         categorical_preferences_json=body.categorical_preferences,
@@ -154,6 +156,7 @@ def to_out(trip: TripRequest) -> TripRequestOut:
         allowed_service_codes=list(trip.allowed_service_codes),
         rejection_reasons=list(trip.rejection_reasons_json),
         direct_distance_km=trip.direct_distance_km,
+        max_passenger_detour_ratio=trip.max_passenger_detour_ratio,
         service_area_version=trip.service_area_version,
         created_at=trip.created_at,
     )

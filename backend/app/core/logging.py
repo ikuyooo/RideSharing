@@ -22,6 +22,22 @@ class CoordinateRedactionFilter(logging.Filter):
         return True
 
 
+SURVEY_PATH_PREFIXES = ("/survey/", "/api/survey/")
+
+
+class SurveyClientAddressFilter(logging.Filter):
+    """Survey respondents are anonymous (Section 59.2): drop the client address
+    from uvicorn access-log records of survey paths. uvicorn.access records
+    carry args (client_addr, method, path, http_version, status)."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if isinstance(args, tuple) and len(args) >= 3 and isinstance(args[2], str) \
+                and args[2].startswith(SURVEY_PATH_PREFIXES):
+            record.args = ("-", *args[1:])
+        return True
+
+
 def configure_logging(level: str) -> None:
     logging.basicConfig(level=level)
     redaction = CoordinateRedactionFilter()
@@ -30,3 +46,5 @@ def configure_logging(level: str) -> None:
     for name in ("uvicorn", "uvicorn.access", "uvicorn.error"):
         for handler in logging.getLogger(name).handlers:
             handler.addFilter(redaction)
+    # Logger-level filter so it applies whatever handlers uvicorn installs later.
+    logging.getLogger("uvicorn.access").addFilter(SurveyClientAddressFilter())

@@ -29,6 +29,7 @@ SECTION_56_1_TABLES = {
 SUPPORTING_TABLES = {
     "users", "refresh_tokens", "driver_locations", "service_areas", "pickup_points",
     "seat_holds", "idempotency_records", "scheduled_jobs", "pricing_configs",
+    "survey_respondents", "survey_responses",
 }
 
 # --- minimal row factories (raw SQL keeps tests independent of services) -------

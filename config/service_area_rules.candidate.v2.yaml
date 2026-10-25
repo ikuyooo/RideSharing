@@ -1,0 +1,99 @@
+# =============================================================================
+# CANDIDATE service-area rules v2 (owner decision "P1: GEOGRAPHY & S1 CLOSURE").
+# STATUS: PENDING_OWNER_APPROVAL - geometry built from these rules is CANDIDATE.
+# v1 (service_area_rules.candidate.yaml, version sa-cand-3873dfbee116) is kept
+# unchanged for traceability.
+#
+# Authoritative sources used for the mapping (A1):
+#   NQ1656  = Nghị quyết 1656/NQ-UBTVQH15 (2025) on Hà Nội commune-level units,
+#             official text: https://xaydungchinhsach.chinhphu.vn/toan-van-nghi-quyet-so-1656-nq-ubtvqh15-sap-xep-cac-dvhc-cap-xa-cua-thanh-pho-ha-noi-nam-2025-119250616192433872.htm
+#             (clause contents were read through a summarising fetch tool; verify
+#             against the official PDF before final approval)
+#   QD19    = Quyết định 19/2025/QĐ-TTg, unit codes; codes below were read from a
+#             secondary lookup table that cites QD19 (nhansu.vn); Từ Liêm and An
+#             Khánh codes also matched a second secondary source.
+# =============================================================================
+rules_id: sa_rules_candidate_v2
+status: PENDING_OWNER_APPROVAL
+
+city:
+  iso3166_2: VN-HN
+
+urban:
+  include_city_wards: true          # U1 (51 wards; QD19 table: 51 phường + 75 xã = 126)
+  include_city_communes_named:      # U2
+    - Xã Gia Lâm     # NQ1656 k109: includes the whole population of former Trâu Quỳ town
+    - Xã Đông Anh    # NQ1656 k114: part of former Đông Anh town - PENDING (see admin_mapping)
+  # U3 (A2): mapped OSM polygons of the An Khánh urban developments, instead of the
+  # whole new Xã An Khánh (which also holds the remainder of La Phù, NQ1656 k105).
+  include_osm_areas:
+    - {osm: relation/21054720, label: "Khu đô thị Nam An Khánh"}
+    - {osm: way/1484064385, label: "Vista Lago Nam An Khánh"}
+    - {osm: way/1298606975, label: "The Golden An Khánh"}
+    - {osm: way/1565334267, label: "An Khánh Ecomony"}
+    - {osm: way/1565297217, label: "Splendora Villas", note: "Splendora assumed to be Bắc An Khánh - confirm"}
+    - {osm: way/1565297218, label: "Splendora Terrace Mailand", note: "assumed Bắc An Khánh - confirm"}
+    - {osm: way/1565297219, label: "Splendora Lakeside Villas", note: "assumed Bắc An Khánh - confirm"}
+
+total:
+  # A5: Section 1's province list is illustrative, not a closed whitelist. Units of
+  # any province qualify individually (never a whole province).
+  province_scope: all_within_range
+  neighbours:   # Section 1 names -> current provinces (documentation of A1)
+    - {name: Hưng Yên, by: province_iso, iso3166_2: VN-66}
+    - {name: Bắc Ninh, by: province_iso, iso3166_2: VN-56}
+    - {name: Hải Dương, by: contains_node, osm_node: 369487115}
+    - {name: Hà Nam, by: contains_node, osm_node: 369487036}
+    - {name: Vĩnh Phúc, by: contains_node, osm_node: 369486946}
+    - {name: Hòa Bình, by: contains_node, osm_node: 13967896564}
+  anchor:
+    osm_node: 74132064   # A4: verified member of r1903516 with role admin_centre
+  unit_admin_level: 6
+  # A4 analysis only (not a business rule): units whose representative-point road
+  # distance lies within +/- band of the limit are sampled at N points.
+  sensitivity_band_km: 20
+  sensitivity_points_per_unit: 12
+
+# A1/A3 mapping of Revision 9 place names to current units. confidence:
+# HIGH = authoritative clause places the whole historic area in selected unit(s);
+# MEDIUM = partial/indirect evidence; LOW/PENDING = insufficient evidence.
+admin_mapping:
+  - {r9_name: "Hoàn Kiếm (quận nội thành)", unit: "Phường Hoàn Kiếm", qd19_code: "00070", nq1656: "k1", confidence: HIGH}
+  - {r9_name: "Hà Đông", unit: "Phường Hà Đông", qd19_code: "09556", nq1656: "k43", confidence: MEDIUM,
+     note: "former Hà Đông district spans several current wards (k43-k45 and others); all are wards (U1)"}
+  - {r9_name: "Yên Nghĩa", unit: "Phường Yên Nghĩa", qd19_code: "09562", nq1656: "k45", confidence: HIGH}
+  - {r9_name: "Dương Nội", unit: "Phường Dương Nội", qd19_code: "09886", nq1656: "k44", confidence: HIGH,
+     note: "k44 also takes part of La Phù"}
+  - {r9_name: "Mỹ Đình", unit: "Phường Cầu Giấy + Phường Từ Liêm", qd19_code: "00166 / 00592", nq1656: "k25, k35",
+     confidence: HIGH, note: "former Mỹ Đình 1 and Mỹ Đình 2 wards were split between these two wards, both U1"}
+  - {r9_name: "An Khánh", unit: "Phường Tây Mỗ (part) + Xã Sơn Đồng (part) + Xã An Khánh (remainder)",
+     qd19_code: "00634 / 09871 / 09877", nq1656: "k37, k104, k105", confidence: MEDIUM,
+     note: "historic An Khánh commune split three ways; urban developments represented by U3 OSM polygons"}
+  - {r9_name: "La Phù", unit: "Phường Dương Nội (part) + Xã An Khánh (remainder)", qd19_code: "09886 / 09877",
+     nq1656: "k44, k105", confidence: MEDIUM,
+     note: "historic La Phù boundary not available as geometry -> split line: PENDING_GEOMETRY_EVIDENCE"}
+  - {r9_name: "Gia Lâm", unit: "Xã Gia Lâm", qd19_code: "00565", nq1656: "k109", confidence: MEDIUM,
+     note: "k109 takes all population and part of the area of former Trâu Quỳ town; remainder -> Xã Bát Tràng (00577, k111)"}
+  - {r9_name: "Đông Anh", unit: "Xã Đông Anh (part) / Xã Thư Lâm (part) / Xã Phúc Thịnh (remainder)",
+     qd19_code: "00454 / 00475 / 00466", nq1656: "k113, k114, k115", confidence: PENDING,
+     note: "former Đông Anh town split three ways; the town place node lies in Xã Phúc Thịnh"}
+  - {r9_name: "TP Hưng Yên", unit: "Phường Phố Hiến (candidate representative only)", qd19_code: null,
+     nq1656: null, confidence: LOW, note: "A8: representative point only, not an official mapping"}
+
+test_locations:
+  - {label: "Hoàn Kiếm", osm: node/13709921432, expected_urban: true, source: "Section 2.3"}
+  - {label: "Hà Đông", osm: node/13709983624, expected_urban: true, source: "Section 2.3"}
+  - {label: "Yên Nghĩa", osm: node/13710038878, expected_urban: true, source: "Section 2.3"}
+  - {label: "Dương Nội", osm: node/13710014146, expected_urban: true, source: "Section 2.3"}
+  - {label: "An Khánh (Khu đô thị Nam An Khánh)", osm: relation/21054720, expected_urban: true, source: "Section 2.3"}
+  - {label: "An Khánh (Splendora / Bắc An Khánh)", osm: way/1565297218, expected_urban: true, source: "Section 2.3",
+     note: "Splendora assumed Bắc An Khánh"}
+  - {label: "Mỹ Đình (Sân vận động Quốc gia)", osm: way/533838254, expected_urban: true, source: "Section 2.3"}
+  - {label: "Mỹ Đình (Bến xe Mỹ Đình)", osm: relation/21430094, expected_urban: true, source: "Section 2.3"}
+  - {label: "Gia Lâm (Khu tái định cư Trâu Quỳ)", osm: way/1431973724, expected_urban: true, source: "Section 2.3; NQ1656 k109"}
+  - {label: "Đông Anh (town place node)", osm: node/13799910539, expected_urban: true, source: "Section 2.3",
+     note: "PENDING: lies in Xã Phúc Thịnh (remainder of former town, k115)"}
+  - {label: "La Phù", osm: node/12147486706, expected_urban: false, source: "Section 72.2"}
+  - {label: "Đại học Phenikaa", osm: way/973433275, expected_urban: true, source: "Sections 16.1, 72.2"}
+  - {label: "Phố Hiến (TP Hưng Yên representative)", osm: node/13155709564, expected_urban: false, expected_total: true,
+     source: "Section 72.2", note: "A8 candidate representative"}

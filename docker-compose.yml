@@ -110,8 +110,12 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       SERVICE_AREA_VERSION: ${SERVICE_AREA_VERSION:-}
       ALLOW_CANDIDATE_SERVICE_AREA: ${ALLOW_CANDIDATE_SERVICE_AREA:-false}
+      # Survey S1 draft (P1-D5): development collects TEST data only.
+      SURVEY_DATASET: ${SURVEY_DATASET:-TEST}
+      SURVEY_S1_RELEASED: ${SURVEY_S1_RELEASED:-false}
     volumes:
       - ./config:/app/config:ro
+      - ./survey:/app/survey:ro
     ports:
       - "127.0.0.1:${BACKEND_HOST_PORT:-8000}:8000"
     networks: [backend]

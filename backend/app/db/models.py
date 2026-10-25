@@ -8,6 +8,7 @@ from app.modules.fund import models as fund_models  # noqa: F401
 from app.modules.identity import models as identity_models  # noqa: F401
 from app.modules.intercity import models as intercity_models  # noqa: F401
 from app.modules.jobs import models as jobs_models  # noqa: F401
+from app.modules.ml_models import models as ml_models_models  # noqa: F401
 from app.modules.pooling import models as pooling_models  # noqa: F401
 from app.modules.pricing import models as pricing_models  # noqa: F401
 from app.modules.routing import models as routing_models  # noqa: F401

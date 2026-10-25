@@ -35,8 +35,11 @@ osmium tags-filter -O -o "$TMP/admin46.osm.pbf" "$TMP/admin.osm.pbf" \
 osmium export -O -f geojsonseq --geometry-types=polygon -a type,id \
     -o "$OUT/admin_boundaries.geojsonseq" "$TMP/admin46.osm.pbf"
 
-log "exporting place nodes and universities"
-osmium tags-filter -O -o "$TMP/places.osm.pbf" "$SOURCE" n/place nwr/amenity=university
+log "exporting place nodes, universities and named landmarks (test locations)"
+# Landmarks give evidence-backed representative points for Revision 9 place
+# names that have no place=* object (e.g. "Mỹ Đình" -> national stadium).
+osmium tags-filter -O -o "$TMP/places.osm.pbf" "$SOURCE" n/place nwr/amenity=university \
+    nwr/leisure=stadium nwr/amenity=bus_station nwr/landuse=residential
 osmium export -O -f geojsonseq -a type,id -o "$OUT/places.geojsonseq" "$TMP/places.osm.pbf"
 
 {

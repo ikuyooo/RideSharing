@@ -29,8 +29,9 @@ MUTABLE_TABLES = (
     "seat_bookings", "ride_participants", "fund_ledger", "driver_payouts", "ride_candidates",
     "bookings", "seat_holds", "scheduled_trips", "ride_plans", "vehicles", "driver_locations",
     "trip_requests", "idempotency_records", "refresh_tokens", "driver_profiles", "users",
-    "scheduled_jobs", "service_areas", "pickup_points",
+    "scheduled_jobs", "service_areas", "pickup_points", "survey_responses", "survey_respondents",
 )
+QUESTIONNAIRE = REPO_ROOT / "survey" / "s1" / "questionnaire.draft.yaml"
 
 
 def _dotenv() -> dict[str, str]:
@@ -120,6 +121,9 @@ def app_env(monkeypatch: pytest.MonkeyPatch, migrated_db_url: str) -> None:
     monkeypatch.setenv("OSRM_MOTORBIKE_URL", "http://127.0.0.1:1")
     monkeypatch.setenv("CONFIG_BASELINE_PATH", str(CONFIG_BASELINE))
     monkeypatch.setenv("JWT_SECRET", "test-secret-" + uuid.uuid4().hex)
+    monkeypatch.setenv("SURVEY_S1_QUESTIONNAIRE_PATH", str(QUESTIONNAIRE))
+    monkeypatch.setenv("SURVEY_DATASET", "TEST")
+    monkeypatch.setenv("SURVEY_S1_RELEASED", "false")
     from app.core.settings import get_settings
     from app.db.session import get_engine, get_sessionmaker
 

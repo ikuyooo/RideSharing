@@ -8,6 +8,11 @@ from datetime import timedelta
 from typing import Any
 
 URBAN_SERVICES = ("BIKE_URBAN", "CAR_URBAN_PRIVATE", "CAR_URBAN_POOL")
+
+# Revision 9 Section 6 (Trip Intent): "max_passenger_detour_ratio ... (mặc định
+# 0.30)". This is a business-spec default, NOT a key of the locked Baseline YAML
+# (owner decision A7 / SF-P1-08); it applies when the passenger gives no value.
+SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO = 0.30
 INTERCITY_SERVICES = ("CAR_INTERCITY_PRIVATE", "CAR_INTERCITY_POOL")
 
 

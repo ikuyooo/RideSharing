@@ -120,10 +120,18 @@ docker compose run --rm --no-deps -e ADMIN_PASSWORD=... backend \
 # Vùng phục vụ ỨNG VIÊN (P1-D1/D3) — kết quả là CANDIDATE, cần Chủ dự án phê duyệt
 docker compose --profile osrm-prep run --rm --no-deps --entrypoint sh osm-fetch \
   /scripts/export_service_area_sources.sh          # Git Bash: thêm MSYS_NO_PATHCONV=1
-docker compose --profile service-area run --rm service-area-build
+docker compose --profile service-area run --rm service-area-build \
+  python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v2.yaml
 docker compose --profile service-area run --rm service-area-build \
   python -m app.modules.trip.boundary_eval --version <service_area_version>
+docker compose --profile service-area run --rm service-area-build \
+  python -m app.modules.trip.service_area_compare --old <version> --new <version>
+# Git Bash: thêm MSYS_NO_PATHCONV=1 trước các lệnh có đường dẫn /app/...
 ```
+
+Khảo sát S1 (bản nháp, chỉ môi trường development, dữ liệu `TEST`): mở `http://127.0.0.1:8000/survey/s1`;
+admin export `GET /api/admin/survey/s1/export/{respondents|choices|fairness_h4}?dataset=TEST`. Tập `RESEARCH`
+bị từ chối cho đến khi Chủ dự án phát hành (`SURVEY_S1_RELEASED`).
 
 Bundle trình duyệt nằm ở `docs/implementation/service_area/<version>/REVIEW.md`. Phân loại chuyến
 (`POST /api/trip-requests`) dùng `SERVICE_AREA_VERSION`; nó trả `503` khi chưa cấu hình hoặc

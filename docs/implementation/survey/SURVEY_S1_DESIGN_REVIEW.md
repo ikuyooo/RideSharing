@@ -1,6 +1,6 @@
 # SURVEY_S1_DESIGN_REVIEW — Khảo sát S1 (bản trình duyệt)
 
-- **Trạng thái:** `DRAFT — EXPERIMENT_VALUES_PENDING_APPROVAL`. **Chưa phát hành.** Không có link thu thập nào đang hoạt động.
+- **Trạng thái:** `DRAFT — EXPERIMENT_VALUES_PENDING_APPROVAL`. **Chưa phát hành.** Không có link thu thập công khai nào. Bản nháp biểu mẫu/API chạy trên môi trường development (mục 11).
 - **Căn cứ:** Revision 9 Mục 65 (thiết kế), 65.1 (phân tầng), 65.3 (phân tích), 59.2 (ẩn danh), 16.1 / 10.4 / 20.1 / 20.2 / 25.2 / 28.2 (số liệu thẻ lựa chọn); quyết định P1-D5 (biểu mẫu web độc lập, không phụ thuộc Frontend Next.js).
 - **File máy đọc được:** [`survey/s1/questionnaire.draft.yaml`](../../../survey/s1/questionnaire.draft.yaml) (mỗi giá trị có trường `source`), [`survey/s1/export_schema.md`](../../../survey/s1/export_schema.md).
 - **Quy ước nguồn:** `R9:<mục>` = có trong Revision 9 / Baseline · `DERIVED:B` = tính theo phương pháp B ở mục 3 (phương pháp chờ duyệt) · `TBD` = chưa có nguồn, cần Chủ dự án cung cấp.
@@ -115,6 +115,38 @@ Câu trả lời bị gắn cờ vẫn được lưu; việc loại khỏi phân
 - **Trình tự:** (1) duyệt tài liệu này → (2) dựng biểu mẫu + API + bảng `survey_responses` → (3) chạy thử nội bộ, kiểm tra export → (4) phát hành link → (5) theo dõi chỉ tiêu hằng ngày.
 
 ---
+
+## 9. Rà soát 8 điểm chờ phê duyệt (cập nhật 2026-10-26, quyết định "P1: GEOGRAPHY & S1 CLOSURE" §C)
+
+Đối chiếu lại với Revision 9 Mục 65 và các công thức đã khóa. **Không giá trị nào dưới đây được coi là đã duyệt.**
+
+| # | Mục | Giá trị đề xuất | Nguồn | Phương pháp tạo | Đánh giá | Cần quyết định |
+|---|---|---|---|---|---|---|
+| 1 | Ngữ cảnh 6 km (Phần 1A) | Xe máy 40.000 đ / 15 phút; bao xe 94.000 đ / 17 phút; ghép dự kiến 70.000 đ, tối đa 84.000 đ, đi vòng +5 phút | Revision 9 không có số liệu 6 km | Phương pháp B: công thức Baseline (`bike_urban`, `car_urban`, `Quote`/`Unmatched` Baseline §2.1, `Fare_matched_est` Mục 20.2) với thời gian tỷ lệ thuận ví dụ 14 km (40/14, 35/14, 12/14 phút/km) | Đã kiểm chứng: cùng phương pháp tái tạo đúng 5 con số 14 km của Revision 9. Hạn chế: thời gian là ngoại suy tuyến tính, không mô hình giờ cao điểm (liên quan SF-05/V-03) | Chấp nhận phương pháp B hay cung cấp số khác |
+| 2 | Giá ghép dự kiến 14 km | 143.000 đ (hoặc 145.000 đ) | Mục 10.4 / 16.1 (143k, ghép cụ thể với khách B); Mục 20.2 (145k = `Fare_matched_est`, xe rảnh) | Lấy trực tiếp | Cả hai có nguồn; thẻ Mục 20.1 dùng ~143k. Bản nháp đang hiển thị 143k | Chọn 143k hay 145k |
+| 3 | Biến thiên giá độc lập | TBD | Mục 65.2 yêu cầu "thay đổi giá, thời gian đi" nhưng không cho mức | — | Thiếu → hệ số giá MNL trùng lặp với quãng đường (chỉ biến thiên 6/14 km) | Bộ mức biến thiên (hoặc chấp nhận hạn chế) |
+| 4 | Giá khi đi bộ 200 m | Giữ nguyên giá hiển thị | Mục 23.3: μ = 2,0 tác động **trọng số phân bổ** `w_i`, không phải phụ phí cộng thẳng; C9 là COULD | Không suy ra giá mới | Hiển thị giá đã bù đi bộ cần một kế hoạch ghép cụ thể (P3) | Giữ nguyên hay hiển thị chú thích |
+| 5 | Khả năng đủ khách (Phần 1B) | TBD (bản nháp hiển thị "chờ duyệt") | Mục 65.2 nêu thuộc tính, không nêu mức | — | Không tự đặt mức | Mức (ví dụ dùng chung Cao/Trung bình/Thấp?) |
+| 6 | Khoảng lựa chọn D2–D4 | TBD (API chỉ chấp nhận `null`) | Mục 65.2 liệt kê câu hỏi, không cho khoảng | — | Không tự đặt khoảng | Các khoảng lựa chọn |
+| 7 | QC2 thời gian tối thiểu; QC5 câu chú ý | TBD; QC3/QC4 đã hiện thực (chỉ gắn cờ) | Mục 65.2 "~4–5 phút" | QC3: cùng vị trí ở cả 8 câu 1A; QC4: cùng điểm cho 3 phương pháp | Gắn cờ, không tự loại | Ngưỡng QC2; có dùng QC5 |
+| 8 | Cỡ mẫu, kênh, nơi triển khai | 100–200; kênh/nơi triển khai: đề xuất ở mục 10 | Mục 65.1 | — | Cần địa chỉ công khai | Chốt cỡ mẫu, kênh, hạ tầng, thời hạn lưu trữ |
+
+## 10. Đề xuất phát hành (chờ quyết định)
+
+| Hạng mục | Đề xuất | Lý do / phương án khác |
+|---|---|---|
+| Nền tảng công khai | **Tự lưu trữ biểu mẫu + API nháp hiện có** trên một máy chủ của dự án (VPS hoặc máy chủ trường), sau reverse proxy HTTPS; **chỉ mở** `/survey/s1` và `/api/survey/s1/*`; endpoint admin (export, quota) chỉ truy cập qua mạng nội bộ / SSH tunnel | Giữ dữ liệu trong PostgreSQL của dự án, giữ được thiết kế ngẫu nhiên theo người + xoay khối. Công cụ ngoài (Google/Microsoft Forms) khó làm thiết kế theo khối và đưa dữ liệu cho bên thứ ba — không khuyến nghị (P1-D5) |
+| Cấu hình phát hành | `SURVEY_DATASET=RESEARCH`, `SURVEY_S1_RELEASED=true` **chỉ đặt trên máy chủ phát hành sau khi được duyệt**; môi trường dev luôn `TEST` | Tách tuyệt đối dữ liệu thử và dữ liệu nghiên cứu |
+| Lưu trữ | Dữ liệu ẩn danh trong PostgreSQL dự án; file export lưu nơi giới hạn truy cập nhóm dự án; đề xuất giữ dữ liệu nghiên cứu đến hết bảo vệ đồ án + thời hạn do Chủ dự án quyết định, sau đó xóa hoặc chỉ giữ số liệu tổng hợp | Không có PII theo thiết kế (Mục 59.2) |
+| Chia sẻ link | **Một link chung** (kèm QR) cho mọi nhóm; nhóm xác định bằng câu D1; phân phát qua kênh sinh viên và kênh người đi làm | Link riêng theo nhóm dễ gây lệch tự chọn và lộ nhóm qua URL |
+| Theo dõi tỷ lệ nhóm | `GET /api/admin/survey/s1/quota?dataset=RESEARCH` (đã có) — số hoàn thành theo nhóm và tỷ lệ; theo dõi hằng ngày | Khi một nhóm chạm trần 60% của cỡ mẫu mục tiêu: cần bổ sung cơ chế đóng nhóm (chưa hiện thực, phụ thuộc cỡ mẫu) |
+
+## 11. Trạng thái bản nháp phát triển (development only)
+
+- Đã có: biểu mẫu `/survey/s1` (HTML tĩnh, dải cảnh báo BẢN NHÁP, `noindex`), API phiên/nộp bài, bảng `survey_respondents` + `survey_responses` (migration `0002`, module `ml_models`), export CSV 3 bảng theo `export_schema.md`, quota.
+- Rào chắn: `dataset` do cấu hình máy chủ quyết định (`TEST`); `RESEARCH` bị từ chối khi chưa phát hành; không tài khoản ứng dụng, không cột định danh, không FK tới `users`; trường lạ bị từ chối; IP bị xóa khỏi log truy cập của đường dẫn khảo sát; mốc thời gian làm tròn đến phút.
+- Kiểm thử: `backend/tests/test_survey_s1.py` — 9/9 PASS.
+- Chỉ chạy trên `127.0.0.1`; DB chính **0** câu trả lời. **Chưa phát hành, chưa thu dữ liệu thật. Không phải `SURVEY_S1_RELEASED`.**
 
 ## Tóm tắt các điểm cần Chủ dự án quyết định
 1. Chấp nhận phương pháp B (mục 3.1) cho ngữ cảnh 6 km, hoặc cung cấp số liệu khác.

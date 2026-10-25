@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,6 +37,13 @@ class Settings(BaseSettings):
     # geometry. Results obtained this way are not acceptance evidence.
     allow_candidate_service_area: bool = False
     routing_timeout_s: float = 5.0
+
+    # --- survey S1 (P1-D5; draft, not released) -------------------------------
+    survey_s1_questionnaire_path: Path = Path("/app/survey/s1/questionnaire.draft.yaml")
+    # Fixed per deployment, never chosen by a request. RESEARCH also needs the
+    # owner's release flag below.
+    survey_dataset: Literal["TEST", "RESEARCH"] = "TEST"
+    survey_s1_released: bool = False
 
     @field_validator("service_area_version", mode="before")
     @classmethod

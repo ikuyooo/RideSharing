@@ -1,0 +1,338 @@
+area_type,component,km2,holes,whole_units,units_at_point,gap_to_nearest_component_m,road_inside,category
+URBAN,2,55.912898,0,2,Phường Tùng Thiện,21196.9,True,SEPARATED_WHOLE_UNIT (valid administrative geometry)
+URBAN,3,1.57141,0,0,,58.6,True,U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)
+URBAN,4,0.191963,0,0,,33.6,True,U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)
+URBAN,5,0.067753,0,0,,38.6,True,U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)
+URBAN,6,0.060373,0,0,,33.6,True,U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)
+URBAN,7,0.01664,0,0,,831.3,True,U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)
+TOTAL,2,167.060731,0,0,Đặc khu Cát Hải,10.0,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,3,16.131945,0,0,Đặc khu Cát Hải,31.7,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,4,10.022837,0,0,Xã Hưng Phú,127.7,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,5,9.207073,0,0,Phường Tuần Châu,35.8,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,6,5.116904,0,0,Phường Hà An,151.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,7,2.859982,0,0,Đặc khu Cát Hải,84.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,8,1.930612,0,0,Phường Tuần Châu,36.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,9,1.614646,0,0,Đặc khu Cát Hải,36.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,10,1.084479,0,0,Xã Đông Thái Ninh,167.3,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,11,1.00672,0,0,Đặc khu Cát Hải,43.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,12,0.938824,0,0,Phường Bãi Cháy,43.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,13,0.787934,0,0,Xã Kim Đông,3388.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,14,0.733259,0,0,Phường Bãi Cháy,60.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,15,0.628039,0,0,Phường Bãi Cháy,14.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,16,0.613467,0,0,Phường Bãi Cháy,82.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,17,0.536766,0,0,Phường Hà An,151.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,18,0.461707,0,0,Đặc khu Cát Hải,93.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,19,0.457378,0,0,Phường Bãi Cháy,63.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,20,0.357078,0,0,Đặc khu Cát Hải,24.9,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,21,0.355129,0,0,Phường Tuần Châu,63.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,22,0.323588,0,0,Phường Bãi Cháy,48.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,23,0.315261,0,0,Đặc khu Cát Hải,19.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,24,0.306848,0,0,Đặc khu Cát Hải,32.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,25,0.302067,0,0,Phường Hà An,738.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,26,0.298133,0,0,Đặc khu Cát Hải,38.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,27,0.294468,0,0,Phường Hà An,53.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,28,0.262936,0,0,Đặc khu Cát Hải,36.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,29,0.257483,0,0,Đặc khu Cát Hải,47.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,30,0.252106,0,0,Đặc khu Cát Hải,25.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,31,0.241182,0,0,Phường Bãi Cháy,28.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,32,0.237955,0,0,Phường Tuần Châu,123.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,33,0.215788,0,0,Đặc khu Cát Hải,8.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,34,0.187364,0,0,Phường Tuần Châu,75.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,35,0.187239,0,0,Xã Đồng Châu,1140.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,36,0.185239,0,0,Đặc khu Cát Hải,22.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,37,0.183674,0,0,Phường Tuần Châu,45.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,38,0.181048,0,0,Đặc khu Cát Hải,44.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,39,0.171724,0,0,Đặc khu Cát Hải,76.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,40,0.162783,0,0,Phường Bãi Cháy,52.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,41,0.15614,0,0,Đặc khu Cát Hải,6.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,42,0.154025,0,0,Phường Tuần Châu,50.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,43,0.151441,0,0,Đặc khu Cát Hải,312.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,44,0.144368,0,0,Đặc khu Cát Hải,80.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,45,0.143003,0,0,Đặc khu Cát Hải,15.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,46,0.136474,0,0,Phường Bãi Cháy,55.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,47,0.136377,0,0,Đặc khu Cát Hải,39.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,48,0.133898,0,0,Đặc khu Cát Hải,10.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,49,0.125007,0,0,Đặc khu Cát Hải,23.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,50,0.12436,0,0,Đặc khu Cát Hải,552.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,51,0.123178,0,0,Đặc khu Cát Hải,44.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,52,0.122473,0,0,Đặc khu Cát Hải,47.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,53,0.122441,0,0,Phường Đồ Sơn,630.9,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,54,0.121573,0,0,Đặc khu Cát Hải,36.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,55,0.118809,0,0,Phường Tuần Châu,114.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,56,0.117828,0,0,Phường Hà An,22.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,57,0.116715,0,0,Phường Tuần Châu,43.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,58,0.11627,0,0,Phường Bãi Cháy,20.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,59,0.112802,0,0,Đặc khu Cát Hải,76.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,60,0.110039,0,0,Đặc khu Cát Hải,58.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,61,0.107976,0,0,Phường Bãi Cháy,24.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,62,0.107899,0,0,Đặc khu Cát Hải,56.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,63,0.096244,0,0,Đặc khu Cát Hải,228.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,64,0.091965,0,0,Đặc khu Cát Hải,37.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,65,0.090566,0,0,Phường Bãi Cháy,109.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,66,0.09042,0,0,Đặc khu Cát Hải,13.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,67,0.089985,0,0,Phường Bãi Cháy,20.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,68,0.086055,0,0,Phường Tuần Châu,163.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,69,0.082336,0,0,Đặc khu Cát Hải,285.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,70,0.079656,0,0,Phường Bãi Cháy,149.3,True,UNIT_PART_SEPARATED (island / exclave of a unit)
+TOTAL,71,0.07938,0,0,Đặc khu Cát Hải,173.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,72,0.076811,0,0,Phường Bãi Cháy,71.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,73,0.073493,0,0,Phường Bãi Cháy,164.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,74,0.071182,0,0,Đặc khu Cát Hải,26.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,75,0.070061,0,0,Đặc khu Cát Hải,172.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,76,0.068493,0,0,Đặc khu Cát Hải,15.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,77,0.066626,0,0,Phường Bãi Cháy,83.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,78,0.064564,0,0,Phường Tuần Châu,85.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,79,0.064551,0,0,Phường Bãi Cháy,110.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,80,0.062969,0,0,Đặc khu Cát Hải,254.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,81,0.06195,0,0,Đặc khu Cát Hải,19.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,82,0.060082,0,0,Đặc khu Cát Hải,80.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,83,0.059582,0,0,Phường Tuần Châu,51.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,84,0.057717,0,0,Đặc khu Cát Hải,33.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,85,0.056221,0,0,Đặc khu Cát Hải,240.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,86,0.050714,0,0,Đặc khu Cát Hải,92.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,87,0.048854,0,0,Phường Bãi Cháy,62.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,88,0.048598,0,0,Đặc khu Cát Hải,18.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,89,0.046392,0,0,Đặc khu Cát Hải,47.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,90,0.044831,0,0,Đặc khu Cát Hải,28.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,91,0.044719,0,0,Đặc khu Cát Hải,20.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,92,0.04454,0,0,Đặc khu Cát Hải,26.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,93,0.044106,0,0,Phường Bãi Cháy,63.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,94,0.041928,0,0,Phường Bãi Cháy,332.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,95,0.040811,0,0,Đặc khu Cát Hải,37.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,96,0.038688,0,0,Phường Bãi Cháy,63.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,97,0.038228,0,0,Phường Tuần Châu,43.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,98,0.038194,0,0,Đặc khu Cát Hải,7.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,99,0.037926,0,0,Phường Tuần Châu,85.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,100,0.036529,0,0,Phường Hà An,7.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,101,0.036496,0,0,Đặc khu Cát Hải,53.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,102,0.034318,0,0,Đặc khu Cát Hải,127.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,103,0.034186,0,0,Đặc khu Cát Hải,392.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,104,0.033856,0,0,Phường Tuần Châu,70.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,105,0.033172,0,0,Đặc khu Cát Hải,96.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,106,0.03269,0,0,Đặc khu Cát Hải,99.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,107,0.030734,0,0,Đặc khu Cát Hải,14.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,108,0.03053,0,0,Phường Bãi Cháy,361.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,109,0.03028,0,0,Đặc khu Cát Hải,95.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,110,0.029742,0,0,Đặc khu Cát Hải,21.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,111,0.029672,0,0,Đặc khu Cát Hải,85.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,112,0.029361,0,0,Đặc khu Cát Hải,33.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,113,0.028999,0,0,Đặc khu Cát Hải,40.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,114,0.028758,0,0,Đặc khu Cát Hải,24.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,115,0.028298,0,0,Phường Hà An,34.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,116,0.027184,0,0,Phường Tuần Châu,285.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,117,0.026066,0,0,Phường Bãi Cháy,185.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,118,0.025977,0,0,Đặc khu Cát Hải,41.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,119,0.024102,0,0,Đặc khu Cát Hải,29.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,120,0.024065,0,0,Đặc khu Cát Hải,81.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,121,0.023984,0,0,Đặc khu Cát Hải,64.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,122,0.02367,0,0,Đặc khu Cát Hải,112.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,123,0.023406,0,0,Đặc khu Cát Hải,41.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,124,0.022277,0,0,Đặc khu Cát Hải,68.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,125,0.020918,0,0,Phường Bãi Cháy,51.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,126,0.020762,0,0,Đặc khu Cát Hải,521.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,127,0.02052,0,0,Đặc khu Cát Hải,14.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,128,0.02017,0,0,Đặc khu Cát Hải,446.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,129,0.020061,0,0,Đặc khu Cát Hải,60.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,130,0.018131,0,0,Đặc khu Cát Hải,81.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,131,0.018095,0,0,Phường Bãi Cháy,155.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,132,0.017994,0,0,Phường Bãi Cháy,24.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,133,0.017949,0,0,Đặc khu Cát Hải,61.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,134,0.016825,0,0,Đặc khu Cát Hải,226.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,135,0.016726,0,0,Phường Bãi Cháy,11.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,136,0.016266,0,0,Đặc khu Cát Hải,89.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,137,0.01576,0,0,Phường Tuần Châu,45.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,138,0.015743,0,0,Đặc khu Cát Hải,53.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,139,0.015379,0,0,Phường Bãi Cháy,88.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,140,0.01521,0,0,Đặc khu Cát Hải,40.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,141,0.01519,0,0,Đặc khu Cát Hải,24.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,142,0.014725,0,0,Phường Tuần Châu,57.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,143,0.014034,0,0,Đặc khu Cát Hải,37.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,144,0.01385,0,0,Đặc khu Cát Hải,99.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,145,0.013262,0,0,Đặc khu Cát Hải,54.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,146,0.012813,0,0,Đặc khu Cát Hải,42.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,147,0.012564,0,0,Đặc khu Cát Hải,18.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,148,0.012204,0,0,Đặc khu Cát Hải,94.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,149,0.012159,0,0,Đặc khu Cát Hải,88.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,150,0.012028,0,0,Phường Tuần Châu,187.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,151,0.012019,0,0,Đặc khu Cát Hải,231.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,152,0.011716,0,0,Đặc khu Cát Hải,78.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,153,0.011706,0,0,Đặc khu Cát Hải,34.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,154,0.011575,0,0,Phường Tuần Châu,132.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,155,0.011545,0,0,Phường Bãi Cháy,232.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,156,0.011471,0,0,Đặc khu Cát Hải,60.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,157,0.011461,0,0,Đặc khu Cát Hải,47.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,158,0.011411,0,0,Đặc khu Cát Hải,26.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,159,0.011359,0,0,Phường Hà An,27.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,160,0.01114,0,0,Phường Bãi Cháy,43.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,161,0.010982,0,0,Phường Tuần Châu,244.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,162,0.010798,0,0,Đặc khu Cát Hải,188.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,163,0.010532,0,0,Đặc khu Cát Hải,228.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,164,0.010429,0,0,Đặc khu Cát Hải,36.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,165,0.010145,0,0,Phường Tuần Châu,75.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,166,0.009907,0,0,Phường Bãi Cháy,48.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,167,0.009865,0,0,Phường Bãi Cháy,86.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,168,0.009803,0,0,Đặc khu Cát Hải,125.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,169,0.009707,0,0,Đặc khu Cát Hải,22.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,170,0.009627,0,0,Đặc khu Cát Hải,125.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,171,0.009484,0,0,Đặc khu Cát Hải,49.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,172,0.00931,0,0,Đặc khu Cát Hải,97.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,173,0.009154,0,0,Phường Bãi Cháy,235.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,174,0.009062,0,0,Đặc khu Cát Hải,40.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,175,0.009024,0,0,Đặc khu Cát Hải,7.2,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,176,0.008881,0,0,Đặc khu Cát Hải,55.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,177,0.008547,0,0,Đặc khu Cát Hải,41.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,178,0.008532,0,0,Đặc khu Cát Hải,48.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,179,0.008514,0,0,Đặc khu Cát Hải,112.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,180,0.008482,0,0,Đặc khu Cát Hải,27.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,181,0.008469,0,0,Đặc khu Cát Hải,45.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,182,0.008331,0,0,Đặc khu Cát Hải,130.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,183,0.008302,0,0,Phường Tuần Châu,35.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,184,0.008224,0,0,Phường Bãi Cháy,182.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,185,0.007866,0,0,Đặc khu Cát Hải,199.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,186,0.007789,0,0,Phường Bãi Cháy,60.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,187,0.007731,0,0,Đặc khu Cát Hải,15.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,188,0.007643,0,0,Phường Tuần Châu,43.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,189,0.007549,0,0,Đặc khu Cát Hải,92.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,190,0.00754,0,0,Phường Bãi Cháy,28.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,191,0.007507,0,0,Đặc khu Cát Hải,161.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,192,0.007412,0,0,Phường Bãi Cháy,52.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,193,0.007365,0,0,Đặc khu Cát Hải,47.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,194,0.007344,0,0,Đặc khu Cát Hải,173.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,195,0.007255,0,0,Phường Tuần Châu,83.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,196,0.006919,0,0,Phường Tuần Châu,86.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,197,0.006833,0,0,Đặc khu Cát Hải,129.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,198,0.006797,0,0,Đặc khu Cát Hải,33.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,199,0.006782,0,0,Phường Đồ Sơn,9.1,True,SLIVER_SUSPECTED (overlay / data artefact)
+TOTAL,200,0.006771,0,0,Đặc khu Cát Hải,79.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,201,0.006693,0,0,Đặc khu Cát Hải,45.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,202,0.006675,0,0,Phường Tuần Châu,36.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,203,0.006602,0,0,Đặc khu Cát Hải,159.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,204,0.006506,0,0,Đặc khu Cát Hải,296.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,205,0.00642,0,0,Đặc khu Cát Hải,120.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,206,0.006399,0,0,Đặc khu Cát Hải,19.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,207,0.005842,0,0,Đặc khu Cát Hải,115.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,208,0.005785,0,0,Phường Hà An,59.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,209,0.005541,0,0,Đặc khu Cát Hải,99.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,210,0.005355,0,0,Đặc khu Cát Hải,105.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,211,0.005158,0,0,Đặc khu Cát Hải,21.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,212,0.005045,0,0,Đặc khu Cát Hải,15.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,213,0.005026,0,0,Đặc khu Cát Hải,359.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,214,0.005004,0,0,Phường Tuần Châu,42.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,215,0.004897,0,0,Phường Bãi Cháy,94.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,216,0.0048,0,0,Phường Bãi Cháy,93.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,217,0.004734,0,0,Phường Tuần Châu,63.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,218,0.004606,0,0,Đặc khu Cát Hải,22.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,219,0.00459,0,0,Đặc khu Cát Hải,227.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,220,0.00454,0,0,Đặc khu Cát Hải,9.9,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,221,0.004528,0,0,Đặc khu Cát Hải,32.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,222,0.004408,0,0,Đặc khu Cát Hải,85.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,223,0.004384,0,0,Phường Bãi Cháy,219.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,224,0.004339,0,0,Đặc khu Cát Hải,58.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,225,0.004218,0,0,Đặc khu Cát Hải,73.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,226,0.004185,0,0,Phường Tuần Châu,157.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,227,0.004004,0,0,Phường Tuần Châu,43.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,228,0.003956,0,0,Phường Tuần Châu,42.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,229,0.003917,0,0,Đặc khu Cát Hải,43.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,230,0.003859,0,0,Đặc khu Cát Hải,41.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,231,0.003765,0,0,Phường Hà An,198.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,232,0.003754,0,0,Đặc khu Cát Hải,100.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,233,0.003752,0,0,Đặc khu Cát Hải,123.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,234,0.003707,0,0,Phường Bãi Cháy,121.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,235,0.003706,0,0,Đặc khu Cát Hải,40.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,236,0.003709,0,0,Đặc khu Cát Hải,135.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,237,0.003686,0,0,Phường Tuần Châu,64.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,238,0.003619,0,0,Đặc khu Cát Hải,425.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,239,0.003605,0,0,Đặc khu Cát Hải,58.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,240,0.003559,0,0,Phường Hà An,39.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,241,0.003483,0,0,Đặc khu Cát Hải,123.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,242,0.003454,0,0,Phường Bãi Cháy,197.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,243,0.003381,0,0,Đặc khu Cát Hải,78.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,244,0.003292,0,0,Đặc khu Cát Hải,38.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,245,0.00324,0,0,Đặc khu Cát Hải,74.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,246,0.003114,0,0,Đặc khu Cát Hải,517.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,247,0.003015,0,0,Đặc khu Cát Hải,55.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,248,0.002853,0,0,Phường Bãi Cháy,69.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,249,0.002855,0,0,Đặc khu Cát Hải,114.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,250,0.002669,0,0,Đặc khu Cát Hải,15.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,251,0.002627,0,0,Phường Bãi Cháy,51.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,252,0.002475,0,0,Đặc khu Cát Hải,233.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,253,0.002475,0,0,Đặc khu Cát Hải,39.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,254,0.002456,0,0,Phường Hà An,148.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,255,0.002435,0,0,Đặc khu Cát Hải,219.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,256,0.002397,0,0,Đặc khu Cát Hải,55.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,257,0.002334,0,0,Đặc khu Cát Hải,11.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,258,0.002326,0,0,Phường Tuần Châu,170.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,259,0.002295,0,0,Đặc khu Cát Hải,43.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,260,0.002269,0,0,Đặc khu Cát Hải,72.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,261,0.002246,0,0,Đặc khu Cát Hải,97.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,262,0.00223,0,0,Đặc khu Cát Hải,458.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,263,0.00221,0,0,Đặc khu Cát Hải,17.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,264,0.002148,0,0,Phường Bãi Cháy,83.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,265,0.002092,0,0,Đặc khu Cát Hải,53.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,266,0.002051,0,0,Đặc khu Cát Hải,24.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,267,0.001998,0,0,Đặc khu Cát Hải,25.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,268,0.001983,0,0,Phường Bãi Cháy,51.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,269,0.001953,0,0,Đặc khu Cát Hải,84.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,270,0.001839,0,0,Phường Hà An,45.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,271,0.001778,0,0,Đặc khu Cát Hải,18.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,272,0.001765,0,0,Đặc khu Cát Hải,18.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,273,0.001758,0,0,Phường Bãi Cháy,153.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,274,0.001753,0,0,Đặc khu Cát Hải,97.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,275,0.001748,0,0,Đặc khu Cát Hải,8.1,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,276,0.001672,0,0,Đặc khu Cát Hải,199.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,277,0.001571,0,0,Phường Hà An,62.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,278,0.001553,0,0,Đặc khu Cát Hải,120.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,279,0.001549,0,0,Đặc khu Cát Hải,47.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,280,0.001535,0,0,Đặc khu Cát Hải,198.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,281,0.001512,0,0,Đặc khu Cát Hải,11.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,282,0.001386,0,0,Phường Bãi Cháy,52.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,283,0.001379,0,0,Đặc khu Cát Hải,32.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,284,0.001192,0,0,Phường Tuần Châu,191.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,285,0.001177,0,0,Phường Hà An,46.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,286,0.001176,0,0,Đặc khu Cát Hải,220.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,287,0.001168,0,0,Đặc khu Cát Hải,102.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,288,0.001134,0,0,Đặc khu Cát Hải,45.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,289,0.001114,0,0,Đặc khu Cát Hải,23.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,290,0.001088,0,0,Đặc khu Cát Hải,25.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,291,0.001041,0,0,Đặc khu Cát Hải,31.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,292,0.001039,0,0,Đặc khu Cát Hải,113.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,293,0.000978,0,0,Phường Hà An,22.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,294,0.000967,0,0,Đặc khu Cát Hải,78.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,295,0.000947,0,0,Đặc khu Cát Hải,15.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,296,0.000938,0,0,Đặc khu Cát Hải,342.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,297,0.000934,0,0,Đặc khu Cát Hải,473.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,298,0.000825,0,0,Đặc khu Cát Hải,11.3,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,299,0.000761,0,0,Đặc khu Cát Hải,187.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,300,0.000758,0,0,Phường Bãi Cháy,232.1,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,301,0.000753,0,0,Đặc khu Cát Hải,56.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,302,0.00075,0,0,Đặc khu Cát Hải,15.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,303,0.000705,0,0,Đặc khu Cát Hải,85.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,304,0.000683,0,0,Đặc khu Cát Hải,19.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,305,0.000681,0,0,Đặc khu Cát Hải,101.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,306,0.000678,0,0,Phường Bãi Cháy,14.6,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,307,0.000678,0,0,Đặc khu Cát Hải,19.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,308,0.000673,0,0,Phường Tuần Châu,51.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,309,0.000663,0,0,Đặc khu Cát Hải,34.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,310,0.000648,0,0,Đặc khu Cát Hải,46.8,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,311,0.000591,0,0,Đặc khu Cát Hải,416.9,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,312,0.000529,0,0,Đặc khu Cát Hải,11.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,313,0.000486,0,0,Đặc khu Cát Hải,10.0,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,314,0.00042,0,0,Phường Bãi Cháy,88.0,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,315,0.000419,0,0,Phường Bãi Cháy,55.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,316,0.000408,0,0,Phường Bãi Cháy,513.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,317,0.000403,0,0,Phường Tuần Châu,65.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,318,0.000402,0,0,Phường Hà An,39.7,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,319,0.000396,0,0,Phường Bãi Cháy,360.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,320,0.000276,0,0,Đặc khu Cát Hải,10.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,321,0.00025,0,0,Đặc khu Cát Hải,18.5,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,322,0.000208,0,0,Phường Bãi Cháy,11.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,323,0.000172,0,0,Đặc khu Cát Hải,787.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,324,0.000124,0,0,Đặc khu Cát Hải,113.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,325,0.000123,0,0,Đặc khu Cát Hải,6.3,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,326,8.7e-05,0,0,Đặc khu Cát Hải,4.3,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,327,8.1e-05,0,0,Đặc khu Cát Hải,7.2,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,328,7.2e-05,0,0,Đặc khu Cát Hải,7.1,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,329,6.6e-05,0,0,Đặc khu Cát Hải,4.3,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,330,6.3e-05,0,0,Đặc khu Cát Hải,32.4,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,331,4.6e-05,0,0,Phường Bãi Cháy,71.2,False,UNIT_PART_SEPARATED (island / exclave of a unit) + NO_ROUTABLE_ROAD_INSIDE
+TOTAL,332,1.1e-05,0,0,Đặc khu Cát Hải,5.3,False,SLIVER_SUSPECTED (overlay / data artefact) + NO_ROUTABLE_ROAD_INSIDE

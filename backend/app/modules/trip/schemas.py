@@ -27,6 +27,8 @@ class TripRequestIn(BaseModel):
     latest_arrival: datetime | None = None
     budget_min: int | None = Field(default=None, ge=0)
     budget_max: int | None = Field(default=None, ge=0)
+    # Omitted -> Revision 9 Section 6 default 0.30 (rules.SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO).
+    # Revision 9 gives no valid range; [0, 1] is a technical bound (ratio of extra distance).
     max_passenger_detour_ratio: float | None = Field(default=None, ge=0, le=1)
     max_in_vehicle_time_s: int | None = Field(default=None, gt=0)
     max_walk_m: int | None = Field(default=None, ge=0)
@@ -55,5 +57,6 @@ class TripRequestOut(BaseModel):
     allowed_service_codes: list[str]
     rejection_reasons: list[dict[str, Any]]
     direct_distance_km: float | None
+    max_passenger_detour_ratio: float | None
     service_area_version: str
     created_at: datetime

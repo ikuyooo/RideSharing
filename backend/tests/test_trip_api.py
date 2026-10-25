@@ -169,6 +169,35 @@ def test_service_area_gates(client: TestClient, db_session: Session, monkeypatch
     assert post(client, headers).status_code == 201
 
 
+def test_detour_ratio_spec_default_and_user_value(client: TestClient, fake_distance: FakeDistance,
+                                                db_session: Session) -> None:
+    """Owner decision A7: Revision 9 Section 6 default 0.30 when omitted (not a Baseline key)."""
+    from app.modules.trip.rules import SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO
+
+    assert SPEC_DEFAULT_MAX_PASSENGER_DETOUR_RATIO == 0.30
+    _, headers = new_user(client)
+    default = post(client, headers).json()
+    assert default["max_passenger_detour_ratio"] == 0.30
+    stored = db_session.execute(text("SELECT max_passenger_detour_ratio FROM trip_requests WHERE id = :i"),
+                                {"i": default["id"]}).scalar_one()
+    assert stored == 0.30
+    assert post(client, headers, max_passenger_detour_ratio=0.25).json()["max_passenger_detour_ratio"] == 0.25
+    for edge in (0, 1):
+        assert post(client, headers, max_passenger_detour_ratio=edge).status_code == 201
+    for bad in (-0.01, 1.01):
+        assert post(client, headers, max_passenger_detour_ratio=bad).status_code == 422
+
+
+def test_baseline_yaml_has_no_detour_ratio_key() -> None:
+    """The default must not be silently added to the locked Baseline (A7)."""
+    import yaml
+
+    from tests.conftest import CONFIG_BASELINE
+
+    assert "max_passenger_detour_ratio" not in CONFIG_BASELINE.read_text(encoding="utf-8")
+    assert "max_passenger_detour_ratio" not in yaml.safe_load(CONFIG_BASELINE.read_text(encoding="utf-8"))["car_urban"]
+
+
 def test_trip_coordinates_not_logged(client: TestClient, fake_distance: FakeDistance,
                                      caplog: pytest.LogCaptureFixture) -> None:
     _, headers = new_user(client)
