@@ -1,0 +1,177 @@
+# Ride-Sharing Platform — Phase 0 infrastructure (Revision 9, Section 5 / 53 / 79).
+#
+# Default services : postgres, redis, osrm-car, osrm-motorbike, backend
+# One-off prep jobs: profile "osrm-prep" (osm-fetch, osrm-prep-car, osrm-prep-motorbike)
+#
+# Large data (OSM extract, OSRM graphs, DB files) lives in named volumes, never
+# in the repository. All host ports bind to 127.0.0.1 only.
+
+name: ${COMPOSE_PROJECT_NAME:-ridesharing}
+
+x-osrm-runtime: &osrm-runtime
+  image: ${OSRM_IMAGE:-ghcr.io/project-osrm/osrm-backend:v5.27.1}
+  restart: unless-stopped
+  networks: [backend]
+  healthcheck:
+    # Real API probe: /nearest at central Hanoi must answer "code":"Ok".
+    test:
+      - CMD
+      - bash
+      - -c
+      - >-
+        exec 3<>/dev/tcp/127.0.0.1/5000 &&
+        printf 'GET /nearest/v1/driving/105.8542,21.0285 HTTP/1.0\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+        grep -q '"code":"Ok"' <&3
+    interval: 15s
+    timeout: 5s
+    retries: 5
+    start_period: 120s
+
+x-osrm-serve-command: &osrm-serve-command
+  - sh
+  - -c
+  - >-
+    test -f /data/PREPARED || {
+    echo 'OSRM graph missing. Run: docker compose --profile osrm-prep run --rm osm-fetch && docker compose --profile osrm-prep run --rm osrm-prep-car && docker compose --profile osrm-prep run --rm osrm-prep-motorbike';
+    exit 1; } &&
+    exec osrm-routed --algorithm ch --ip 0.0.0.0 --port 5000
+    --max-table-size ${OSRM_MAX_TABLE_SIZE:-200} /data/region.osrm
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ridesharing}
+      POSTGRES_USER: ${POSTGRES_USER:-ridesharing}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    networks: [backend]
+    healthcheck:
+      # TCP (not the init-time unix socket) + PostGIS must be loaded.
+      test:
+        - CMD-SHELL
+        - >-
+          pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" &&
+          PGPASSWORD="$$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+          -tAc 'SELECT postgis_version()' | grep -q .
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  osrm-car:
+    <<: *osrm-runtime
+    command: *osrm-serve-command
+    volumes:
+      - osrm_car_data:/data:ro
+    ports:
+      - "127.0.0.1:${OSRM_CAR_HOST_PORT:-5000}:5000"
+
+  osrm-motorbike:
+    <<: *osrm-runtime
+    command: *osrm-serve-command
+    volumes:
+      - osrm_motorbike_data:/data:ro
+    ports:
+      - "127.0.0.1:${OSRM_MOTORBIKE_HOST_PORT:-5001}:5000"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ridesharing}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ridesharing}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      OSRM_CAR_URL: http://osrm-car:5000
+      OSRM_MOTORBIKE_URL: http://osrm-motorbike:5000
+      CONFIG_BASELINE_PATH: /app/config/mvp_config_baseline_v1.yaml
+    volumes:
+      - ./config:/app/config:ro
+    ports:
+      - "127.0.0.1:${BACKEND_HOST_PORT:-8000}:8000"
+    networks: [backend]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Liveness of the API process itself; dependency status is /health/ready.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # One-off data preparation (profile: osrm-prep). Idempotent; FORCE=1 rebuilds.
+  # ---------------------------------------------------------------------------
+  osm-fetch:
+    profiles: ["osrm-prep"]
+    build: ./infra/osm-tools
+    environment:
+      OSM_SOURCE_URL: ${OSM_SOURCE_URL:-https://download.geofabrik.de/asia/vietnam-latest.osm.pbf}
+      OSM_CLIP_BBOX: ${OSM_CLIP_BBOX:-104.30,19.60,107.50,22.50}
+      FORCE: ${FORCE:-0}
+    volumes:
+      - osm_data:/data
+      - ./scripts/osm:/scripts:ro
+    entrypoint: ["sh", "/scripts/fetch_and_clip.sh"]
+
+  osrm-prep-car:
+    profiles: ["osrm-prep"]
+    image: ${OSRM_IMAGE:-ghcr.io/project-osrm/osrm-backend:v5.27.1}
+    environment:
+      FORCE: ${FORCE:-0}
+      OSRM_THREADS: ${OSRM_THREADS:-2}
+    volumes:
+      - osm_data:/osm:ro
+      - osrm_car_data:/data
+      - ./scripts/osrm:/scripts:ro
+    entrypoint: ["sh", "/scripts/prepare.sh", "/opt/car.lua", "car"]
+
+  osrm-prep-motorbike:
+    profiles: ["osrm-prep"]
+    image: ${OSRM_IMAGE:-ghcr.io/project-osrm/osrm-backend:v5.27.1}
+    environment:
+      FORCE: ${FORCE:-0}
+      OSRM_THREADS: ${OSRM_THREADS:-2}
+    volumes:
+      - osm_data:/osm:ro
+      - osrm_motorbike_data:/data
+      - ./scripts/osrm:/scripts:ro
+      - ./infra/osrm/profiles:/profiles:ro
+    entrypoint: ["sh", "/scripts/prepare.sh", "/profiles/motorbike.lua", "motorbike"]
+
+networks:
+  backend:
+    name: ${COMPOSE_PROJECT_NAME:-ridesharing}_backend
+
+volumes:
+  pgdata:
+  redisdata:
+  osm_data:
+  osrm_car_data:
+  osrm_motorbike_data:

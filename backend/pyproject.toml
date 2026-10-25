@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ridesharing-backend"
+version = "0.0.1"
+description = "Ride-sharing platform backend (Revision 9) - FastAPI modular monolith"
+requires-python = ">=3.11"
+# Phase 0 runtime dependencies only. AI / optimisation / blockchain libraries
+# are added in the phase that first needs them (Revision 9, Section 79).
+dependencies = [
+    "fastapi==0.115.12",
+    "uvicorn[standard]==0.34.2",
+    "pydantic==2.11.4",
+    "pydantic-settings==2.9.1",
+    "SQLAlchemy==2.0.41",
+    "psycopg[binary]==3.2.9",
+    "redis==5.2.1",
+    "httpx==0.28.1",
+    "PyYAML==6.0.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.5"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,167 @@
+{
+  "run_at_utc": "2026-10-24T16:24:04Z",
+  "seed": 20261024,
+  "iterations": 50,
+  "warmup": 5,
+  "bbox": [
+    105.7,
+    20.93,
+    105.92,
+    21.1
+  ],
+  "target_ms": 50.0,
+  "host": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "Intel64 Family 6 Model 61 Stepping 4, GenuineIntel"
+  },
+  "http": "http.client persistent keep-alive connection from the host to 127.0.0.1 (Docker Desktop port forwarding), client-side wall-clock latency",
+  "docker_stats_before": {
+    "ridesharing-osrm-motorbike-1": "cpu=0.00% mem=1.03GiB / 5.739GiB",
+    "ridesharing-osrm-car-1": "cpu=0.00% mem=990.9MiB / 5.739GiB",
+    "ridesharing-backend-1": "cpu=0.22% mem=55.95MiB / 5.739GiB",
+    "ridesharing-redis-1": "cpu=0.71% mem=9.004MiB / 5.739GiB",
+    "ridesharing-postgres-1": "cpu=0.00% mem=23.71MiB / 5.739GiB"
+  },
+  "profiles": {
+    "car": {
+      "snap_distance_m": {
+        "p50": 19.4,
+        "max": 461.9
+      },
+      "table": {
+        "10x10": {
+          "points": 10,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 12.49,
+          "p95_ms": 14.51,
+          "p99_ms": 15.04,
+          "max_ms": 15.04,
+          "mean_ms": 12.56,
+          "meets_target_p95": true
+        },
+        "25x25": {
+          "points": 25,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 24.49,
+          "p95_ms": 54.53,
+          "p99_ms": 80.23,
+          "max_ms": 80.23,
+          "mean_ms": 27.92,
+          "meets_target_p95": false
+        },
+        "50x50": {
+          "points": 50,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 35.59,
+          "p95_ms": 50.04,
+          "p99_ms": 68.08,
+          "max_ms": 68.08,
+          "mean_ms": 38.58,
+          "meets_target_p95": false
+        },
+        "100x100": {
+          "points": 100,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 65.83,
+          "p95_ms": 109.82,
+          "p99_ms": 123.1,
+          "max_ms": 123.1,
+          "mean_ms": 69.52,
+          "meets_target_p95": false
+        }
+      },
+      "docker_stats_after_tables": {
+        "ridesharing-osrm-motorbike-1": "cpu=0.00% mem=1.031GiB / 5.739GiB",
+        "ridesharing-osrm-car-1": "cpu=0.00% mem=990.8MiB / 5.739GiB",
+        "ridesharing-backend-1": "cpu=0.16% mem=55.7MiB / 5.739GiB",
+        "ridesharing-redis-1": "cpu=0.60% mem=9.266MiB / 5.739GiB",
+        "ridesharing-postgres-1": "cpu=0.00% mem=23.76MiB / 5.739GiB"
+      },
+      "route_phenikaa_dongda": {
+        "ok": 50,
+        "failed": 0,
+        "p50_ms": 44.0,
+        "p95_ms": 48.02,
+        "p99_ms": 48.14,
+        "max_ms": 48.14,
+        "mean_ms": 44.81,
+        "distance_km": 12.77,
+        "duration_min": 17.6
+      }
+    },
+    "motorbike": {
+      "snap_distance_m": {
+        "p50": 18.6,
+        "max": 461.9
+      },
+      "table": {
+        "10x10": {
+          "points": 10,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 12.17,
+          "p95_ms": 15.62,
+          "p99_ms": 16.8,
+          "max_ms": 16.8,
+          "mean_ms": 12.31,
+          "meets_target_p95": true
+        },
+        "25x25": {
+          "points": 25,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 21.29,
+          "p95_ms": 35.06,
+          "p99_ms": 40.05,
+          "max_ms": 40.05,
+          "mean_ms": 24.31,
+          "meets_target_p95": true
+        },
+        "50x50": {
+          "points": 50,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 37.13,
+          "p95_ms": 85.08,
+          "p99_ms": 100.89,
+          "max_ms": 100.89,
+          "mean_ms": 41.89,
+          "meets_target_p95": false
+        },
+        "100x100": {
+          "points": 100,
+          "ok": 50,
+          "failed": 0,
+          "p50_ms": 72.09,
+          "p95_ms": 96.15,
+          "p99_ms": 118.1,
+          "max_ms": 118.1,
+          "mean_ms": 75.55,
+          "meets_target_p95": false
+        }
+      },
+      "docker_stats_after_tables": {
+        "ridesharing-osrm-motorbike-1": "cpu=8.20% mem=1.031GiB / 5.739GiB",
+        "ridesharing-osrm-car-1": "cpu=0.00% mem=990.9MiB / 5.739GiB",
+        "ridesharing-backend-1": "cpu=0.15% mem=56.02MiB / 5.739GiB",
+        "ridesharing-redis-1": "cpu=0.71% mem=9.031MiB / 5.739GiB",
+        "ridesharing-postgres-1": "cpu=0.00% mem=23.78MiB / 5.739GiB"
+      },
+      "route_phenikaa_dongda": {
+        "ok": 50,
+        "failed": 0,
+        "p50_ms": 44.02,
+        "p95_ms": 47.97,
+        "p99_ms": 58.96,
+        "max_ms": 58.96,
+        "mean_ms": 44.95,
+        "distance_km": 12.77,
+        "duration_min": 18.3
+      }
+    }
+  }
+}

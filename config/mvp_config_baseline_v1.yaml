@@ -1,0 +1,140 @@
+# =============================================================================
+# MVP_CONFIG_BASELINE_V1 — machine-readable copy of the LOCKED baseline.
+# Source of truth: docs/pre/mvp_config_baseline_v1.md, Section 4 (verbatim copy).
+# DO NOT EDIT BY HAND. Any parameter change requires a new pricing_version /
+# config version per Section 5 of the baseline document.
+# Drift is guarded by backend/tests/test_config_baseline.py.
+# =============================================================================
+config_baseline_version: "MVP_CONFIG_BASELINE_V1"
+config_status: "LOCKED_AND_APPROVED"
+blueprint_revision: "Revision_9"
+pricing_version: "price_v9_two_sided_bounded"
+pool_policy_version: "guarantee_fund_v2_post_rounding_hourly_gate"
+
+spatial_and_service_areas:
+  max_total_service_radius_km: 150.0
+  urban_boundary_buffer_km: 15.0
+
+bike_urban:
+  base_vnd: 10000
+  per_km_vnd: 4500
+  per_min_vnd: 250
+  commission_rate: 0.20
+  rounding_step_vnd: 1000
+  capacity: 1
+  now_pickup_window_min: [3, 15]
+  max_ahead_hours: 12
+
+car_urban:
+  base_vnd: 20000
+  per_km_vnd: 11000
+  per_min_vnd: 500
+  extra_stop_fee_vnd: 5000
+  stop_dwell_time_s: 60
+  commission_private: 0.20
+  commission_pool_total: 0.15
+  platform_net_pool_rate: 0.12
+  fund_contribution_rate: 0.03
+  d_min: 0.20
+  d_max: 0.60                                       # [ACCEPTED: D-43 / O-01]
+  on_lower_bound_infeasible: "REJECT"               # [ACCEPTED: D-43 / O-01]
+  allow_dynamic_insertion_after_partial_lock: true  # [ACCEPTED: D-44 / O-02]
+  d_matched_typical: 0.25
+  party_seat_surcharge_gamma: 0.35                  # [ACCEPTED: D-45b / O-04] Applies to w_i & Floor_i only
+  detour_weight_lambda: 1.0
+  walk_weight_mu: 2.0
+  unmatched_passenger_share_alpha: 0.50
+  enforce_driver_hourly_rate_gate: true             # [ACCEPTED: D-45a / O-03] Computed on 0.85 * sum(Fare_charged)
+  driver_hourly_rate_tolerance_eps: 0.00            # [ACCEPTED: D-45a / O-03]
+  rounding_step_vnd: 1000
+  capacity: 4
+  max_party_seats_pool: 2
+  pool_lock_remaining_km: 3.0
+  k_max_stops: 8
+  n_pool_max_candidates: 20
+  now_pickup_window_min: [5, 20]
+  max_ahead_hours: 12
+
+car_intercity_private:
+  base_vnd: 150000
+  per_km_vnd: 7500
+  commission_rate: 0.15
+  rounding_step_vnd: 1000
+  now_pickup_window_min: [15, 45]
+  now_search_radius_km: 5.0
+  max_ahead_days: 7
+
+car_intercity_pool:
+  commission_seat: 0.10
+  commission_topup: 0.15
+  min_seats_ref: 3
+  allowed_driver_min_seats: [2, 3]
+  default_min_seats_to_run: 3
+  seat_price_band: [0.90, 1.10]
+  door_surcharge_per_km_vnd: 4000
+  max_corridor_deviation_km: 10.0
+  rounding_step_vnd: 1000
+  booking_open_days: 7
+  booking_close_hours: 72
+  allow_post_confirm_late_booking: false            # [ACCEPTED: O-08]
+  merge_confirmation_window_hours: 2
+  topup_response_window_hours: 6
+  driver_decision_deadline_hours: 60
+  pickup_order_fix_hours: 24
+  merge_max_departure_gap_min: 60
+
+booking_and_concurrency:
+  offer_timeout_s_urban: 20
+  offer_timeout_s_intercity: 60
+  per_offer_hold_buffer_s: 15
+  offer_cascade_max_attempts: 3
+  idempotency_key_ttl_hours: 24
+  require_escrow_deposited_before_start: true       # [ACCEPTED: D-34, D-49 / O-06]
+  escrow_deposit_timeout_s: 120                     # [ACCEPTED: D-49 / O-06]
+  escrow_wallet_mode_must: "CUSTODIAL_HD_RELAYER"   # [ACCEPTED: D-49 / O-06]
+  escrow_auto_release_after_hours: 24
+  escrow_base_unit: "VND"
+  initial_guarantee_fund_seed_vnd: 5000000
+
+cancellation_policy:                                # [ACCEPTED: D-52]
+  urban_free_cancel_grace_s: 120
+  urban_no_show_wait_min: 5
+  urban_single_cancel_fee_rate: 0.20
+  urban_single_cancel_fee_cap_vnd: 20000
+  urban_pool_cancel_fee_rate_on_quote: 0.20
+  intercity_private_free_cancel_lead_h: 2.0
+  intercity_private_late_cancel_fee_rate: 0.20
+  intercity_pool_free_cancel_before_h: 72
+  intercity_pool_cancel_fee_rate_72h_to_24h: 0.50
+  intercity_pool_cancel_fee_rate_after_24h: 1.00
+
+batch_matching:
+  interval_s: 30
+  max_new_requests_per_plan: 2
+  solver: "ORTOOLS_CP_SAT_RTV"
+  solver_time_limit_s: 3.0
+  unassigned_penalty_vnd: 50000
+
+meeting_points:
+  max_walk_m_range: [100, 400]
+  max_candidates_per_rider: 3
+  allowed_osm_highway_classes: ["primary", "secondary", "tertiary"]
+  disabled_night_hours: ["22:00", "05:00"]
+  disable_when_raining: true
+
+in_vehicle_time_default:
+  direct_duration_multiplier: 1.5
+  additive_buffer_min: 10
+
+simulator_and_evaluation:
+  scenario_version: "sim_v9_multi_service"
+  urban_pool_density_levels: ["LOW", "MEDIUM", "HIGH"]
+  intercity_pool_demand_levels: ["LOW", "MEDIUM", "HIGH"]
+  rain_share_levels: [0.10, 0.30]
+  now_booking_share_levels: [0.50, 0.70, 0.90]
+  recurring_user_share_levels: [0.00, 0.20, 0.40]
+  strategic_driver_share_levels: [0.00, 0.10, 0.30]
+  closed_loop_seeds_count: 20
+  oof_cross_fitting_folds: 5
+  calibration_max_ece_threshold: 0.05
+  survey_group_kfold_splits: 5
