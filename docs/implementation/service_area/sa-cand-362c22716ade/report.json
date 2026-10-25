@@ -1,0 +1,4499 @@
+{
+  "service_area_version": "sa-cand-362c22716ade",
+  "status": "CANDIDATE",
+  "approval": "PENDING_OWNER_APPROVAL",
+  "manifest": {
+    "region_md5": "c9d1afd9a82fe03b01834120ea0a36d3",
+    "source_url": "https://download.geofabrik.de/asia/vietnam-latest.osm.pbf",
+    "source_md5": "bdf516510a27fab5223bee468f79c79a",
+    "source_replication_timestamp": "2026-10-23T20:20:51Z",
+    "bbox": "104.30,19.60,107.50,22.50",
+    "osmium_version": "osmium version 1.15.0",
+    "admin_boundaries_md5": "efc91bc2395d916746b52d15a5a6bd4f",
+    "admin_boundaries_features": "2880",
+    "places_md5": "d732ad83176bb14f8e98e746ea16c92e",
+    "places_features": "5558"
+  },
+  "rules_file": "service_area_rules.candidate.yaml",
+  "rules": {
+    "rules_id": "sa_rules_candidate_v1",
+    "status": "PENDING_OWNER_APPROVAL",
+    "city": {
+      "iso3166_2": "VN-HN"
+    },
+    "urban": {
+      "include_city_wards": true,
+      "include_city_communes_named": [
+        "Xã An Khánh",
+        "Xã Gia Lâm",
+        "Xã Đông Anh"
+      ]
+    },
+    "total": {
+      "neighbours": [
+        {
+          "name": "Hưng Yên",
+          "by": "province_iso",
+          "iso3166_2": "VN-66"
+        },
+        {
+          "name": "Bắc Ninh",
+          "by": "province_iso",
+          "iso3166_2": "VN-56"
+        },
+        {
+          "name": "Hải Dương",
+          "by": "contains_node",
+          "osm_node": 369487115
+        },
+        {
+          "name": "Hà Nam",
+          "by": "contains_node",
+          "osm_node": 369487036
+        },
+        {
+          "name": "Vĩnh Phúc",
+          "by": "contains_node",
+          "osm_node": 369486946
+        },
+        {
+          "name": "Hòa Bình",
+          "by": "contains_node",
+          "osm_node": 13967896564
+        }
+      ],
+      "anchor": {
+        "osm_node": 74132064
+      },
+      "unit_admin_level": 6
+    },
+    "test_locations": [
+      {
+        "label": "Hoàn Kiếm",
+        "osm": "node/13709921432",
+        "expected_urban": true,
+        "source": "Section 2.3 (quận nội thành)"
+      },
+      {
+        "label": "Hà Đông",
+        "osm": "node/13709983624",
+        "expected_urban": true,
+        "source": "Section 2.3"
+      },
+      {
+        "label": "Yên Nghĩa",
+        "osm": "node/13710038878",
+        "expected_urban": true,
+        "source": "Section 2.3"
+      },
+      {
+        "label": "Dương Nội",
+        "osm": "node/13710014146",
+        "expected_urban": true,
+        "source": "Section 2.3"
+      },
+      {
+        "label": "An Khánh",
+        "osm": "node/12147486701",
+        "expected_urban": true,
+        "source": "Section 2.3"
+      },
+      {
+        "label": "Mỹ Đình",
+        "osm": null,
+        "expected_urban": true,
+        "source": "Section 2.3",
+        "note": "no place=* object named Mỹ Đình exists in the extract"
+      },
+      {
+        "label": "Gia Lâm",
+        "osm": "node/11786552273",
+        "expected_urban": true,
+        "source": "Section 2.3",
+        "note": "only place=neighbourhood node named Gia Lâm near Hà Nội; may not represent the former district"
+      },
+      {
+        "label": "Đông Anh",
+        "osm": "node/13799910539",
+        "expected_urban": true,
+        "source": "Section 2.3"
+      },
+      {
+        "label": "La Phù",
+        "osm": "node/12147486706",
+        "expected_urban": false,
+        "source": "Section 72.2 ('sát ngoài đa giác nội đô')"
+      },
+      {
+        "label": "Đại học Phenikaa",
+        "osm": "way/973433275",
+        "expected_urban": true,
+        "source": "Sections 16.1, 72.2 (Hà Đông)"
+      },
+      {
+        "label": "Phố Hiến (former TP Hưng Yên)",
+        "osm": "node/13155709564",
+        "expected_urban": false,
+        "expected_total": true,
+        "source": "Section 72.2 ('TP Hưng Yên')",
+        "note": "assumes Phố Hiến represents former TP Hưng Yên"
+      }
+    ]
+  },
+  "max_km": 150.0,
+  "provinces": [
+    {
+      "neighbour": "(city)",
+      "osm_id": 1903516,
+      "name": "Thành phố Hà Nội",
+      "iso": "VN-HN",
+      "evidence": "city",
+      "neighbours": [
+        "(city)"
+      ]
+    },
+    {
+      "neighbour": "Hưng Yên",
+      "osm_id": 1901032,
+      "name": "Tỉnh Hưng Yên",
+      "iso": "VN-66",
+      "evidence": "admin_level=4 unit with ISO3166-2=VN-66",
+      "neighbours": [
+        "Hưng Yên"
+      ]
+    },
+    {
+      "neighbour": "Bắc Ninh",
+      "osm_id": 1902690,
+      "name": "Thành phố Bắc Ninh",
+      "iso": "VN-56",
+      "evidence": "admin_level=4 unit with ISO3166-2=VN-56",
+      "neighbours": [
+        "Bắc Ninh"
+      ]
+    },
+    {
+      "neighbour": "Vĩnh Phúc",
+      "osm_id": 1902930,
+      "name": "Tỉnh Phú Thọ",
+      "iso": "VN-68",
+      "evidence": "admin_level=4 unit containing node/369486946",
+      "neighbours": [
+        "Vĩnh Phúc",
+        "Hòa Bình"
+      ]
+    }
+  ],
+  "urban_units": [
+    {
+      "osm_id": 19301116,
+      "name": "Phường Phúc Lợi",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19301117,
+      "name": "Phường Việt Hưng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19301118,
+      "name": "Phường Bồ Đề",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19301119,
+      "name": "Phường Long Biên",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19317430,
+      "name": "Xã Gia Lâm",
+      "province": "Thành phố Hà Nội",
+      "rule": "U2 named commune"
+    },
+    {
+      "osm_id": 19322845,
+      "name": "Xã Đông Anh",
+      "province": "Thành phố Hà Nội",
+      "rule": "U2 named commune"
+    },
+    {
+      "osm_id": 19331651,
+      "name": "Phường Hoàn Kiếm",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331652,
+      "name": "Phường Ba Đình",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331653,
+      "name": "Phường Cửa Nam",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331654,
+      "name": "Phường Hai Bà Trưng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331655,
+      "name": "Phường Văn Miếu - Quốc Tử Giám",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331656,
+      "name": "Phường Kim Liên",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331657,
+      "name": "Phường Bạch Mai",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331658,
+      "name": "Phường Ô Chợ Dừa",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19331659,
+      "name": "Phường Đống Đa",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19332318,
+      "name": "Phường Láng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19332319,
+      "name": "Phường Giảng Võ",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19332320,
+      "name": "Phường Ngọc Hà",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19332321,
+      "name": "Phường Tây Hồ",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334582,
+      "name": "Phường Hồng Hà",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334583,
+      "name": "Phường Vĩnh Tuy",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334584,
+      "name": "Phường Tương Mai",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334585,
+      "name": "Phường Phương Liệt",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334586,
+      "name": "Phường Vĩnh Hưng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334587,
+      "name": "Phường Hoàng Mai",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334588,
+      "name": "Phường Định Công",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19334589,
+      "name": "Phường Khương Đình",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335051,
+      "name": "Phường Thanh Xuân",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335052,
+      "name": "Phường Yên Hòa",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335053,
+      "name": "Phường Cầu Giấy",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335054,
+      "name": "Phường Nghĩa Đô",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335055,
+      "name": "Phường Xuân Đỉnh",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19335056,
+      "name": "Phường Phú Thượng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338313,
+      "name": "Phường Từ Liêm",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338314,
+      "name": "Phường Đại Mỗ",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338315,
+      "name": "Phường Thanh Liệt",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338316,
+      "name": "Phường Hoàng Liệt",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338317,
+      "name": "Phường Yên Sở",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338318,
+      "name": "Phường Lĩnh Nam",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338319,
+      "name": "Phường Phú Diễn",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19338320,
+      "name": "Phường Đông Ngạc",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341250,
+      "name": "Phường Thượng Cát",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341251,
+      "name": "Phường Tây Tựu",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341252,
+      "name": "Phường Xuân Phương",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341253,
+      "name": "Phường Tây Mỗ",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341254,
+      "name": "Phường Dương Nội",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341924,
+      "name": "Phường Hà Đông",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341926,
+      "name": "Phường Kiến Hưng",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341927,
+      "name": "Phường Yên Nghĩa",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19341928,
+      "name": "Phường Phú Lương",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19437090,
+      "name": "Xã An Khánh",
+      "province": "Thành phố Hà Nội",
+      "rule": "U2 named commune"
+    },
+    {
+      "osm_id": 19446384,
+      "name": "Phường Chương Mỹ",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19514776,
+      "name": "Phường Tùng Thiện",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    },
+    {
+      "osm_id": 19514781,
+      "name": "Phường Sơn Tây",
+      "province": "Thành phố Hà Nội",
+      "rule": "U1 city ward"
+    }
+  ],
+  "urban_by_rule": {
+    "U1 city ward": 51,
+    "U2 named commune": 3
+  },
+  "total_units": [
+    {
+      "osm_id": 16190351,
+      "name": "Xã Xuân Cẩm",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 37.056,
+      "snap_m": 11.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17776226,
+      "name": "Phường Mão Điền",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 33.223,
+      "snap_m": 6.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17776228,
+      "name": "Phường Trạm Lộ",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 34.513,
+      "snap_m": 159.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17776230,
+      "name": "Phường Ninh Xá",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 30.289,
+      "snap_m": 294.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17777467,
+      "name": "Phường Song Liễu",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 26.144,
+      "snap_m": 115.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17777471,
+      "name": "Phường Trí Quả",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 24.812,
+      "snap_m": 101.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 17781589,
+      "name": "Phường Chi Lăng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 40.891,
+      "snap_m": 38.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18270239,
+      "name": "Phường Tam Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 20.158,
+      "snap_m": 7.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18305003,
+      "name": "Phường Phương Liễu",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 37.518,
+      "snap_m": 13.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18305124,
+      "name": "Phường Nam Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 35.859,
+      "snap_m": 21.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18305255,
+      "name": "Phường Nhân Hòa",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 39.532,
+      "snap_m": 276.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18305437,
+      "name": "Phường Bồng Lai",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 45.278,
+      "snap_m": 23.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18305439,
+      "name": "Phường Hạp Lĩnh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 30.154,
+      "snap_m": 125.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18307849,
+      "name": "Phường Vũ Ninh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 34.26,
+      "snap_m": 45.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18309842,
+      "name": "Phường Kinh Bắc",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 32.027,
+      "snap_m": 58.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18309844,
+      "name": "Phường Võ Cường",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 28.493,
+      "snap_m": 12.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18312917,
+      "name": "Phường Phù Lãng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 53.41,
+      "snap_m": 68.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18316811,
+      "name": "Xã Đại Đồng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 21.824,
+      "snap_m": 51.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18317420,
+      "name": "Phường Đồng Nguyên",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 18.43,
+      "snap_m": 1.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18317425,
+      "name": "Phường Phù Khê",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 18.119,
+      "snap_m": 4.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18317719,
+      "name": "Phường Đào Viên",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 53.584,
+      "snap_m": 50.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18439792,
+      "name": "Phường Nhân Thắng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 47.725,
+      "snap_m": 70.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18439966,
+      "name": "Xã Đại Lai",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 43.586,
+      "snap_m": 66.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18465772,
+      "name": "Xã Cao Đức",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 51.808,
+      "snap_m": 8.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18469581,
+      "name": "Xã Đông Cứu",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 38.329,
+      "snap_m": 19.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18469701,
+      "name": "Xã Trung Kênh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 50.964,
+      "snap_m": 52.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18481212,
+      "name": "Xã Trung Chính",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 46.125,
+      "snap_m": 31.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18481319,
+      "name": "Xã Lâm Thao",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 38.496,
+      "snap_m": 14.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18481557,
+      "name": "Xã Tân Chi",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 36.492,
+      "snap_m": 11.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18481850,
+      "name": "Xã Phật Tích",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 28.201,
+      "snap_m": 47.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18485891,
+      "name": "Xã Liên Bão",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 25.609,
+      "snap_m": 13.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18508489,
+      "name": "Xã Tam Đa",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 34.485,
+      "snap_m": 51.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18509071,
+      "name": "Xã Yên Trung",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 32.029,
+      "snap_m": 42.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18509763,
+      "name": "Xã Tam Giang",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 29.766,
+      "snap_m": 100.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18514983,
+      "name": "Xã Văn Môn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 25.86,
+      "snap_m": 244.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18649617,
+      "name": "Xã Tân Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 120.013,
+      "snap_m": 84.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18649815,
+      "name": "Xã Sa Lý",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 134.226,
+      "snap_m": 491.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18649967,
+      "name": "Xã Biển Động",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 114.427,
+      "snap_m": 105.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18653509,
+      "name": "Xã Sơn Hải",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 109.688,
+      "snap_m": 35.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18653821,
+      "name": "Xã Biên Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 122.621,
+      "snap_m": 1999.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18654013,
+      "name": "Phường Phượng Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 85.637,
+      "snap_m": 10.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18654054,
+      "name": "Xã Đèo Gia",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 111.466,
+      "snap_m": 46.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18654095,
+      "name": "Xã Nam Dương",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 98.205,
+      "snap_m": 3.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18654096,
+      "name": "Xã Kiên Lao",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 101.534,
+      "snap_m": 6.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18658622,
+      "name": "Xã Dương Hưu",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 148.368,
+      "snap_m": 109.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699320,
+      "name": "Xã An Lạc",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 143.373,
+      "snap_m": 1035.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699321,
+      "name": "Xã Đông Phú",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 84.919,
+      "snap_m": 318.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699355,
+      "name": "Xã Đại Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 127.171,
+      "snap_m": 951.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699430,
+      "name": "Xã Tây Yên Tử",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 123.178,
+      "snap_m": 74.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699448,
+      "name": "Xã Tuấn Đạo",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 131.819,
+      "snap_m": 905.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18699478,
+      "name": "Xã Nghĩa Phương",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 81.396,
+      "snap_m": 47.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18707946,
+      "name": "Xã Yên Định",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 120.673,
+      "snap_m": 717.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18707983,
+      "name": "Xã Bắc Lũng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 70.276,
+      "snap_m": 96.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18726310,
+      "name": "Xã Cẩm Lý",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 81.488,
+      "snap_m": 237.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18726331,
+      "name": "Xã Trường Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 94.622,
+      "snap_m": 249.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18726339,
+      "name": "Xã Lục Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 103.577,
+      "snap_m": 799.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18758357,
+      "name": "Phường Bắc Giang",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 55.736,
+      "snap_m": 46.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18758370,
+      "name": "Phường Tân Tiến",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 55.443,
+      "snap_m": 100.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18758380,
+      "name": "Phường Tiền Phong",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 48.02,
+      "snap_m": 36.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18759231,
+      "name": "Xã Đồng Việt",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 63.49,
+      "snap_m": 12.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18759422,
+      "name": "Phường Đa Mai",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 53.876,
+      "snap_m": 10.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18759461,
+      "name": "Xã Nhã Nam",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 59.641,
+      "snap_m": 67.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18759494,
+      "name": "Xã Vân Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 142.874,
+      "snap_m": 933.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18759499,
+      "name": "Xã Mỹ Thái",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 65.174,
+      "snap_m": 214.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18762684,
+      "name": "Xã Tân Dĩnh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 58.913,
+      "snap_m": 12.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18762724,
+      "name": "Xã Tiên Lục",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 65.954,
+      "snap_m": 4.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18763054,
+      "name": "Phường Kép",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 72.637,
+      "snap_m": 11.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18763210,
+      "name": "Phường Yên Dũng",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 53.288,
+      "snap_m": 65.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787162,
+      "name": "Phường Cảnh Thụy",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 58.562,
+      "snap_m": 28.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787303,
+      "name": "Xã Phúc Hòa",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 59.523,
+      "snap_m": 42.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787338,
+      "name": "Phường Tân An",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 64.0,
+      "snap_m": 87.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787456,
+      "name": "Xã Ngọc Thiện",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 53.139,
+      "snap_m": 14.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787478,
+      "name": "Xã Quang Trung",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 65.151,
+      "snap_m": 146.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18787504,
+      "name": "Phường Nếnh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 40.471,
+      "snap_m": 125.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18788173,
+      "name": "Phường Tự Lạn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 46.248,
+      "snap_m": 10.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18802196,
+      "name": "Xã Tam Tiến",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 73.448,
+      "snap_m": 4.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18802345,
+      "name": "Xã Hoàng Vân",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 54.175,
+      "snap_m": 4.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18802476,
+      "name": "Phường Bố Hạ",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 69.974,
+      "snap_m": 97.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18802500,
+      "name": "Xã Đồng Kỳ",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 81.792,
+      "snap_m": 27.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18820860,
+      "name": "Phường Vân Hà",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 43.302,
+      "snap_m": 37.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18846899,
+      "name": "Xã Xuân Lương",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 84.414,
+      "snap_m": 87.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 18847020,
+      "name": "Xã Hợp Thịnh",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 43.798,
+      "snap_m": 62.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19301116,
+      "name": "Phường Phúc Lợi",
+      "province": "Thành phố Hà Nội",
+      "road_km": 10.095,
+      "snap_m": 3.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19301117,
+      "name": "Phường Việt Hưng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 7.969,
+      "snap_m": 23.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19301118,
+      "name": "Phường Bồ Đề",
+      "province": "Thành phố Hà Nội",
+      "road_km": 4.543,
+      "snap_m": 5.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19301119,
+      "name": "Phường Long Biên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 6.963,
+      "snap_m": 37.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19317429,
+      "name": "Xã Thuận An",
+      "province": "Thành phố Hà Nội",
+      "road_km": 17.911,
+      "snap_m": 36.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19317430,
+      "name": "Xã Gia Lâm",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.273,
+      "snap_m": 6.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19317431,
+      "name": "Xã Bát Tràng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.104,
+      "snap_m": 23.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19317432,
+      "name": "Xã Phù Đổng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 13.23,
+      "snap_m": 108.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19322845,
+      "name": "Xã Đông Anh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 13.481,
+      "snap_m": 15.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19322846,
+      "name": "Xã Thư Lâm",
+      "province": "Thành phố Hà Nội",
+      "road_km": 21.992,
+      "snap_m": 122.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19322847,
+      "name": "Xã Vĩnh Thanh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.563,
+      "snap_m": 6.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19322848,
+      "name": "Xã Thiên Lộc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 21.149,
+      "snap_m": 13.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19322849,
+      "name": "Xã Phúc Thịnh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 17.995,
+      "snap_m": 101.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331543,
+      "name": "Xã A Sào",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 86.245,
+      "snap_m": 3.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331651,
+      "name": "Phường Hoàn Kiếm",
+      "province": "Thành phố Hà Nội",
+      "road_km": 1.466,
+      "snap_m": 2.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331652,
+      "name": "Phường Ba Đình",
+      "province": "Thành phố Hà Nội",
+      "road_km": 3.368,
+      "snap_m": 0.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331653,
+      "name": "Phường Cửa Nam",
+      "province": "Thành phố Hà Nội",
+      "road_km": 1.357,
+      "snap_m": 14.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331654,
+      "name": "Phường Hai Bà Trưng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 1.987,
+      "snap_m": 17.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331655,
+      "name": "Phường Văn Miếu - Quốc Tử Giám",
+      "province": "Thành phố Hà Nội",
+      "road_km": 3.387,
+      "snap_m": 23.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331656,
+      "name": "Phường Kim Liên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.549,
+      "snap_m": 14.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331657,
+      "name": "Phường Bạch Mai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 4.149,
+      "snap_m": 30.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331658,
+      "name": "Phường Ô Chợ Dừa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 4.203,
+      "snap_m": 3.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19331659,
+      "name": "Phường Đống Đa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 6.17,
+      "snap_m": 22.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19332318,
+      "name": "Phường Láng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 7.123,
+      "snap_m": 20.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19332319,
+      "name": "Phường Giảng Võ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.244,
+      "snap_m": 68.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19332320,
+      "name": "Phường Ngọc Hà",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.435,
+      "snap_m": 8.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19332321,
+      "name": "Phường Tây Hồ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 6.408,
+      "snap_m": 156.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334582,
+      "name": "Phường Hồng Hà",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.773,
+      "snap_m": 59.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334583,
+      "name": "Phường Vĩnh Tuy",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.087,
+      "snap_m": 7.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334584,
+      "name": "Phường Tương Mai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 6.656,
+      "snap_m": 7.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334585,
+      "name": "Phường Phương Liệt",
+      "province": "Thành phố Hà Nội",
+      "road_km": 7.055,
+      "snap_m": 11.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334586,
+      "name": "Phường Vĩnh Hưng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 5.984,
+      "snap_m": 64.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334587,
+      "name": "Phường Hoàng Mai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 8.283,
+      "snap_m": 168.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334588,
+      "name": "Phường Định Công",
+      "province": "Thành phố Hà Nội",
+      "road_km": 9.797,
+      "snap_m": 15.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19334589,
+      "name": "Phường Khương Đình",
+      "province": "Thành phố Hà Nội",
+      "road_km": 8.159,
+      "snap_m": 21.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335051,
+      "name": "Phường Thanh Xuân",
+      "province": "Thành phố Hà Nội",
+      "road_km": 8.161,
+      "snap_m": 42.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335052,
+      "name": "Phường Yên Hòa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 7.97,
+      "snap_m": 35.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335053,
+      "name": "Phường Cầu Giấy",
+      "province": "Thành phố Hà Nội",
+      "road_km": 8.277,
+      "snap_m": 28.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335054,
+      "name": "Phường Nghĩa Đô",
+      "province": "Thành phố Hà Nội",
+      "road_km": 7.869,
+      "snap_m": 15.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335055,
+      "name": "Phường Xuân Đỉnh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 10.035,
+      "snap_m": 27.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335056,
+      "name": "Phường Phú Thượng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 9.749,
+      "snap_m": 28.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335112,
+      "name": "Xã Mê Linh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 27.472,
+      "snap_m": 51.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335113,
+      "name": "Xã Quang Minh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 28.56,
+      "snap_m": 6.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335114,
+      "name": "Xã Yên Lãng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 34.867,
+      "snap_m": 17.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19335115,
+      "name": "Xã Tiến Thắng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 35.14,
+      "snap_m": 9.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338086,
+      "name": "Xã Nội Bài",
+      "province": "Thành phố Hà Nội",
+      "road_km": 32.527,
+      "snap_m": 84.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338087,
+      "name": "Xã Sóc Sơn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 28.595,
+      "snap_m": 55.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338088,
+      "name": "Xã Đa Phúc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 34.203,
+      "snap_m": 102.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338089,
+      "name": "Xã Trung Giã",
+      "province": "Thành phố Hà Nội",
+      "road_km": 42.807,
+      "snap_m": 42.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338090,
+      "name": "Xã Kim Anh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 41.097,
+      "snap_m": 13.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338313,
+      "name": "Phường Từ Liêm",
+      "province": "Thành phố Hà Nội",
+      "road_km": 12.43,
+      "snap_m": 20.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338314,
+      "name": "Phường Đại Mỗ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 11.014,
+      "snap_m": 7.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338315,
+      "name": "Phường Thanh Liệt",
+      "province": "Thành phố Hà Nội",
+      "road_km": 11.463,
+      "snap_m": 113.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338316,
+      "name": "Phường Hoàng Liệt",
+      "province": "Thành phố Hà Nội",
+      "road_km": 10.653,
+      "snap_m": 22.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338317,
+      "name": "Phường Yên Sở",
+      "province": "Thành phố Hà Nội",
+      "road_km": 12.771,
+      "snap_m": 108.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338318,
+      "name": "Phường Lĩnh Nam",
+      "province": "Thành phố Hà Nội",
+      "road_km": 9.292,
+      "snap_m": 18.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338319,
+      "name": "Phường Phú Diễn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 11.78,
+      "snap_m": 21.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19338320,
+      "name": "Phường Đông Ngạc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 14.037,
+      "snap_m": 144.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341250,
+      "name": "Phường Thượng Cát",
+      "province": "Thành phố Hà Nội",
+      "road_km": 17.362,
+      "snap_m": 92.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341251,
+      "name": "Phường Tây Tựu",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.993,
+      "snap_m": 19.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341252,
+      "name": "Phường Xuân Phương",
+      "province": "Thành phố Hà Nội",
+      "road_km": 13.568,
+      "snap_m": 7.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341253,
+      "name": "Phường Tây Mỗ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.568,
+      "snap_m": 28.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341254,
+      "name": "Phường Dương Nội",
+      "province": "Thành phố Hà Nội",
+      "road_km": 14.507,
+      "snap_m": 7.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341924,
+      "name": "Phường Hà Đông",
+      "province": "Thành phố Hà Nội",
+      "road_km": 11.461,
+      "snap_m": 33.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341926,
+      "name": "Phường Kiến Hưng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.177,
+      "snap_m": 68.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341927,
+      "name": "Phường Yên Nghĩa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 17.693,
+      "snap_m": 22.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19341928,
+      "name": "Phường Phú Lương",
+      "province": "Thành phố Hà Nội",
+      "road_km": 16.993,
+      "snap_m": 50.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19377767,
+      "name": "Phường Quế Võ",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 48.227,
+      "snap_m": 4.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411380,
+      "name": "Xã Thường Tín",
+      "province": "Thành phố Hà Nội",
+      "road_km": 24.714,
+      "snap_m": 25.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411381,
+      "name": "Xã Thượng Phúc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 28.154,
+      "snap_m": 33.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411382,
+      "name": "Xã Chương Dương",
+      "province": "Thành phố Hà Nội",
+      "road_km": 29.732,
+      "snap_m": 6.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411383,
+      "name": "Xã Phượng Dực",
+      "province": "Thành phố Hà Nội",
+      "road_km": 37.555,
+      "snap_m": 1.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411384,
+      "name": "Xã Phú Xuyên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 34.581,
+      "snap_m": 1.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411385,
+      "name": "Xã Đại Xuyên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 45.359,
+      "snap_m": 0.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411386,
+      "name": "Xã Chuyên Mỹ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 42.566,
+      "snap_m": 111.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411387,
+      "name": "Xã Ứng Hòa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 46.319,
+      "snap_m": 45.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19411388,
+      "name": "Xã Hòa Xá",
+      "province": "Thành phố Hà Nội",
+      "road_km": 64.986,
+      "snap_m": 111.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425625,
+      "name": "Xã Lục Ngạn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 104.179,
+      "snap_m": 9.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425626,
+      "name": "Phường Chũ",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 94.991,
+      "snap_m": 15.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425627,
+      "name": "Phường Lạng Giang",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 65.428,
+      "snap_m": 62.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425628,
+      "name": "Xã Bảo Đài",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 71.306,
+      "snap_m": 107.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425629,
+      "name": "Phường Lục Nam",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 71.45,
+      "snap_m": 122.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425630,
+      "name": "Xã Yên Thế",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 73.782,
+      "snap_m": 42.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425631,
+      "name": "Xã Tân Yên",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 52.861,
+      "snap_m": 20.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425632,
+      "name": "Phường Việt Yên",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 47.155,
+      "snap_m": 82.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425633,
+      "name": "Phường Hiệp Hòa",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 46.098,
+      "snap_m": 8.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425634,
+      "name": "Phường Yên Phong",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 27.211,
+      "snap_m": 100.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425635,
+      "name": "Phường Tiên Du",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 24.526,
+      "snap_m": 35.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425636,
+      "name": "Phường Thuận Thành",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 30.88,
+      "snap_m": 19.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425637,
+      "name": "Phường Lương Tài",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 43.581,
+      "snap_m": 33.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425638,
+      "name": "Phường Gia Bình",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 38.004,
+      "snap_m": 95.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19425704,
+      "name": "Xã Sơn Động",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 127.671,
+      "snap_m": 24.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19435863,
+      "name": "Xã Quốc Oai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 24.684,
+      "snap_m": 55.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19435864,
+      "name": "Xã Hưng Đạo",
+      "province": "Thành phố Hà Nội",
+      "road_km": 29.872,
+      "snap_m": 34.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19435883,
+      "name": "Phường Từ Sơn",
+      "province": "Thành phố Bắc Ninh",
+      "road_km": 17.137,
+      "snap_m": 84.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437088,
+      "name": "Xã Thanh Trì",
+      "province": "Thành phố Hà Nội",
+      "road_km": 14.305,
+      "snap_m": 29.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437089,
+      "name": "Xã Đại Thanh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.974,
+      "snap_m": 246.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437090,
+      "name": "Xã An Khánh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 19.621,
+      "snap_m": 22.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437091,
+      "name": "Xã Sơn Đồng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 19.634,
+      "snap_m": 1.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437092,
+      "name": "Xã Hoài Đức",
+      "province": "Thành phố Hà Nội",
+      "road_km": 18.232,
+      "snap_m": 25.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437093,
+      "name": "Xã Ô Diên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 22.989,
+      "snap_m": 32.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437094,
+      "name": "Xã Ngọc Hồi",
+      "province": "Thành phố Hà Nội",
+      "road_km": 15.029,
+      "snap_m": 218.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437095,
+      "name": "Xã Nam Phù",
+      "province": "Thành phố Hà Nội",
+      "road_km": 18.184,
+      "snap_m": 71.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19437096,
+      "name": "Xã Hồng Vân",
+      "province": "Thành phố Hà Nội",
+      "road_km": 24.369,
+      "snap_m": 56.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19446382,
+      "name": "Xã Đan Phượng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 23.121,
+      "snap_m": 27.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19446383,
+      "name": "Xã Dương Hòa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 22.557,
+      "snap_m": 37.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19446384,
+      "name": "Phường Chương Mỹ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 21.143,
+      "snap_m": 22.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19446385,
+      "name": "Xã Phú Nghĩa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 28.33,
+      "snap_m": 1.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19446386,
+      "name": "Xã Xuân Mai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 38.245,
+      "snap_m": 6.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19463170,
+      "name": "Phường Hồng Châu",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 60.714,
+      "snap_m": 50.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19463171,
+      "name": "Phường Phố Hiến",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 54.534,
+      "snap_m": 58.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514767,
+      "name": "Xã Phú Cát",
+      "province": "Thành phố Hà Nội",
+      "road_km": 45.218,
+      "snap_m": 9.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514768,
+      "name": "Xã Yên Xuân",
+      "province": "Thành phố Hà Nội",
+      "road_km": 44.24,
+      "snap_m": 45.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514769,
+      "name": "Xã Kiều Phú",
+      "province": "Thành phố Hà Nội",
+      "road_km": 31.794,
+      "snap_m": 13.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514770,
+      "name": "Xã Hòa Lạc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 41.382,
+      "snap_m": 290.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514771,
+      "name": "Xã Hạ Bằng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 36.164,
+      "snap_m": 6.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514772,
+      "name": "Xã Thạch Thất",
+      "province": "Thành phố Hà Nội",
+      "road_km": 36.618,
+      "snap_m": 171.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514773,
+      "name": "Xã Tây Phương",
+      "province": "Thành phố Hà Nội",
+      "road_km": 32.522,
+      "snap_m": 0.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514774,
+      "name": "Xã Đoài Phương",
+      "province": "Thành phố Hà Nội",
+      "road_km": 42.86,
+      "snap_m": 5.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514775,
+      "name": "Xã Yên Bài",
+      "province": "Thành phố Hà Nội",
+      "road_km": 54.852,
+      "snap_m": 108.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514776,
+      "name": "Phường Tùng Thiện",
+      "province": "Thành phố Hà Nội",
+      "road_km": 46.978,
+      "snap_m": 175.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514777,
+      "name": "Xã Phúc Thọ",
+      "province": "Thành phố Hà Nội",
+      "road_km": 35.452,
+      "snap_m": 8.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514778,
+      "name": "Xã Hát Môn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 27.465,
+      "snap_m": 19.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514779,
+      "name": "Xã Liên Minh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 27.814,
+      "snap_m": 40.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514780,
+      "name": "Xã Phúc Lộc",
+      "province": "Thành phố Hà Nội",
+      "road_km": 37.306,
+      "snap_m": 16.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514781,
+      "name": "Phường Sơn Tây",
+      "province": "Thành phố Hà Nội",
+      "road_km": 46.359,
+      "snap_m": 117.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514782,
+      "name": "Xã Ba Vì",
+      "province": "Thành phố Hà Nội",
+      "road_km": 70.176,
+      "snap_m": 50.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514783,
+      "name": "Xã Suối Hai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 56.379,
+      "snap_m": 180.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514784,
+      "name": "Xã Bất Bạt",
+      "province": "Thành phố Hà Nội",
+      "road_km": 64.4,
+      "snap_m": 108.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514785,
+      "name": "Xã Quảng Oai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 51.66,
+      "snap_m": 48.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514786,
+      "name": "Xã Minh Châu",
+      "province": "Thành phố Hà Nội",
+      "road_km": 57.613,
+      "snap_m": 273.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514787,
+      "name": "Xã Vật Lại",
+      "province": "Thành phố Hà Nội",
+      "road_km": 58.163,
+      "snap_m": 4.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514788,
+      "name": "Xã Cổ Đô",
+      "province": "Thành phố Hà Nội",
+      "road_km": 62.401,
+      "snap_m": 433.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514789,
+      "name": "Xã Hương Sơn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 69.153,
+      "snap_m": 872.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514790,
+      "name": "Xã Mỹ Đức",
+      "province": "Thành phố Hà Nội",
+      "road_km": 53.538,
+      "snap_m": 369.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514791,
+      "name": "Xã Hồng Sơn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 52.62,
+      "snap_m": 91.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514792,
+      "name": "Xã Vân Đình",
+      "province": "Thành phố Hà Nội",
+      "road_km": 45.244,
+      "snap_m": 38.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514793,
+      "name": "Xã Phúc Sơn",
+      "province": "Thành phố Hà Nội",
+      "road_km": 44.075,
+      "snap_m": 65.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514794,
+      "name": "Xã Ứng Thiên",
+      "province": "Thành phố Hà Nội",
+      "road_km": 35.482,
+      "snap_m": 12.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514795,
+      "name": "Xã Dân Hòa",
+      "province": "Thành phố Hà Nội",
+      "road_km": 31.581,
+      "snap_m": 88.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514796,
+      "name": "Xã Thanh Oai",
+      "province": "Thành phố Hà Nội",
+      "road_km": 27.739,
+      "snap_m": 1.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514797,
+      "name": "Xã Hòa Phú",
+      "province": "Thành phố Hà Nội",
+      "road_km": 31.17,
+      "snap_m": 120.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514798,
+      "name": "Xã Trần Phú",
+      "province": "Thành phố Hà Nội",
+      "road_km": 35.873,
+      "snap_m": 74.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514799,
+      "name": "Xã Quảng Bị",
+      "province": "Thành phố Hà Nội",
+      "road_km": 27.426,
+      "snap_m": 0.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514800,
+      "name": "Xã Tam Hưng",
+      "province": "Thành phố Hà Nội",
+      "road_km": 22.82,
+      "snap_m": 10.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19514801,
+      "name": "Xã Bình Minh",
+      "province": "Thành phố Hà Nội",
+      "road_km": 21.511,
+      "snap_m": 177.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541827,
+      "name": "Xã Yên Mỹ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 37.061,
+      "snap_m": 86.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541828,
+      "name": "Xã Xuân Trúc",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 37.411,
+      "snap_m": 90.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541829,
+      "name": "Xã Vũ Tiên",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 110.971,
+      "snap_m": 21.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541830,
+      "name": "Xã Vũ Thư",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 99.418,
+      "snap_m": 2.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541831,
+      "name": "Xã Vũ Quý",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 111.38,
+      "snap_m": 30.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541832,
+      "name": "Phường Vũ Phúc",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 104.29,
+      "snap_m": 127.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541833,
+      "name": "Xã Việt Yên",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 26.566,
+      "snap_m": 43.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541834,
+      "name": "Xã Việt Tiến",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 35.706,
+      "snap_m": 4.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541835,
+      "name": "Xã Vạn Xuân",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 85.631,
+      "snap_m": 116.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541836,
+      "name": "Xã Văn Giang",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 19.543,
+      "snap_m": 71.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541837,
+      "name": "Xã Triệu Việt Vương",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 31.285,
+      "snap_m": 19.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541838,
+      "name": "Phường Trần Lãm",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 108.614,
+      "snap_m": 240.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541839,
+      "name": "Phường Trần Hưng Đạo",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 104.419,
+      "snap_m": 159.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541840,
+      "name": "Phường Trà Lý",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 99.522,
+      "snap_m": 34.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541841,
+      "name": "Xã Trà Giang",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 115.156,
+      "snap_m": 23.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541842,
+      "name": "Xã Tống Trân",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 71.438,
+      "snap_m": 5.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541843,
+      "name": "Xã Tiên Tiến",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 67.571,
+      "snap_m": 132.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541844,
+      "name": "Xã Tiên Lữ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 59.588,
+      "snap_m": 62.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541845,
+      "name": "Xã Tiên La",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 72.706,
+      "snap_m": 294.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541846,
+      "name": "Xã Tiên Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 84.208,
+      "snap_m": 179.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541847,
+      "name": "Xã Tiên Hoa",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 62.598,
+      "snap_m": 4.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541848,
+      "name": "Xã Tiền Hải",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 124.845,
+      "snap_m": 13.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541849,
+      "name": "Xã Thụy Anh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 108.16,
+      "snap_m": 154.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541850,
+      "name": "Phường Thượng Hồng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 38.076,
+      "snap_m": 63.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541851,
+      "name": "Xã Thư Vũ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 112.266,
+      "snap_m": 29.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541852,
+      "name": "Xã Thư Trì",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 88.261,
+      "snap_m": 137.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541853,
+      "name": "Xã Thần Khê",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 82.247,
+      "snap_m": 43.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541854,
+      "name": "Xã Thái Thụy",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 105.932,
+      "snap_m": 80.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541855,
+      "name": "Xã Thái Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 110.192,
+      "snap_m": 168.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541856,
+      "name": "Phường Thái Bình",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 105.295,
+      "snap_m": 9.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541857,
+      "name": "Xã Tây Tiền Hải",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 124.207,
+      "snap_m": 144.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541858,
+      "name": "Xã Tây Thụy Anh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 106.641,
+      "snap_m": 142.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541859,
+      "name": "Xã Tây Thái Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 110.69,
+      "snap_m": 153.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541860,
+      "name": "Xã Tân Tiến",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 104.737,
+      "snap_m": 41.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541861,
+      "name": "Xã Tân Thuận",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 96.244,
+      "snap_m": 22.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541862,
+      "name": "Xã Tân Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 56.712,
+      "snap_m": 7.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541863,
+      "name": "Phường Sơn Nam",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 54.963,
+      "snap_m": 20.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541864,
+      "name": "Xã Quỳnh Phụ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 87.149,
+      "snap_m": 30.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541865,
+      "name": "Xã Quỳnh An",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 92.566,
+      "snap_m": 16.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541866,
+      "name": "Xã Quang Lịch",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 113.606,
+      "snap_m": 22.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541867,
+      "name": "Xã Quang Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 64.379,
+      "snap_m": 2.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541868,
+      "name": "Xã Phụng Công",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 16.141,
+      "snap_m": 3.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541869,
+      "name": "Xã Phụ Dực",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 97.607,
+      "snap_m": 2.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541870,
+      "name": "Xã Phạm Ngũ Lão",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 43.17,
+      "snap_m": 34.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541871,
+      "name": "Xã Như Quỳnh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 20.003,
+      "snap_m": 71.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541872,
+      "name": "Xã Nguyễn Văn Linh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 27.316,
+      "snap_m": 191.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541873,
+      "name": "Xã Nguyễn Trãi",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 50.558,
+      "snap_m": 139.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541874,
+      "name": "Xã Nguyễn Du",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 87.533,
+      "snap_m": 59.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541875,
+      "name": "Xã Ngự Thiên",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 67.827,
+      "snap_m": 48.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541876,
+      "name": "Xã Ngọc Lâm",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 85.719,
+      "snap_m": 23.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541877,
+      "name": "Xã Nghĩa Trụ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 20.23,
+      "snap_m": 8.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541878,
+      "name": "Xã Nghĩa Dân",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 44.65,
+      "snap_m": 192.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541879,
+      "name": "Xã Nam Tiên Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 87.307,
+      "snap_m": 19.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541880,
+      "name": "Xã Nam Tiền Hải",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 135.727,
+      "snap_m": 52.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541881,
+      "name": "Xã Nam Thụy Anh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 111.271,
+      "snap_m": 9.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541882,
+      "name": "Xã Nam Thái Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 119.005,
+      "snap_m": 126.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541883,
+      "name": "Xã Nam Đông Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 97.147,
+      "snap_m": 42.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541884,
+      "name": "Xã Nam Cường",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 132.548,
+      "snap_m": 16.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541885,
+      "name": "Phường Mỹ Hào",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 31.398,
+      "snap_m": 29.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541886,
+      "name": "Xã Minh Thọ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 86.43,
+      "snap_m": 79.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541887,
+      "name": "Xã Mễ Sở",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 23.549,
+      "snap_m": 58.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541888,
+      "name": "Xã Lương Bằng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 43.698,
+      "snap_m": 30.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541889,
+      "name": "Xã Long Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 67.281,
+      "snap_m": 34.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541890,
+      "name": "Xã Lê Quý Đôn",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 73.948,
+      "snap_m": 232.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541891,
+      "name": "Xã Lê Lợi",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 119.585,
+      "snap_m": 28.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541892,
+      "name": "Xã Lạc Đạo",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 25.162,
+      "snap_m": 56.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541893,
+      "name": "Xã Kiến Xương",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 117.894,
+      "snap_m": 123.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541894,
+      "name": "Xã Khoái Châu",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 36.998,
+      "snap_m": 35.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541895,
+      "name": "Xã Hưng Phú",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 135.782,
+      "snap_m": 2.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541896,
+      "name": "Xã Hưng Hà",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 75.681,
+      "snap_m": 39.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541897,
+      "name": "Xã Hồng Vũ",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 116.732,
+      "snap_m": 130.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541898,
+      "name": "Xã Hồng Quang",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 50.528,
+      "snap_m": 65.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541899,
+      "name": "Xã Hồng Minh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 78.764,
+      "snap_m": 141.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541900,
+      "name": "Xã Hoàng Hoa Thám",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 54.244,
+      "snap_m": 110.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541901,
+      "name": "Xã Hoàn Long",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 23.798,
+      "snap_m": 11.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541902,
+      "name": "Xã Hiệp Cường",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 52.716,
+      "snap_m": 346.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541903,
+      "name": "Phường Đường Hào",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 34.72,
+      "snap_m": 20.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541904,
+      "name": "Xã Đức Hợp",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 47.696,
+      "snap_m": 24.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541905,
+      "name": "Xã Đông Tiên Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 87.517,
+      "snap_m": 54.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541906,
+      "name": "Xã Đông Tiền Hải",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 122.378,
+      "snap_m": 101.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541907,
+      "name": "Xã Đông Thụy Anh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 108.92,
+      "snap_m": 165.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541908,
+      "name": "Xã Đông Thái Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 115.79,
+      "snap_m": 45.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541909,
+      "name": "Xã Đông Quan",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 104.682,
+      "snap_m": 17.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541910,
+      "name": "Xã Đông Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 91.517,
+      "snap_m": 0.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541911,
+      "name": "Xã Đồng Châu",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 126.547,
+      "snap_m": 143.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541912,
+      "name": "Xã Đồng Bằng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 91.359,
+      "snap_m": 13.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541913,
+      "name": "Xã Đoàn Đào",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 55.009,
+      "snap_m": 445.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541914,
+      "name": "Xã Diên Hà",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 80.504,
+      "snap_m": 162.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541915,
+      "name": "Xã Đại Đồng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 30.083,
+      "snap_m": 15.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541916,
+      "name": "Xã Chí Minh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 41.079,
+      "snap_m": 124.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541917,
+      "name": "Xã Châu Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 34.95,
+      "snap_m": 44.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541918,
+      "name": "Xã Bình Thanh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 123.433,
+      "snap_m": 12.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541919,
+      "name": "Xã Bình Nguyên",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 111.173,
+      "snap_m": 40.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541920,
+      "name": "Xã Bình Định",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 125.461,
+      "snap_m": 43.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541921,
+      "name": "Xã Bắc Tiên Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 88.129,
+      "snap_m": 117.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541922,
+      "name": "Xã Bắc Thụy Anh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 102.242,
+      "snap_m": 21.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541923,
+      "name": "Xã Bắc Thái Ninh",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 117.073,
+      "snap_m": 96.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541924,
+      "name": "Xã Bắc Đông Quan",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 98.064,
+      "snap_m": 34.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541925,
+      "name": "Xã Bắc Đông Hưng",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 95.958,
+      "snap_m": 158.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541926,
+      "name": "Xã Ân Thi",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 46.167,
+      "snap_m": 21.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19541927,
+      "name": "Xã Ái Quốc",
+      "province": "Tỉnh Hưng Yên",
+      "road_km": 130.264,
+      "snap_m": 29.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542969,
+      "name": "Xã Yên Trị",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 103.85,
+      "snap_m": 317.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542970,
+      "name": "Xã Yên Thủy",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 95.645,
+      "snap_m": 99.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542971,
+      "name": "Xã Yên Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 89.365,
+      "snap_m": 74.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542972,
+      "name": "Xã Yên Phú",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 114.371,
+      "snap_m": 1220.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542973,
+      "name": "Xã Yên Lập",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 112.636,
+      "snap_m": 647.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542974,
+      "name": "Xã Yên Lãng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 91.558,
+      "snap_m": 202.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542975,
+      "name": "Xã Yên Lạc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 53.833,
+      "snap_m": 64.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542976,
+      "name": "Xã Yên Kỳ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 125.091,
+      "snap_m": 73.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542977,
+      "name": "Xã Xuân Viên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 112.153,
+      "snap_m": 674.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542978,
+      "name": "Xã Xuân Lũng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 92.371,
+      "snap_m": 79.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542979,
+      "name": "Xã Xuân Lãng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 42.955,
+      "snap_m": 5.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542980,
+      "name": "Phường Xuân Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 48.952,
+      "snap_m": 358.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542981,
+      "name": "Xã Xuân Đài",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 120.953,
+      "snap_m": 1076.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542982,
+      "name": "Xã Võ Miếu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 94.782,
+      "snap_m": 60.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542983,
+      "name": "Phường Vĩnh Yên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 53.454,
+      "snap_m": 8.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542984,
+      "name": "Xã Vĩnh Tường",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 54.256,
+      "snap_m": 5.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542985,
+      "name": "Xã Vĩnh Thành",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 63.783,
+      "snap_m": 419.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542986,
+      "name": "Phường Vĩnh Phúc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 49.851,
+      "snap_m": 12.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542987,
+      "name": "Xã Vĩnh Phú",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 51.306,
+      "snap_m": 88.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542988,
+      "name": "Xã Vĩnh Hưng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 60.434,
+      "snap_m": 30.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542989,
+      "name": "Xã Vĩnh Chân",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 126.633,
+      "snap_m": 6.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542990,
+      "name": "Xã Vĩnh An",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 59.133,
+      "snap_m": 240.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542991,
+      "name": "Phường Việt Trì",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 74.939,
+      "snap_m": 47.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542992,
+      "name": "Xã Vạn Xuân",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 78.786,
+      "snap_m": 68.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542993,
+      "name": "Xã Vân Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 126.702,
+      "snap_m": 548.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542994,
+      "name": "Phường Vân Phú",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 82.238,
+      "snap_m": 9.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542995,
+      "name": "Xã Văn Miếu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 91.178,
+      "snap_m": 12.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542996,
+      "name": "Xã Văn Lang",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 127.513,
+      "snap_m": 567.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542997,
+      "name": "Xã Vân Bán",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 122.802,
+      "snap_m": 29.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542998,
+      "name": "Xã Tu Vũ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 71.178,
+      "snap_m": 58.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19542999,
+      "name": "Xã Trung Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 127.789,
+      "snap_m": 283.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543000,
+      "name": "Xã Trạm Thản",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 99.938,
+      "snap_m": 15.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543001,
+      "name": "Xã Toàn Thắng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 117.87,
+      "snap_m": 182.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543002,
+      "name": "Xã Tiền Phong",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 114.37,
+      "snap_m": 79.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543003,
+      "name": "Xã Tiên Lương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 124.01,
+      "snap_m": 6.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543004,
+      "name": "Xã Tiên Lữ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 68.937,
+      "snap_m": 2.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543005,
+      "name": "Xã Thượng Long",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 113.949,
+      "snap_m": 1.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543006,
+      "name": "Xã Thượng Cốc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 122.757,
+      "snap_m": 369.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543007,
+      "name": "Xã Thung Nai",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 96.696,
+      "snap_m": 55.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543008,
+      "name": "Xã Thu Cúc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 128.176,
+      "snap_m": 837.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543009,
+      "name": "Phường Thống Nhất",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 80.452,
+      "snap_m": 14.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543010,
+      "name": "Xã Thọ Văn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 74.531,
+      "snap_m": 3.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543011,
+      "name": "Xã Thổ Tang",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 56.246,
+      "snap_m": 104.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543012,
+      "name": "Xã Thịnh Minh",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 58.741,
+      "snap_m": 157.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543013,
+      "name": "Xã Thanh Thủy",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 72.183,
+      "snap_m": 134.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543014,
+      "name": "Xã Thanh Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 83.798,
+      "snap_m": 362.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543015,
+      "name": "Phường Thanh Miếu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 69.968,
+      "snap_m": 4.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543016,
+      "name": "Xã Thanh Ba",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 118.693,
+      "snap_m": 13.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543017,
+      "name": "Xã Thái Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 77.368,
+      "snap_m": 181.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543018,
+      "name": "Xã Tề Lỗ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 56.955,
+      "snap_m": 0.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543019,
+      "name": "Xã Tây Cốc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 129.955,
+      "snap_m": 28.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543020,
+      "name": "Xã Tân Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 110.443,
+      "snap_m": 18.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543021,
+      "name": "Xã Tân Pheo",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 129.983,
+      "snap_m": 625.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543023,
+      "name": "Xã Tân Lạc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 111.308,
+      "snap_m": 80.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543024,
+      "name": "Phường Tân Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 81.323,
+      "snap_m": 191.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543025,
+      "name": "Xã Tam Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 81.802,
+      "snap_m": 180.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543026,
+      "name": "Xã Tam Nông",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 68.649,
+      "snap_m": 20.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543027,
+      "name": "Xã Tam Hồng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 50.24,
+      "snap_m": 0.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543028,
+      "name": "Xã Tam Dương Bắc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 66.381,
+      "snap_m": 12.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543029,
+      "name": "Xã Tam Dương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 60.408,
+      "snap_m": 51.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543030,
+      "name": "Xã Tam Đảo",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 62.735,
+      "snap_m": 15.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543031,
+      "name": "Xã Sông Lô",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 75.918,
+      "snap_m": 53.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543032,
+      "name": "Xã Sơn Lương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 138.124,
+      "snap_m": 125.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543033,
+      "name": "Xã Sơn Đông",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 72.923,
+      "snap_m": 60.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543034,
+      "name": "Xã Quyết Thắng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 127.142,
+      "snap_m": 131.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543035,
+      "name": "Xã Quy Đức",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 134.342,
+      "snap_m": 698.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543036,
+      "name": "Xã Quảng Yên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 112.999,
+      "snap_m": 19.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543037,
+      "name": "Xã Phùng Nguyên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 78.074,
+      "snap_m": 77.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543038,
+      "name": "Phường Phúc Yên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 37.422,
+      "snap_m": 47.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543039,
+      "name": "Phường Phú Thọ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 97.993,
+      "snap_m": 87.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543040,
+      "name": "Xã Phù Ninh",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 89.323,
+      "snap_m": 11.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543041,
+      "name": "Xã Phú Mỹ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 107.11,
+      "snap_m": 14.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543042,
+      "name": "Xã Phú Khê",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 118.05,
+      "snap_m": 33.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543043,
+      "name": "Phường Phong Châu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 97.795,
+      "snap_m": 47.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543045,
+      "name": "Phường Nông Trang",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 78.908,
+      "snap_m": 35.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543046,
+      "name": "Xã Nhân Nghĩa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 91.955,
+      "snap_m": 38.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543047,
+      "name": "Xã Nguyệt Đức",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 45.02,
+      "snap_m": 93.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543048,
+      "name": "Xã Ngọc Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 128.896,
+      "snap_m": 579.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543049,
+      "name": "Xã Nật Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 59.456,
+      "snap_m": 411.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543050,
+      "name": "Xã Mường Vang",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 133.727,
+      "snap_m": 24.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543051,
+      "name": "Xã Mường Thàng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 100.314,
+      "snap_m": 54.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543052,
+      "name": "Xã Mường Hoa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 121.209,
+      "snap_m": 583.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543053,
+      "name": "Xã Mường Động",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 72.686,
+      "snap_m": 1887.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543054,
+      "name": "Xã Mường Bi",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 118.397,
+      "snap_m": 77.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543055,
+      "name": "Xã Minh Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 99.713,
+      "snap_m": 153.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543056,
+      "name": "Xã Minh Đài",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 104.578,
+      "snap_m": 70.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543057,
+      "name": "Xã Mai Hạ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 144.214,
+      "snap_m": 700.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543058,
+      "name": "Xã Mai Châu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 128.484,
+      "snap_m": 547.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543059,
+      "name": "Xã Lương Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 45.131,
+      "snap_m": 132.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543060,
+      "name": "Xã Long Cốc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 111.184,
+      "snap_m": 109.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543061,
+      "name": "Xã Liên Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 48.787,
+      "snap_m": 258.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543062,
+      "name": "Xã Liên Minh",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 105.73,
+      "snap_m": 183.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543063,
+      "name": "Xã Liên Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 76.469,
+      "snap_m": 130.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543064,
+      "name": "Xã Liên Châu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 52.302,
+      "snap_m": 22.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543065,
+      "name": "Xã Lập Thạch",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 77.73,
+      "snap_m": 9.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543066,
+      "name": "Xã Lâm Thao",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 81.311,
+      "snap_m": 30.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543067,
+      "name": "Xã Lai Đồng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 125.221,
+      "snap_m": 5.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543068,
+      "name": "Xã Lạc Thủy",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 77.41,
+      "snap_m": 21.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543069,
+      "name": "Xã Lạc Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 111.081,
+      "snap_m": 289.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543070,
+      "name": "Xã Lạc Lương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 85.847,
+      "snap_m": 90.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543071,
+      "name": "Phường Kỳ Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 69.87,
+      "snap_m": 257.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543072,
+      "name": "Xã Kim Bôi",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 79.319,
+      "snap_m": 203.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543073,
+      "name": "Xã Khả Cửu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 111.11,
+      "snap_m": 743.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543074,
+      "name": "Xã Hy Cương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 88.128,
+      "snap_m": 44.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543075,
+      "name": "Xã Hương Cần",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 83.537,
+      "snap_m": 65.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543076,
+      "name": "Xã Hùng Việt",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 92.318,
+      "snap_m": 129.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543077,
+      "name": "Xã Hợp Lý",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 83.608,
+      "snap_m": 67.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543078,
+      "name": "Xã Hợp Kim",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 72.809,
+      "snap_m": 643.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543079,
+      "name": "Xã Hội Thịnh",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 56.345,
+      "snap_m": 127.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543080,
+      "name": "Xã Hoàng Cương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 112.975,
+      "snap_m": 32.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543081,
+      "name": "Xã Hoàng An",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 65.831,
+      "snap_m": 4.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543082,
+      "name": "Phường Hòa Bình",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 71.748,
+      "snap_m": 85.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543083,
+      "name": "Xã Hiền Quan",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 83.826,
+      "snap_m": 4.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543084,
+      "name": "Xã Hiền Lương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 136.625,
+      "snap_m": 115.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543085,
+      "name": "Xã Hải Lựu",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 91.212,
+      "snap_m": 38.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543086,
+      "name": "Xã Hạ Hòa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 135.594,
+      "snap_m": 15.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543087,
+      "name": "Xã Dũng Tiến",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 84.731,
+      "snap_m": 5.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543089,
+      "name": "Xã Đông Thành",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 101.967,
+      "snap_m": 22.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543090,
+      "name": "Xã Đồng Lương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 86.031,
+      "snap_m": 14.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543091,
+      "name": "Xã Đoan Hùng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 121.437,
+      "snap_m": 107.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543092,
+      "name": "Xã Đào Xá",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 70.761,
+      "snap_m": 23.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543093,
+      "name": "Xã Đạo Trù",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 77.979,
+      "snap_m": 1406.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543094,
+      "name": "Xã Đan Thượng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 142.324,
+      "snap_m": 695.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543095,
+      "name": "Xã Dân Chủ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 103.645,
+      "snap_m": 239.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543096,
+      "name": "Xã Đại Đồng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 107.472,
+      "snap_m": 16.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543097,
+      "name": "Xã Đại Đình",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 69.96,
+      "snap_m": 16.7,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543098,
+      "name": "Xã Đà Bắc",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 91.113,
+      "snap_m": 185.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543099,
+      "name": "Xã Cự Đồng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 72.895,
+      "snap_m": 11.4,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543100,
+      "name": "Xã Chí Tiên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 105.974,
+      "snap_m": 12.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543101,
+      "name": "Xã Chí Đám",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 130.554,
+      "snap_m": 1.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543102,
+      "name": "Xã Chân Mộng",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 115.466,
+      "snap_m": 56.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543103,
+      "name": "Xã Cao Sơn",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 102.818,
+      "snap_m": 596.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543104,
+      "name": "Xã Cao Phong",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 94.435,
+      "snap_m": 162.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543105,
+      "name": "Xã Cao Dương",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 52.106,
+      "snap_m": 235.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543106,
+      "name": "Xã Cẩm Khê",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 113.878,
+      "snap_m": 33.5,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543107,
+      "name": "Xã Bình Xuyên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 51.498,
+      "snap_m": 26.0,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543108,
+      "name": "Xã Bình Tuyền",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 50.727,
+      "snap_m": 93.1,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543109,
+      "name": "Xã Bình Phú",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 88.309,
+      "snap_m": 12.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543110,
+      "name": "Xã Bình Nguyên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 44.336,
+      "snap_m": 5.2,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543112,
+      "name": "Xã Bằng Luân",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 147.353,
+      "snap_m": 179.9,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543113,
+      "name": "Xã Bản Nguyên",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 81.725,
+      "snap_m": 116.6,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543114,
+      "name": "Phường Âu Cơ",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 101.653,
+      "snap_m": 30.8,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543115,
+      "name": "Xã An Nghĩa",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 71.756,
+      "snap_m": 41.3,
+      "rule": "T road distance <= 150.0 km"
+    },
+    {
+      "osm_id": 19543116,
+      "name": "Xã An Bình",
+      "province": "Tỉnh Phú Thọ",
+      "road_km": 86.516,
+      "snap_m": 222.0,
+      "rule": "T road distance <= 150.0 km"
+    }
+  ],
+  "total_stats": {
+    "anchor": {
+      "osm_node": 74132064,
+      "name": "Hà Nội",
+      "lon": 105.854041,
+      "lat": 21.0283334
+    },
+    "units_considered": 542,
+    "unroutable_in_scope": 0,
+    "units_in_range_outside_listed_provinces": {
+      "Tỉnh Lạng Sơn": 25
+    }
+  },
+  "checks": {
+    "urban_valid": true,
+    "total_valid": true,
+    "urban_parts": 2,
+    "total_parts": 4,
+    "urban_km2": 511.1657,
+    "total_km2": 19487.4046,
+    "urban_within_total": true,
+    "urban_units_km2": 511.1658,
+    "total_units_km2": 19487.4046,
+    "urban_overlap_km2": 0.0001,
+    "total_overlap_km2": 0.0001
+  },
+  "locations": [
+    {
+      "label": "Hoàn Kiếm",
+      "osm": "node/13709921432",
+      "source": "Section 2.3 (quận nội thành)",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.8506925,
+      "lat": 21.0323032,
+      "unit": "Phường Hoàn Kiếm",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "Hà Đông",
+      "osm": "node/13709983624",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.7787998,
+      "lat": 20.9732937,
+      "unit": "Phường Hà Đông",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "Yên Nghĩa",
+      "osm": "node/13710038878",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.7378002,
+      "lat": 20.9378169,
+      "unit": "Phường Yên Nghĩa",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "Dương Nội",
+      "osm": "node/13710014146",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.7510178,
+      "lat": 20.9752796,
+      "unit": "Phường Dương Nội",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "An Khánh",
+      "osm": "node/12147486701",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.7179738,
+      "lat": 21.0023161,
+      "unit": "Xã An Khánh",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "Mỹ Đình",
+      "osm": null,
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "result": "UNRESOLVED",
+      "detail": "no place=* object named Mỹ Đình exists in the extract"
+    },
+    {
+      "label": "Gia Lâm",
+      "osm": "node/11786552273",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 106.0088888,
+      "lat": 21.0519827,
+      "unit": "Xã Thuận An",
+      "province": "Thành phố Hà Nội",
+      "in_urban": false,
+      "in_total": true,
+      "result": "MISMATCH(urban)",
+      "detail": "only place=neighbourhood node named Gia Lâm near Hà Nội; may not represent the former district"
+    },
+    {
+      "label": "Đông Anh",
+      "osm": "node/13799910539",
+      "source": "Section 2.3",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.848178,
+      "lat": 21.1713382,
+      "unit": "Xã Phúc Thịnh",
+      "province": "Thành phố Hà Nội",
+      "in_urban": false,
+      "in_total": true,
+      "result": "MISMATCH(urban)"
+    },
+    {
+      "label": "La Phù",
+      "osm": "node/12147486706",
+      "source": "Section 72.2 ('sát ngoài đa giác nội đô')",
+      "expected_urban": false,
+      "expected_total": null,
+      "lon": 105.7315043,
+      "lat": 20.9831862,
+      "unit": "Xã An Khánh",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "MISMATCH(urban)"
+    },
+    {
+      "label": "Đại học Phenikaa",
+      "osm": "way/973433275",
+      "source": "Sections 16.1, 72.2 (Hà Đông)",
+      "expected_urban": true,
+      "expected_total": null,
+      "lon": 105.7473199,
+      "lat": 20.9621261,
+      "unit": "Phường Dương Nội",
+      "province": "Thành phố Hà Nội",
+      "in_urban": true,
+      "in_total": true,
+      "result": "AS_EXPECTED"
+    },
+    {
+      "label": "Phố Hiến (former TP Hưng Yên)",
+      "osm": "node/13155709564",
+      "source": "Section 72.2 ('TP Hưng Yên')",
+      "expected_urban": false,
+      "expected_total": true,
+      "lon": 106.0584835,
+      "lat": 20.6625669,
+      "unit": "Phường Phố Hiến",
+      "province": "Tỉnh Hưng Yên",
+      "in_urban": false,
+      "in_total": true,
+      "result": "AS_EXPECTED",
+      "detail": "assumes Phố Hiến represents former TP Hưng Yên"
+    }
+  ],
+  "persist": {
+    "URBAN": "inserted",
+    "TOTAL": "inserted"
+  },
+  "conflicts": [
+    "neighbour 'Hải Dương': admin_level=4 unit containing node/369487115 matched 0 provinces (expected 1)",
+    "neighbour 'Hà Nam': admin_level=4 unit containing node/369487036 matched 0 provinces (expected 1)"
+  ],
+  "log": [
+    "loaded admin units: level 4: 5 (0 repaired with ST_MakeValid), level 6: 1186 (0 repaired with ST_MakeValid)",
+    "loaded places: 5558",
+    "city: r1903516 Thành phố Hà Nội (VN-HN)",
+    "urban: 126 level-6 units in city, selected 54",
+    "provinces for total area: Thành phố Hà Nội <- (city); Tỉnh Hưng Yên <- Hưng Yên; Thành phố Bắc Ninh <- Bắc Ninh; Tỉnh Phú Thọ <- Vĩnh Phúc, Hòa Bình",
+    "anchor: node/74132064 'Hà Nội' (105.85404, 21.02833) - ANCHOR_DEFINITION_REQUIRED",
+    "total: 473 level-6 units within 150.0 km in selected provinces; 0 unroutable; other provinces with units in range: {'Tỉnh Lạng Sơn': 25}"
+  ]
+}

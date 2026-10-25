@@ -1,0 +1,84 @@
+# =============================================================================
+# CANDIDATE service-area rules (owner decisions P1-D1 / P1-D3).
+# STATUS: PENDING_OWNER_APPROVAL - geometry built from these rules is stored as
+# service_areas.status = 'CANDIDATE' and must not be used for acceptance.
+#
+# Input data: OSM extract verified in Phase 0 (region.osm.pbf), exported by
+# scripts/osm/export_service_area_sources.sh. Every OSM id below was looked up
+# in that extract (snapshot 2026-10-23T20:20:51Z).
+#
+# Context found in the data: the snapshot reflects Vietnam's 2025
+# administrative reorganisation (two-level local government). admin_level=4 =
+# province/municipality (merged units), admin_level=6 = commune/ward; districts
+# (quận/huyện) such as "Hà Đông", "Hoài Đức", "Gia Lâm", "Đông Anh" no longer
+# exist as units. Revision 9 Sections 1 / 2.3 name pre-2025 units.
+# =============================================================================
+rules_id: sa_rules_candidate_v1
+status: PENDING_OWNER_APPROVAL
+
+city:
+  # Revision 9 Section 2.3: urban_service_area = Hà Nội core + named satellites.
+  iso3166_2: VN-HN          # OSM relation 1903516 "Thành phố Hà Nội"
+
+urban:
+  # U1: every ward ("Phường ...") of the city. Rationale: after the 2025 reform
+  # wards are the urban administrative units. PROPOSAL - needs approval.
+  include_city_wards: true
+  # U2: communes ("Xã ...") of the city that Section 2.3 names as urban
+  # satellites but that are communes in the current data. Matched by exact
+  # name inside the city only (other provinces have units with the same names).
+  include_city_communes_named:
+    - Xã An Khánh
+    - Xã Gia Lâm
+    - Xã Đông Anh
+
+total:
+  # Section 1 / 2.3: Hà Nội + neighbouring provinces within a 150 km road range.
+  # Section 1 names Hưng Yên, Bắc Ninh, Hải Dương, Hà Nam, Vĩnh Phúc, Hòa Bình.
+  # Mapping to current admin_level=4 units (PROPOSAL - needs approval):
+  neighbours:
+    - name: Hưng Yên        # still a province: "Tỉnh Hưng Yên"
+      by: province_iso
+      iso3166_2: VN-66
+    - name: Bắc Ninh        # "Thành phố Bắc Ninh"
+      by: province_iso
+      iso3166_2: VN-56
+    - name: Hải Dương       # no longer a province; former capital place=city node
+      by: contains_node
+      osm_node: 369487115
+    - name: Hà Nam          # former capital Phủ Lý (place=city)
+      by: contains_node
+      osm_node: 369487036
+    - name: Vĩnh Phúc       # former capital Vĩnh Yên (place=city)
+      by: contains_node
+      osm_node: 369486946
+    - name: Hòa Bình        # former capital "Hòa Bình" (place=suburb node; no place=city node exists)
+      by: contains_node
+      osm_node: 13967896564
+  # ANCHOR_DEFINITION_REQUIRED: Revision 9 gives a 150 km road range but no
+  # origin. Proposal: the admin_centre node of the Hà Nội relation.
+  anchor:
+    osm_node: 74132064      # "Hà Nội", place=city, role admin_centre of r1903516
+  # Granularity: a commune/ward (admin_level=6) of the selected provinces is
+  # included when the OSRM car road distance from the anchor to its
+  # ST_PointOnSurface is <= max_total_service_radius_km (baseline, 150.0).
+  unit_admin_level: 6
+
+# Locations Revision 9 names (Sections 2.3, 16, 72.2), resolved to OSM objects.
+# expected_* states what Revision 9 implies; the pipeline reports the actual
+# result and never adjusts geometry to match.
+test_locations:
+  - {label: "Hoàn Kiếm", osm: node/13709921432, expected_urban: true, source: "Section 2.3 (quận nội thành)"}
+  - {label: "Hà Đông", osm: node/13709983624, expected_urban: true, source: "Section 2.3"}
+  - {label: "Yên Nghĩa", osm: node/13710038878, expected_urban: true, source: "Section 2.3"}
+  - {label: "Dương Nội", osm: node/13710014146, expected_urban: true, source: "Section 2.3"}
+  - {label: "An Khánh", osm: node/12147486701, expected_urban: true, source: "Section 2.3"}
+  - {label: "Mỹ Đình", osm: null, expected_urban: true, source: "Section 2.3",
+     note: "no place=* object named Mỹ Đình exists in the extract"}
+  - {label: "Gia Lâm", osm: node/11786552273, expected_urban: true, source: "Section 2.3",
+     note: "only place=neighbourhood node named Gia Lâm near Hà Nội; may not represent the former district"}
+  - {label: "Đông Anh", osm: node/13799910539, expected_urban: true, source: "Section 2.3"}
+  - {label: "La Phù", osm: node/12147486706, expected_urban: false, source: "Section 72.2 ('sát ngoài đa giác nội đô')"}
+  - {label: "Đại học Phenikaa", osm: way/973433275, expected_urban: true, source: "Sections 16.1, 72.2 (Hà Đông)"}
+  - {label: "Phố Hiến (former TP Hưng Yên)", osm: node/13155709564, expected_urban: false, expected_total: true,
+     source: "Section 72.2 ('TP Hưng Yên')", note: "assumes Phố Hiến represents former TP Hưng Yên"}

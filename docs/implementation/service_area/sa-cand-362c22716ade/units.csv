@@ -1,0 +1,528 @@
+area_type,osm_relation,name,province,rule,road_km,snap_m
+URBAN,19301116,Phường Phúc Lợi,Thành phố Hà Nội,U1 city ward,,
+URBAN,19301117,Phường Việt Hưng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19301118,Phường Bồ Đề,Thành phố Hà Nội,U1 city ward,,
+URBAN,19301119,Phường Long Biên,Thành phố Hà Nội,U1 city ward,,
+URBAN,19317430,Xã Gia Lâm,Thành phố Hà Nội,U2 named commune,,
+URBAN,19322845,Xã Đông Anh,Thành phố Hà Nội,U2 named commune,,
+URBAN,19331651,Phường Hoàn Kiếm,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331652,Phường Ba Đình,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331653,Phường Cửa Nam,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331654,Phường Hai Bà Trưng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331655,Phường Văn Miếu - Quốc Tử Giám,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331656,Phường Kim Liên,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331657,Phường Bạch Mai,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331658,Phường Ô Chợ Dừa,Thành phố Hà Nội,U1 city ward,,
+URBAN,19331659,Phường Đống Đa,Thành phố Hà Nội,U1 city ward,,
+URBAN,19332318,Phường Láng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19332319,Phường Giảng Võ,Thành phố Hà Nội,U1 city ward,,
+URBAN,19332320,Phường Ngọc Hà,Thành phố Hà Nội,U1 city ward,,
+URBAN,19332321,Phường Tây Hồ,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334582,Phường Hồng Hà,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334583,Phường Vĩnh Tuy,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334584,Phường Tương Mai,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334585,Phường Phương Liệt,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334586,Phường Vĩnh Hưng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334587,Phường Hoàng Mai,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334588,Phường Định Công,Thành phố Hà Nội,U1 city ward,,
+URBAN,19334589,Phường Khương Đình,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335051,Phường Thanh Xuân,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335052,Phường Yên Hòa,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335053,Phường Cầu Giấy,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335054,Phường Nghĩa Đô,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335055,Phường Xuân Đỉnh,Thành phố Hà Nội,U1 city ward,,
+URBAN,19335056,Phường Phú Thượng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338313,Phường Từ Liêm,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338314,Phường Đại Mỗ,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338315,Phường Thanh Liệt,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338316,Phường Hoàng Liệt,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338317,Phường Yên Sở,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338318,Phường Lĩnh Nam,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338319,Phường Phú Diễn,Thành phố Hà Nội,U1 city ward,,
+URBAN,19338320,Phường Đông Ngạc,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341250,Phường Thượng Cát,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341251,Phường Tây Tựu,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341252,Phường Xuân Phương,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341253,Phường Tây Mỗ,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341254,Phường Dương Nội,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341924,Phường Hà Đông,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341926,Phường Kiến Hưng,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341927,Phường Yên Nghĩa,Thành phố Hà Nội,U1 city ward,,
+URBAN,19341928,Phường Phú Lương,Thành phố Hà Nội,U1 city ward,,
+URBAN,19437090,Xã An Khánh,Thành phố Hà Nội,U2 named commune,,
+URBAN,19446384,Phường Chương Mỹ,Thành phố Hà Nội,U1 city ward,,
+URBAN,19514776,Phường Tùng Thiện,Thành phố Hà Nội,U1 city ward,,
+URBAN,19514781,Phường Sơn Tây,Thành phố Hà Nội,U1 city ward,,
+TOTAL,16190351,Xã Xuân Cẩm,Thành phố Bắc Ninh,T road distance <= 150.0 km,37.056,11.0
+TOTAL,17776226,Phường Mão Điền,Thành phố Bắc Ninh,T road distance <= 150.0 km,33.223,6.0
+TOTAL,17776228,Phường Trạm Lộ,Thành phố Bắc Ninh,T road distance <= 150.0 km,34.513,159.1
+TOTAL,17776230,Phường Ninh Xá,Thành phố Bắc Ninh,T road distance <= 150.0 km,30.289,294.2
+TOTAL,17777467,Phường Song Liễu,Thành phố Bắc Ninh,T road distance <= 150.0 km,26.144,115.3
+TOTAL,17777471,Phường Trí Quả,Thành phố Bắc Ninh,T road distance <= 150.0 km,24.812,101.7
+TOTAL,17781589,Phường Chi Lăng,Thành phố Bắc Ninh,T road distance <= 150.0 km,40.891,38.3
+TOTAL,18270239,Phường Tam Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,20.158,7.0
+TOTAL,18305003,Phường Phương Liễu,Thành phố Bắc Ninh,T road distance <= 150.0 km,37.518,13.0
+TOTAL,18305124,Phường Nam Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,35.859,21.3
+TOTAL,18305255,Phường Nhân Hòa,Thành phố Bắc Ninh,T road distance <= 150.0 km,39.532,276.8
+TOTAL,18305437,Phường Bồng Lai,Thành phố Bắc Ninh,T road distance <= 150.0 km,45.278,23.8
+TOTAL,18305439,Phường Hạp Lĩnh,Thành phố Bắc Ninh,T road distance <= 150.0 km,30.154,125.7
+TOTAL,18307849,Phường Vũ Ninh,Thành phố Bắc Ninh,T road distance <= 150.0 km,34.26,45.0
+TOTAL,18309842,Phường Kinh Bắc,Thành phố Bắc Ninh,T road distance <= 150.0 km,32.027,58.3
+TOTAL,18309844,Phường Võ Cường,Thành phố Bắc Ninh,T road distance <= 150.0 km,28.493,12.9
+TOTAL,18312917,Phường Phù Lãng,Thành phố Bắc Ninh,T road distance <= 150.0 km,53.41,68.8
+TOTAL,18316811,Xã Đại Đồng,Thành phố Bắc Ninh,T road distance <= 150.0 km,21.824,51.0
+TOTAL,18317420,Phường Đồng Nguyên,Thành phố Bắc Ninh,T road distance <= 150.0 km,18.43,1.8
+TOTAL,18317425,Phường Phù Khê,Thành phố Bắc Ninh,T road distance <= 150.0 km,18.119,4.6
+TOTAL,18317719,Phường Đào Viên,Thành phố Bắc Ninh,T road distance <= 150.0 km,53.584,50.9
+TOTAL,18439792,Phường Nhân Thắng,Thành phố Bắc Ninh,T road distance <= 150.0 km,47.725,70.8
+TOTAL,18439966,Xã Đại Lai,Thành phố Bắc Ninh,T road distance <= 150.0 km,43.586,66.5
+TOTAL,18465772,Xã Cao Đức,Thành phố Bắc Ninh,T road distance <= 150.0 km,51.808,8.3
+TOTAL,18469581,Xã Đông Cứu,Thành phố Bắc Ninh,T road distance <= 150.0 km,38.329,19.3
+TOTAL,18469701,Xã Trung Kênh,Thành phố Bắc Ninh,T road distance <= 150.0 km,50.964,52.4
+TOTAL,18481212,Xã Trung Chính,Thành phố Bắc Ninh,T road distance <= 150.0 km,46.125,31.0
+TOTAL,18481319,Xã Lâm Thao,Thành phố Bắc Ninh,T road distance <= 150.0 km,38.496,14.9
+TOTAL,18481557,Xã Tân Chi,Thành phố Bắc Ninh,T road distance <= 150.0 km,36.492,11.5
+TOTAL,18481850,Xã Phật Tích,Thành phố Bắc Ninh,T road distance <= 150.0 km,28.201,47.6
+TOTAL,18485891,Xã Liên Bão,Thành phố Bắc Ninh,T road distance <= 150.0 km,25.609,13.2
+TOTAL,18508489,Xã Tam Đa,Thành phố Bắc Ninh,T road distance <= 150.0 km,34.485,51.2
+TOTAL,18509071,Xã Yên Trung,Thành phố Bắc Ninh,T road distance <= 150.0 km,32.029,42.5
+TOTAL,18509763,Xã Tam Giang,Thành phố Bắc Ninh,T road distance <= 150.0 km,29.766,100.7
+TOTAL,18514983,Xã Văn Môn,Thành phố Bắc Ninh,T road distance <= 150.0 km,25.86,244.7
+TOTAL,18649617,Xã Tân Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,120.013,84.7
+TOTAL,18649815,Xã Sa Lý,Thành phố Bắc Ninh,T road distance <= 150.0 km,134.226,491.3
+TOTAL,18649967,Xã Biển Động,Thành phố Bắc Ninh,T road distance <= 150.0 km,114.427,105.4
+TOTAL,18653509,Xã Sơn Hải,Thành phố Bắc Ninh,T road distance <= 150.0 km,109.688,35.6
+TOTAL,18653821,Xã Biên Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,122.621,1999.7
+TOTAL,18654013,Phường Phượng Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,85.637,10.0
+TOTAL,18654054,Xã Đèo Gia,Thành phố Bắc Ninh,T road distance <= 150.0 km,111.466,46.9
+TOTAL,18654095,Xã Nam Dương,Thành phố Bắc Ninh,T road distance <= 150.0 km,98.205,3.2
+TOTAL,18654096,Xã Kiên Lao,Thành phố Bắc Ninh,T road distance <= 150.0 km,101.534,6.9
+TOTAL,18658622,Xã Dương Hưu,Thành phố Bắc Ninh,T road distance <= 150.0 km,148.368,109.2
+TOTAL,18699320,Xã An Lạc,Thành phố Bắc Ninh,T road distance <= 150.0 km,143.373,1035.4
+TOTAL,18699321,Xã Đông Phú,Thành phố Bắc Ninh,T road distance <= 150.0 km,84.919,318.6
+TOTAL,18699355,Xã Đại Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,127.171,951.6
+TOTAL,18699430,Xã Tây Yên Tử,Thành phố Bắc Ninh,T road distance <= 150.0 km,123.178,74.7
+TOTAL,18699448,Xã Tuấn Đạo,Thành phố Bắc Ninh,T road distance <= 150.0 km,131.819,905.7
+TOTAL,18699478,Xã Nghĩa Phương,Thành phố Bắc Ninh,T road distance <= 150.0 km,81.396,47.1
+TOTAL,18707946,Xã Yên Định,Thành phố Bắc Ninh,T road distance <= 150.0 km,120.673,717.4
+TOTAL,18707983,Xã Bắc Lũng,Thành phố Bắc Ninh,T road distance <= 150.0 km,70.276,96.9
+TOTAL,18726310,Xã Cẩm Lý,Thành phố Bắc Ninh,T road distance <= 150.0 km,81.488,237.2
+TOTAL,18726331,Xã Trường Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,94.622,249.9
+TOTAL,18726339,Xã Lục Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,103.577,799.3
+TOTAL,18758357,Phường Bắc Giang,Thành phố Bắc Ninh,T road distance <= 150.0 km,55.736,46.6
+TOTAL,18758370,Phường Tân Tiến,Thành phố Bắc Ninh,T road distance <= 150.0 km,55.443,100.9
+TOTAL,18758380,Phường Tiền Phong,Thành phố Bắc Ninh,T road distance <= 150.0 km,48.02,36.5
+TOTAL,18759231,Xã Đồng Việt,Thành phố Bắc Ninh,T road distance <= 150.0 km,63.49,12.2
+TOTAL,18759422,Phường Đa Mai,Thành phố Bắc Ninh,T road distance <= 150.0 km,53.876,10.8
+TOTAL,18759461,Xã Nhã Nam,Thành phố Bắc Ninh,T road distance <= 150.0 km,59.641,67.0
+TOTAL,18759494,Xã Vân Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,142.874,933.4
+TOTAL,18759499,Xã Mỹ Thái,Thành phố Bắc Ninh,T road distance <= 150.0 km,65.174,214.9
+TOTAL,18762684,Xã Tân Dĩnh,Thành phố Bắc Ninh,T road distance <= 150.0 km,58.913,12.6
+TOTAL,18762724,Xã Tiên Lục,Thành phố Bắc Ninh,T road distance <= 150.0 km,65.954,4.7
+TOTAL,18763054,Phường Kép,Thành phố Bắc Ninh,T road distance <= 150.0 km,72.637,11.1
+TOTAL,18763210,Phường Yên Dũng,Thành phố Bắc Ninh,T road distance <= 150.0 km,53.288,65.2
+TOTAL,18787162,Phường Cảnh Thụy,Thành phố Bắc Ninh,T road distance <= 150.0 km,58.562,28.9
+TOTAL,18787303,Xã Phúc Hòa,Thành phố Bắc Ninh,T road distance <= 150.0 km,59.523,42.6
+TOTAL,18787338,Phường Tân An,Thành phố Bắc Ninh,T road distance <= 150.0 km,64.0,87.5
+TOTAL,18787456,Xã Ngọc Thiện,Thành phố Bắc Ninh,T road distance <= 150.0 km,53.139,14.8
+TOTAL,18787478,Xã Quang Trung,Thành phố Bắc Ninh,T road distance <= 150.0 km,65.151,146.3
+TOTAL,18787504,Phường Nếnh,Thành phố Bắc Ninh,T road distance <= 150.0 km,40.471,125.8
+TOTAL,18788173,Phường Tự Lạn,Thành phố Bắc Ninh,T road distance <= 150.0 km,46.248,10.2
+TOTAL,18802196,Xã Tam Tiến,Thành phố Bắc Ninh,T road distance <= 150.0 km,73.448,4.3
+TOTAL,18802345,Xã Hoàng Vân,Thành phố Bắc Ninh,T road distance <= 150.0 km,54.175,4.3
+TOTAL,18802476,Phường Bố Hạ,Thành phố Bắc Ninh,T road distance <= 150.0 km,69.974,97.2
+TOTAL,18802500,Xã Đồng Kỳ,Thành phố Bắc Ninh,T road distance <= 150.0 km,81.792,27.4
+TOTAL,18820860,Phường Vân Hà,Thành phố Bắc Ninh,T road distance <= 150.0 km,43.302,37.3
+TOTAL,18846899,Xã Xuân Lương,Thành phố Bắc Ninh,T road distance <= 150.0 km,84.414,87.2
+TOTAL,18847020,Xã Hợp Thịnh,Thành phố Bắc Ninh,T road distance <= 150.0 km,43.798,62.4
+TOTAL,19301116,Phường Phúc Lợi,Thành phố Hà Nội,T road distance <= 150.0 km,10.095,3.6
+TOTAL,19301117,Phường Việt Hưng,Thành phố Hà Nội,T road distance <= 150.0 km,7.969,23.5
+TOTAL,19301118,Phường Bồ Đề,Thành phố Hà Nội,T road distance <= 150.0 km,4.543,5.1
+TOTAL,19301119,Phường Long Biên,Thành phố Hà Nội,T road distance <= 150.0 km,6.963,37.1
+TOTAL,19317429,Xã Thuận An,Thành phố Hà Nội,T road distance <= 150.0 km,17.911,36.5
+TOTAL,19317430,Xã Gia Lâm,Thành phố Hà Nội,T road distance <= 150.0 km,15.273,6.1
+TOTAL,19317431,Xã Bát Tràng,Thành phố Hà Nội,T road distance <= 150.0 km,15.104,23.1
+TOTAL,19317432,Xã Phù Đổng,Thành phố Hà Nội,T road distance <= 150.0 km,13.23,108.1
+TOTAL,19322845,Xã Đông Anh,Thành phố Hà Nội,T road distance <= 150.0 km,13.481,15.9
+TOTAL,19322846,Xã Thư Lâm,Thành phố Hà Nội,T road distance <= 150.0 km,21.992,122.1
+TOTAL,19322847,Xã Vĩnh Thanh,Thành phố Hà Nội,T road distance <= 150.0 km,15.563,6.8
+TOTAL,19322848,Xã Thiên Lộc,Thành phố Hà Nội,T road distance <= 150.0 km,21.149,13.0
+TOTAL,19322849,Xã Phúc Thịnh,Thành phố Hà Nội,T road distance <= 150.0 km,17.995,101.4
+TOTAL,19331543,Xã A Sào,Tỉnh Hưng Yên,T road distance <= 150.0 km,86.245,3.6
+TOTAL,19331651,Phường Hoàn Kiếm,Thành phố Hà Nội,T road distance <= 150.0 km,1.466,2.8
+TOTAL,19331652,Phường Ba Đình,Thành phố Hà Nội,T road distance <= 150.0 km,3.368,0.3
+TOTAL,19331653,Phường Cửa Nam,Thành phố Hà Nội,T road distance <= 150.0 km,1.357,14.7
+TOTAL,19331654,Phường Hai Bà Trưng,Thành phố Hà Nội,T road distance <= 150.0 km,1.987,17.4
+TOTAL,19331655,Phường Văn Miếu - Quốc Tử Giám,Thành phố Hà Nội,T road distance <= 150.0 km,3.387,23.9
+TOTAL,19331656,Phường Kim Liên,Thành phố Hà Nội,T road distance <= 150.0 km,5.549,14.0
+TOTAL,19331657,Phường Bạch Mai,Thành phố Hà Nội,T road distance <= 150.0 km,4.149,30.9
+TOTAL,19331658,Phường Ô Chợ Dừa,Thành phố Hà Nội,T road distance <= 150.0 km,4.203,3.6
+TOTAL,19331659,Phường Đống Đa,Thành phố Hà Nội,T road distance <= 150.0 km,6.17,22.8
+TOTAL,19332318,Phường Láng,Thành phố Hà Nội,T road distance <= 150.0 km,7.123,20.7
+TOTAL,19332319,Phường Giảng Võ,Thành phố Hà Nội,T road distance <= 150.0 km,5.244,68.9
+TOTAL,19332320,Phường Ngọc Hà,Thành phố Hà Nội,T road distance <= 150.0 km,5.435,8.6
+TOTAL,19332321,Phường Tây Hồ,Thành phố Hà Nội,T road distance <= 150.0 km,6.408,156.9
+TOTAL,19334582,Phường Hồng Hà,Thành phố Hà Nội,T road distance <= 150.0 km,5.773,59.1
+TOTAL,19334583,Phường Vĩnh Tuy,Thành phố Hà Nội,T road distance <= 150.0 km,5.087,7.4
+TOTAL,19334584,Phường Tương Mai,Thành phố Hà Nội,T road distance <= 150.0 km,6.656,7.4
+TOTAL,19334585,Phường Phương Liệt,Thành phố Hà Nội,T road distance <= 150.0 km,7.055,11.5
+TOTAL,19334586,Phường Vĩnh Hưng,Thành phố Hà Nội,T road distance <= 150.0 km,5.984,64.2
+TOTAL,19334587,Phường Hoàng Mai,Thành phố Hà Nội,T road distance <= 150.0 km,8.283,168.7
+TOTAL,19334588,Phường Định Công,Thành phố Hà Nội,T road distance <= 150.0 km,9.797,15.6
+TOTAL,19334589,Phường Khương Đình,Thành phố Hà Nội,T road distance <= 150.0 km,8.159,21.3
+TOTAL,19335051,Phường Thanh Xuân,Thành phố Hà Nội,T road distance <= 150.0 km,8.161,42.0
+TOTAL,19335052,Phường Yên Hòa,Thành phố Hà Nội,T road distance <= 150.0 km,7.97,35.2
+TOTAL,19335053,Phường Cầu Giấy,Thành phố Hà Nội,T road distance <= 150.0 km,8.277,28.6
+TOTAL,19335054,Phường Nghĩa Đô,Thành phố Hà Nội,T road distance <= 150.0 km,7.869,15.7
+TOTAL,19335055,Phường Xuân Đỉnh,Thành phố Hà Nội,T road distance <= 150.0 km,10.035,27.9
+TOTAL,19335056,Phường Phú Thượng,Thành phố Hà Nội,T road distance <= 150.0 km,9.749,28.4
+TOTAL,19335112,Xã Mê Linh,Thành phố Hà Nội,T road distance <= 150.0 km,27.472,51.4
+TOTAL,19335113,Xã Quang Minh,Thành phố Hà Nội,T road distance <= 150.0 km,28.56,6.3
+TOTAL,19335114,Xã Yên Lãng,Thành phố Hà Nội,T road distance <= 150.0 km,34.867,17.7
+TOTAL,19335115,Xã Tiến Thắng,Thành phố Hà Nội,T road distance <= 150.0 km,35.14,9.2
+TOTAL,19338086,Xã Nội Bài,Thành phố Hà Nội,T road distance <= 150.0 km,32.527,84.4
+TOTAL,19338087,Xã Sóc Sơn,Thành phố Hà Nội,T road distance <= 150.0 km,28.595,55.9
+TOTAL,19338088,Xã Đa Phúc,Thành phố Hà Nội,T road distance <= 150.0 km,34.203,102.6
+TOTAL,19338089,Xã Trung Giã,Thành phố Hà Nội,T road distance <= 150.0 km,42.807,42.6
+TOTAL,19338090,Xã Kim Anh,Thành phố Hà Nội,T road distance <= 150.0 km,41.097,13.1
+TOTAL,19338313,Phường Từ Liêm,Thành phố Hà Nội,T road distance <= 150.0 km,12.43,20.2
+TOTAL,19338314,Phường Đại Mỗ,Thành phố Hà Nội,T road distance <= 150.0 km,11.014,7.3
+TOTAL,19338315,Phường Thanh Liệt,Thành phố Hà Nội,T road distance <= 150.0 km,11.463,113.8
+TOTAL,19338316,Phường Hoàng Liệt,Thành phố Hà Nội,T road distance <= 150.0 km,10.653,22.8
+TOTAL,19338317,Phường Yên Sở,Thành phố Hà Nội,T road distance <= 150.0 km,12.771,108.5
+TOTAL,19338318,Phường Lĩnh Nam,Thành phố Hà Nội,T road distance <= 150.0 km,9.292,18.8
+TOTAL,19338319,Phường Phú Diễn,Thành phố Hà Nội,T road distance <= 150.0 km,11.78,21.5
+TOTAL,19338320,Phường Đông Ngạc,Thành phố Hà Nội,T road distance <= 150.0 km,14.037,144.9
+TOTAL,19341250,Phường Thượng Cát,Thành phố Hà Nội,T road distance <= 150.0 km,17.362,92.7
+TOTAL,19341251,Phường Tây Tựu,Thành phố Hà Nội,T road distance <= 150.0 km,15.993,19.3
+TOTAL,19341252,Phường Xuân Phương,Thành phố Hà Nội,T road distance <= 150.0 km,13.568,7.4
+TOTAL,19341253,Phường Tây Mỗ,Thành phố Hà Nội,T road distance <= 150.0 km,15.568,28.8
+TOTAL,19341254,Phường Dương Nội,Thành phố Hà Nội,T road distance <= 150.0 km,14.507,7.9
+TOTAL,19341924,Phường Hà Đông,Thành phố Hà Nội,T road distance <= 150.0 km,11.461,33.0
+TOTAL,19341926,Phường Kiến Hưng,Thành phố Hà Nội,T road distance <= 150.0 km,15.177,68.4
+TOTAL,19341927,Phường Yên Nghĩa,Thành phố Hà Nội,T road distance <= 150.0 km,17.693,22.0
+TOTAL,19341928,Phường Phú Lương,Thành phố Hà Nội,T road distance <= 150.0 km,16.993,50.9
+TOTAL,19377767,Phường Quế Võ,Thành phố Bắc Ninh,T road distance <= 150.0 km,48.227,4.9
+TOTAL,19411380,Xã Thường Tín,Thành phố Hà Nội,T road distance <= 150.0 km,24.714,25.1
+TOTAL,19411381,Xã Thượng Phúc,Thành phố Hà Nội,T road distance <= 150.0 km,28.154,33.7
+TOTAL,19411382,Xã Chương Dương,Thành phố Hà Nội,T road distance <= 150.0 km,29.732,6.4
+TOTAL,19411383,Xã Phượng Dực,Thành phố Hà Nội,T road distance <= 150.0 km,37.555,1.7
+TOTAL,19411384,Xã Phú Xuyên,Thành phố Hà Nội,T road distance <= 150.0 km,34.581,1.8
+TOTAL,19411385,Xã Đại Xuyên,Thành phố Hà Nội,T road distance <= 150.0 km,45.359,0.6
+TOTAL,19411386,Xã Chuyên Mỹ,Thành phố Hà Nội,T road distance <= 150.0 km,42.566,111.4
+TOTAL,19411387,Xã Ứng Hòa,Thành phố Hà Nội,T road distance <= 150.0 km,46.319,45.8
+TOTAL,19411388,Xã Hòa Xá,Thành phố Hà Nội,T road distance <= 150.0 km,64.986,111.3
+TOTAL,19425625,Xã Lục Ngạn,Thành phố Bắc Ninh,T road distance <= 150.0 km,104.179,9.4
+TOTAL,19425626,Phường Chũ,Thành phố Bắc Ninh,T road distance <= 150.0 km,94.991,15.2
+TOTAL,19425627,Phường Lạng Giang,Thành phố Bắc Ninh,T road distance <= 150.0 km,65.428,62.7
+TOTAL,19425628,Xã Bảo Đài,Thành phố Bắc Ninh,T road distance <= 150.0 km,71.306,107.8
+TOTAL,19425629,Phường Lục Nam,Thành phố Bắc Ninh,T road distance <= 150.0 km,71.45,122.5
+TOTAL,19425630,Xã Yên Thế,Thành phố Bắc Ninh,T road distance <= 150.0 km,73.782,42.7
+TOTAL,19425631,Xã Tân Yên,Thành phố Bắc Ninh,T road distance <= 150.0 km,52.861,20.2
+TOTAL,19425632,Phường Việt Yên,Thành phố Bắc Ninh,T road distance <= 150.0 km,47.155,82.3
+TOTAL,19425633,Phường Hiệp Hòa,Thành phố Bắc Ninh,T road distance <= 150.0 km,46.098,8.5
+TOTAL,19425634,Phường Yên Phong,Thành phố Bắc Ninh,T road distance <= 150.0 km,27.211,100.5
+TOTAL,19425635,Phường Tiên Du,Thành phố Bắc Ninh,T road distance <= 150.0 km,24.526,35.9
+TOTAL,19425636,Phường Thuận Thành,Thành phố Bắc Ninh,T road distance <= 150.0 km,30.88,19.3
+TOTAL,19425637,Phường Lương Tài,Thành phố Bắc Ninh,T road distance <= 150.0 km,43.581,33.4
+TOTAL,19425638,Phường Gia Bình,Thành phố Bắc Ninh,T road distance <= 150.0 km,38.004,95.0
+TOTAL,19425704,Xã Sơn Động,Thành phố Bắc Ninh,T road distance <= 150.0 km,127.671,24.1
+TOTAL,19435863,Xã Quốc Oai,Thành phố Hà Nội,T road distance <= 150.0 km,24.684,55.5
+TOTAL,19435864,Xã Hưng Đạo,Thành phố Hà Nội,T road distance <= 150.0 km,29.872,34.4
+TOTAL,19435883,Phường Từ Sơn,Thành phố Bắc Ninh,T road distance <= 150.0 km,17.137,84.4
+TOTAL,19437088,Xã Thanh Trì,Thành phố Hà Nội,T road distance <= 150.0 km,14.305,29.4
+TOTAL,19437089,Xã Đại Thanh,Thành phố Hà Nội,T road distance <= 150.0 km,15.974,246.3
+TOTAL,19437090,Xã An Khánh,Thành phố Hà Nội,T road distance <= 150.0 km,19.621,22.0
+TOTAL,19437091,Xã Sơn Đồng,Thành phố Hà Nội,T road distance <= 150.0 km,19.634,1.4
+TOTAL,19437092,Xã Hoài Đức,Thành phố Hà Nội,T road distance <= 150.0 km,18.232,25.6
+TOTAL,19437093,Xã Ô Diên,Thành phố Hà Nội,T road distance <= 150.0 km,22.989,32.0
+TOTAL,19437094,Xã Ngọc Hồi,Thành phố Hà Nội,T road distance <= 150.0 km,15.029,218.0
+TOTAL,19437095,Xã Nam Phù,Thành phố Hà Nội,T road distance <= 150.0 km,18.184,71.1
+TOTAL,19437096,Xã Hồng Vân,Thành phố Hà Nội,T road distance <= 150.0 km,24.369,56.0
+TOTAL,19446382,Xã Đan Phượng,Thành phố Hà Nội,T road distance <= 150.0 km,23.121,27.8
+TOTAL,19446383,Xã Dương Hòa,Thành phố Hà Nội,T road distance <= 150.0 km,22.557,37.9
+TOTAL,19446384,Phường Chương Mỹ,Thành phố Hà Nội,T road distance <= 150.0 km,21.143,22.6
+TOTAL,19446385,Xã Phú Nghĩa,Thành phố Hà Nội,T road distance <= 150.0 km,28.33,1.1
+TOTAL,19446386,Xã Xuân Mai,Thành phố Hà Nội,T road distance <= 150.0 km,38.245,6.7
+TOTAL,19463170,Phường Hồng Châu,Tỉnh Hưng Yên,T road distance <= 150.0 km,60.714,50.5
+TOTAL,19463171,Phường Phố Hiến,Tỉnh Hưng Yên,T road distance <= 150.0 km,54.534,58.4
+TOTAL,19514767,Xã Phú Cát,Thành phố Hà Nội,T road distance <= 150.0 km,45.218,9.6
+TOTAL,19514768,Xã Yên Xuân,Thành phố Hà Nội,T road distance <= 150.0 km,44.24,45.3
+TOTAL,19514769,Xã Kiều Phú,Thành phố Hà Nội,T road distance <= 150.0 km,31.794,13.5
+TOTAL,19514770,Xã Hòa Lạc,Thành phố Hà Nội,T road distance <= 150.0 km,41.382,290.0
+TOTAL,19514771,Xã Hạ Bằng,Thành phố Hà Nội,T road distance <= 150.0 km,36.164,6.5
+TOTAL,19514772,Xã Thạch Thất,Thành phố Hà Nội,T road distance <= 150.0 km,36.618,171.3
+TOTAL,19514773,Xã Tây Phương,Thành phố Hà Nội,T road distance <= 150.0 km,32.522,0.8
+TOTAL,19514774,Xã Đoài Phương,Thành phố Hà Nội,T road distance <= 150.0 km,42.86,5.4
+TOTAL,19514775,Xã Yên Bài,Thành phố Hà Nội,T road distance <= 150.0 km,54.852,108.8
+TOTAL,19514776,Phường Tùng Thiện,Thành phố Hà Nội,T road distance <= 150.0 km,46.978,175.8
+TOTAL,19514777,Xã Phúc Thọ,Thành phố Hà Nội,T road distance <= 150.0 km,35.452,8.7
+TOTAL,19514778,Xã Hát Môn,Thành phố Hà Nội,T road distance <= 150.0 km,27.465,19.0
+TOTAL,19514779,Xã Liên Minh,Thành phố Hà Nội,T road distance <= 150.0 km,27.814,40.3
+TOTAL,19514780,Xã Phúc Lộc,Thành phố Hà Nội,T road distance <= 150.0 km,37.306,16.1
+TOTAL,19514781,Phường Sơn Tây,Thành phố Hà Nội,T road distance <= 150.0 km,46.359,117.2
+TOTAL,19514782,Xã Ba Vì,Thành phố Hà Nội,T road distance <= 150.0 km,70.176,50.9
+TOTAL,19514783,Xã Suối Hai,Thành phố Hà Nội,T road distance <= 150.0 km,56.379,180.8
+TOTAL,19514784,Xã Bất Bạt,Thành phố Hà Nội,T road distance <= 150.0 km,64.4,108.3
+TOTAL,19514785,Xã Quảng Oai,Thành phố Hà Nội,T road distance <= 150.0 km,51.66,48.0
+TOTAL,19514786,Xã Minh Châu,Thành phố Hà Nội,T road distance <= 150.0 km,57.613,273.9
+TOTAL,19514787,Xã Vật Lại,Thành phố Hà Nội,T road distance <= 150.0 km,58.163,4.9
+TOTAL,19514788,Xã Cổ Đô,Thành phố Hà Nội,T road distance <= 150.0 km,62.401,433.8
+TOTAL,19514789,Xã Hương Sơn,Thành phố Hà Nội,T road distance <= 150.0 km,69.153,872.0
+TOTAL,19514790,Xã Mỹ Đức,Thành phố Hà Nội,T road distance <= 150.0 km,53.538,369.3
+TOTAL,19514791,Xã Hồng Sơn,Thành phố Hà Nội,T road distance <= 150.0 km,52.62,91.4
+TOTAL,19514792,Xã Vân Đình,Thành phố Hà Nội,T road distance <= 150.0 km,45.244,38.6
+TOTAL,19514793,Xã Phúc Sơn,Thành phố Hà Nội,T road distance <= 150.0 km,44.075,65.0
+TOTAL,19514794,Xã Ứng Thiên,Thành phố Hà Nội,T road distance <= 150.0 km,35.482,12.4
+TOTAL,19514795,Xã Dân Hòa,Thành phố Hà Nội,T road distance <= 150.0 km,31.581,88.9
+TOTAL,19514796,Xã Thanh Oai,Thành phố Hà Nội,T road distance <= 150.0 km,27.739,1.0
+TOTAL,19514797,Xã Hòa Phú,Thành phố Hà Nội,T road distance <= 150.0 km,31.17,120.8
+TOTAL,19514798,Xã Trần Phú,Thành phố Hà Nội,T road distance <= 150.0 km,35.873,74.6
+TOTAL,19514799,Xã Quảng Bị,Thành phố Hà Nội,T road distance <= 150.0 km,27.426,0.4
+TOTAL,19514800,Xã Tam Hưng,Thành phố Hà Nội,T road distance <= 150.0 km,22.82,10.9
+TOTAL,19514801,Xã Bình Minh,Thành phố Hà Nội,T road distance <= 150.0 km,21.511,177.2
+TOTAL,19541827,Xã Yên Mỹ,Tỉnh Hưng Yên,T road distance <= 150.0 km,37.061,86.7
+TOTAL,19541828,Xã Xuân Trúc,Tỉnh Hưng Yên,T road distance <= 150.0 km,37.411,90.2
+TOTAL,19541829,Xã Vũ Tiên,Tỉnh Hưng Yên,T road distance <= 150.0 km,110.971,21.6
+TOTAL,19541830,Xã Vũ Thư,Tỉnh Hưng Yên,T road distance <= 150.0 km,99.418,2.9
+TOTAL,19541831,Xã Vũ Quý,Tỉnh Hưng Yên,T road distance <= 150.0 km,111.38,30.1
+TOTAL,19541832,Phường Vũ Phúc,Tỉnh Hưng Yên,T road distance <= 150.0 km,104.29,127.7
+TOTAL,19541833,Xã Việt Yên,Tỉnh Hưng Yên,T road distance <= 150.0 km,26.566,43.6
+TOTAL,19541834,Xã Việt Tiến,Tỉnh Hưng Yên,T road distance <= 150.0 km,35.706,4.0
+TOTAL,19541835,Xã Vạn Xuân,Tỉnh Hưng Yên,T road distance <= 150.0 km,85.631,116.9
+TOTAL,19541836,Xã Văn Giang,Tỉnh Hưng Yên,T road distance <= 150.0 km,19.543,71.5
+TOTAL,19541837,Xã Triệu Việt Vương,Tỉnh Hưng Yên,T road distance <= 150.0 km,31.285,19.3
+TOTAL,19541838,Phường Trần Lãm,Tỉnh Hưng Yên,T road distance <= 150.0 km,108.614,240.7
+TOTAL,19541839,Phường Trần Hưng Đạo,Tỉnh Hưng Yên,T road distance <= 150.0 km,104.419,159.9
+TOTAL,19541840,Phường Trà Lý,Tỉnh Hưng Yên,T road distance <= 150.0 km,99.522,34.2
+TOTAL,19541841,Xã Trà Giang,Tỉnh Hưng Yên,T road distance <= 150.0 km,115.156,23.4
+TOTAL,19541842,Xã Tống Trân,Tỉnh Hưng Yên,T road distance <= 150.0 km,71.438,5.9
+TOTAL,19541843,Xã Tiên Tiến,Tỉnh Hưng Yên,T road distance <= 150.0 km,67.571,132.9
+TOTAL,19541844,Xã Tiên Lữ,Tỉnh Hưng Yên,T road distance <= 150.0 km,59.588,62.0
+TOTAL,19541845,Xã Tiên La,Tỉnh Hưng Yên,T road distance <= 150.0 km,72.706,294.2
+TOTAL,19541846,Xã Tiên Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,84.208,179.4
+TOTAL,19541847,Xã Tiên Hoa,Tỉnh Hưng Yên,T road distance <= 150.0 km,62.598,4.2
+TOTAL,19541848,Xã Tiền Hải,Tỉnh Hưng Yên,T road distance <= 150.0 km,124.845,13.3
+TOTAL,19541849,Xã Thụy Anh,Tỉnh Hưng Yên,T road distance <= 150.0 km,108.16,154.3
+TOTAL,19541850,Phường Thượng Hồng,Tỉnh Hưng Yên,T road distance <= 150.0 km,38.076,63.5
+TOTAL,19541851,Xã Thư Vũ,Tỉnh Hưng Yên,T road distance <= 150.0 km,112.266,29.9
+TOTAL,19541852,Xã Thư Trì,Tỉnh Hưng Yên,T road distance <= 150.0 km,88.261,137.4
+TOTAL,19541853,Xã Thần Khê,Tỉnh Hưng Yên,T road distance <= 150.0 km,82.247,43.6
+TOTAL,19541854,Xã Thái Thụy,Tỉnh Hưng Yên,T road distance <= 150.0 km,105.932,80.9
+TOTAL,19541855,Xã Thái Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,110.192,168.1
+TOTAL,19541856,Phường Thái Bình,Tỉnh Hưng Yên,T road distance <= 150.0 km,105.295,9.5
+TOTAL,19541857,Xã Tây Tiền Hải,Tỉnh Hưng Yên,T road distance <= 150.0 km,124.207,144.4
+TOTAL,19541858,Xã Tây Thụy Anh,Tỉnh Hưng Yên,T road distance <= 150.0 km,106.641,142.0
+TOTAL,19541859,Xã Tây Thái Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,110.69,153.7
+TOTAL,19541860,Xã Tân Tiến,Tỉnh Hưng Yên,T road distance <= 150.0 km,104.737,41.5
+TOTAL,19541861,Xã Tân Thuận,Tỉnh Hưng Yên,T road distance <= 150.0 km,96.244,22.6
+TOTAL,19541862,Xã Tân Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,56.712,7.5
+TOTAL,19541863,Phường Sơn Nam,Tỉnh Hưng Yên,T road distance <= 150.0 km,54.963,20.3
+TOTAL,19541864,Xã Quỳnh Phụ,Tỉnh Hưng Yên,T road distance <= 150.0 km,87.149,30.5
+TOTAL,19541865,Xã Quỳnh An,Tỉnh Hưng Yên,T road distance <= 150.0 km,92.566,16.2
+TOTAL,19541866,Xã Quang Lịch,Tỉnh Hưng Yên,T road distance <= 150.0 km,113.606,22.5
+TOTAL,19541867,Xã Quang Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,64.379,2.7
+TOTAL,19541868,Xã Phụng Công,Tỉnh Hưng Yên,T road distance <= 150.0 km,16.141,3.3
+TOTAL,19541869,Xã Phụ Dực,Tỉnh Hưng Yên,T road distance <= 150.0 km,97.607,2.9
+TOTAL,19541870,Xã Phạm Ngũ Lão,Tỉnh Hưng Yên,T road distance <= 150.0 km,43.17,34.7
+TOTAL,19541871,Xã Như Quỳnh,Tỉnh Hưng Yên,T road distance <= 150.0 km,20.003,71.4
+TOTAL,19541872,Xã Nguyễn Văn Linh,Tỉnh Hưng Yên,T road distance <= 150.0 km,27.316,191.2
+TOTAL,19541873,Xã Nguyễn Trãi,Tỉnh Hưng Yên,T road distance <= 150.0 km,50.558,139.3
+TOTAL,19541874,Xã Nguyễn Du,Tỉnh Hưng Yên,T road distance <= 150.0 km,87.533,59.8
+TOTAL,19541875,Xã Ngự Thiên,Tỉnh Hưng Yên,T road distance <= 150.0 km,67.827,48.8
+TOTAL,19541876,Xã Ngọc Lâm,Tỉnh Hưng Yên,T road distance <= 150.0 km,85.719,23.1
+TOTAL,19541877,Xã Nghĩa Trụ,Tỉnh Hưng Yên,T road distance <= 150.0 km,20.23,8.5
+TOTAL,19541878,Xã Nghĩa Dân,Tỉnh Hưng Yên,T road distance <= 150.0 km,44.65,192.5
+TOTAL,19541879,Xã Nam Tiên Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,87.307,19.0
+TOTAL,19541880,Xã Nam Tiền Hải,Tỉnh Hưng Yên,T road distance <= 150.0 km,135.727,52.4
+TOTAL,19541881,Xã Nam Thụy Anh,Tỉnh Hưng Yên,T road distance <= 150.0 km,111.271,9.9
+TOTAL,19541882,Xã Nam Thái Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,119.005,126.1
+TOTAL,19541883,Xã Nam Đông Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,97.147,42.4
+TOTAL,19541884,Xã Nam Cường,Tỉnh Hưng Yên,T road distance <= 150.0 km,132.548,16.7
+TOTAL,19541885,Phường Mỹ Hào,Tỉnh Hưng Yên,T road distance <= 150.0 km,31.398,29.7
+TOTAL,19541886,Xã Minh Thọ,Tỉnh Hưng Yên,T road distance <= 150.0 km,86.43,79.6
+TOTAL,19541887,Xã Mễ Sở,Tỉnh Hưng Yên,T road distance <= 150.0 km,23.549,58.8
+TOTAL,19541888,Xã Lương Bằng,Tỉnh Hưng Yên,T road distance <= 150.0 km,43.698,30.3
+TOTAL,19541889,Xã Long Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,67.281,34.0
+TOTAL,19541890,Xã Lê Quý Đôn,Tỉnh Hưng Yên,T road distance <= 150.0 km,73.948,232.9
+TOTAL,19541891,Xã Lê Lợi,Tỉnh Hưng Yên,T road distance <= 150.0 km,119.585,28.9
+TOTAL,19541892,Xã Lạc Đạo,Tỉnh Hưng Yên,T road distance <= 150.0 km,25.162,56.0
+TOTAL,19541893,Xã Kiến Xương,Tỉnh Hưng Yên,T road distance <= 150.0 km,117.894,123.9
+TOTAL,19541894,Xã Khoái Châu,Tỉnh Hưng Yên,T road distance <= 150.0 km,36.998,35.0
+TOTAL,19541895,Xã Hưng Phú,Tỉnh Hưng Yên,T road distance <= 150.0 km,135.782,2.4
+TOTAL,19541896,Xã Hưng Hà,Tỉnh Hưng Yên,T road distance <= 150.0 km,75.681,39.5
+TOTAL,19541897,Xã Hồng Vũ,Tỉnh Hưng Yên,T road distance <= 150.0 km,116.732,130.4
+TOTAL,19541898,Xã Hồng Quang,Tỉnh Hưng Yên,T road distance <= 150.0 km,50.528,65.4
+TOTAL,19541899,Xã Hồng Minh,Tỉnh Hưng Yên,T road distance <= 150.0 km,78.764,141.5
+TOTAL,19541900,Xã Hoàng Hoa Thám,Tỉnh Hưng Yên,T road distance <= 150.0 km,54.244,110.8
+TOTAL,19541901,Xã Hoàn Long,Tỉnh Hưng Yên,T road distance <= 150.0 km,23.798,11.7
+TOTAL,19541902,Xã Hiệp Cường,Tỉnh Hưng Yên,T road distance <= 150.0 km,52.716,346.9
+TOTAL,19541903,Phường Đường Hào,Tỉnh Hưng Yên,T road distance <= 150.0 km,34.72,20.5
+TOTAL,19541904,Xã Đức Hợp,Tỉnh Hưng Yên,T road distance <= 150.0 km,47.696,24.3
+TOTAL,19541905,Xã Đông Tiên Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,87.517,54.8
+TOTAL,19541906,Xã Đông Tiền Hải,Tỉnh Hưng Yên,T road distance <= 150.0 km,122.378,101.5
+TOTAL,19541907,Xã Đông Thụy Anh,Tỉnh Hưng Yên,T road distance <= 150.0 km,108.92,165.4
+TOTAL,19541908,Xã Đông Thái Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,115.79,45.3
+TOTAL,19541909,Xã Đông Quan,Tỉnh Hưng Yên,T road distance <= 150.0 km,104.682,17.3
+TOTAL,19541910,Xã Đông Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,91.517,0.3
+TOTAL,19541911,Xã Đồng Châu,Tỉnh Hưng Yên,T road distance <= 150.0 km,126.547,143.0
+TOTAL,19541912,Xã Đồng Bằng,Tỉnh Hưng Yên,T road distance <= 150.0 km,91.359,13.3
+TOTAL,19541913,Xã Đoàn Đào,Tỉnh Hưng Yên,T road distance <= 150.0 km,55.009,445.9
+TOTAL,19541914,Xã Diên Hà,Tỉnh Hưng Yên,T road distance <= 150.0 km,80.504,162.7
+TOTAL,19541915,Xã Đại Đồng,Tỉnh Hưng Yên,T road distance <= 150.0 km,30.083,15.7
+TOTAL,19541916,Xã Chí Minh,Tỉnh Hưng Yên,T road distance <= 150.0 km,41.079,124.0
+TOTAL,19541917,Xã Châu Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,34.95,44.2
+TOTAL,19541918,Xã Bình Thanh,Tỉnh Hưng Yên,T road distance <= 150.0 km,123.433,12.1
+TOTAL,19541919,Xã Bình Nguyên,Tỉnh Hưng Yên,T road distance <= 150.0 km,111.173,40.1
+TOTAL,19541920,Xã Bình Định,Tỉnh Hưng Yên,T road distance <= 150.0 km,125.461,43.7
+TOTAL,19541921,Xã Bắc Tiên Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,88.129,117.5
+TOTAL,19541922,Xã Bắc Thụy Anh,Tỉnh Hưng Yên,T road distance <= 150.0 km,102.242,21.0
+TOTAL,19541923,Xã Bắc Thái Ninh,Tỉnh Hưng Yên,T road distance <= 150.0 km,117.073,96.1
+TOTAL,19541924,Xã Bắc Đông Quan,Tỉnh Hưng Yên,T road distance <= 150.0 km,98.064,34.3
+TOTAL,19541925,Xã Bắc Đông Hưng,Tỉnh Hưng Yên,T road distance <= 150.0 km,95.958,158.0
+TOTAL,19541926,Xã Ân Thi,Tỉnh Hưng Yên,T road distance <= 150.0 km,46.167,21.5
+TOTAL,19541927,Xã Ái Quốc,Tỉnh Hưng Yên,T road distance <= 150.0 km,130.264,29.9
+TOTAL,19542969,Xã Yên Trị,Tỉnh Phú Thọ,T road distance <= 150.0 km,103.85,317.6
+TOTAL,19542970,Xã Yên Thủy,Tỉnh Phú Thọ,T road distance <= 150.0 km,95.645,99.4
+TOTAL,19542971,Xã Yên Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,89.365,74.7
+TOTAL,19542972,Xã Yên Phú,Tỉnh Phú Thọ,T road distance <= 150.0 km,114.371,1220.7
+TOTAL,19542973,Xã Yên Lập,Tỉnh Phú Thọ,T road distance <= 150.0 km,112.636,647.6
+TOTAL,19542974,Xã Yên Lãng,Tỉnh Phú Thọ,T road distance <= 150.0 km,91.558,202.2
+TOTAL,19542975,Xã Yên Lạc,Tỉnh Phú Thọ,T road distance <= 150.0 km,53.833,64.6
+TOTAL,19542976,Xã Yên Kỳ,Tỉnh Phú Thọ,T road distance <= 150.0 km,125.091,73.8
+TOTAL,19542977,Xã Xuân Viên,Tỉnh Phú Thọ,T road distance <= 150.0 km,112.153,674.7
+TOTAL,19542978,Xã Xuân Lũng,Tỉnh Phú Thọ,T road distance <= 150.0 km,92.371,79.8
+TOTAL,19542979,Xã Xuân Lãng,Tỉnh Phú Thọ,T road distance <= 150.0 km,42.955,5.7
+TOTAL,19542980,Phường Xuân Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,48.952,358.2
+TOTAL,19542981,Xã Xuân Đài,Tỉnh Phú Thọ,T road distance <= 150.0 km,120.953,1076.2
+TOTAL,19542982,Xã Võ Miếu,Tỉnh Phú Thọ,T road distance <= 150.0 km,94.782,60.3
+TOTAL,19542983,Phường Vĩnh Yên,Tỉnh Phú Thọ,T road distance <= 150.0 km,53.454,8.5
+TOTAL,19542984,Xã Vĩnh Tường,Tỉnh Phú Thọ,T road distance <= 150.0 km,54.256,5.9
+TOTAL,19542985,Xã Vĩnh Thành,Tỉnh Phú Thọ,T road distance <= 150.0 km,63.783,419.4
+TOTAL,19542986,Phường Vĩnh Phúc,Tỉnh Phú Thọ,T road distance <= 150.0 km,49.851,12.8
+TOTAL,19542987,Xã Vĩnh Phú,Tỉnh Phú Thọ,T road distance <= 150.0 km,51.306,88.8
+TOTAL,19542988,Xã Vĩnh Hưng,Tỉnh Phú Thọ,T road distance <= 150.0 km,60.434,30.3
+TOTAL,19542989,Xã Vĩnh Chân,Tỉnh Phú Thọ,T road distance <= 150.0 km,126.633,6.7
+TOTAL,19542990,Xã Vĩnh An,Tỉnh Phú Thọ,T road distance <= 150.0 km,59.133,240.9
+TOTAL,19542991,Phường Việt Trì,Tỉnh Phú Thọ,T road distance <= 150.0 km,74.939,47.6
+TOTAL,19542992,Xã Vạn Xuân,Tỉnh Phú Thọ,T road distance <= 150.0 km,78.786,68.9
+TOTAL,19542993,Xã Vân Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,126.702,548.9
+TOTAL,19542994,Phường Vân Phú,Tỉnh Phú Thọ,T road distance <= 150.0 km,82.238,9.4
+TOTAL,19542995,Xã Văn Miếu,Tỉnh Phú Thọ,T road distance <= 150.0 km,91.178,12.2
+TOTAL,19542996,Xã Văn Lang,Tỉnh Phú Thọ,T road distance <= 150.0 km,127.513,567.8
+TOTAL,19542997,Xã Vân Bán,Tỉnh Phú Thọ,T road distance <= 150.0 km,122.802,29.5
+TOTAL,19542998,Xã Tu Vũ,Tỉnh Phú Thọ,T road distance <= 150.0 km,71.178,58.0
+TOTAL,19542999,Xã Trung Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,127.789,283.3
+TOTAL,19543000,Xã Trạm Thản,Tỉnh Phú Thọ,T road distance <= 150.0 km,99.938,15.9
+TOTAL,19543001,Xã Toàn Thắng,Tỉnh Phú Thọ,T road distance <= 150.0 km,117.87,182.4
+TOTAL,19543002,Xã Tiền Phong,Tỉnh Phú Thọ,T road distance <= 150.0 km,114.37,79.8
+TOTAL,19543003,Xã Tiên Lương,Tỉnh Phú Thọ,T road distance <= 150.0 km,124.01,6.1
+TOTAL,19543004,Xã Tiên Lữ,Tỉnh Phú Thọ,T road distance <= 150.0 km,68.937,2.0
+TOTAL,19543005,Xã Thượng Long,Tỉnh Phú Thọ,T road distance <= 150.0 km,113.949,1.7
+TOTAL,19543006,Xã Thượng Cốc,Tỉnh Phú Thọ,T road distance <= 150.0 km,122.757,369.5
+TOTAL,19543007,Xã Thung Nai,Tỉnh Phú Thọ,T road distance <= 150.0 km,96.696,55.8
+TOTAL,19543008,Xã Thu Cúc,Tỉnh Phú Thọ,T road distance <= 150.0 km,128.176,837.5
+TOTAL,19543009,Phường Thống Nhất,Tỉnh Phú Thọ,T road distance <= 150.0 km,80.452,14.6
+TOTAL,19543010,Xã Thọ Văn,Tỉnh Phú Thọ,T road distance <= 150.0 km,74.531,3.9
+TOTAL,19543011,Xã Thổ Tang,Tỉnh Phú Thọ,T road distance <= 150.0 km,56.246,104.9
+TOTAL,19543012,Xã Thịnh Minh,Tỉnh Phú Thọ,T road distance <= 150.0 km,58.741,157.2
+TOTAL,19543013,Xã Thanh Thủy,Tỉnh Phú Thọ,T road distance <= 150.0 km,72.183,134.3
+TOTAL,19543014,Xã Thanh Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,83.798,362.1
+TOTAL,19543015,Phường Thanh Miếu,Tỉnh Phú Thọ,T road distance <= 150.0 km,69.968,4.9
+TOTAL,19543016,Xã Thanh Ba,Tỉnh Phú Thọ,T road distance <= 150.0 km,118.693,13.2
+TOTAL,19543017,Xã Thái Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,77.368,181.9
+TOTAL,19543018,Xã Tề Lỗ,Tỉnh Phú Thọ,T road distance <= 150.0 km,56.955,0.9
+TOTAL,19543019,Xã Tây Cốc,Tỉnh Phú Thọ,T road distance <= 150.0 km,129.955,28.6
+TOTAL,19543020,Xã Tân Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,110.443,18.3
+TOTAL,19543021,Xã Tân Pheo,Tỉnh Phú Thọ,T road distance <= 150.0 km,129.983,625.1
+TOTAL,19543023,Xã Tân Lạc,Tỉnh Phú Thọ,T road distance <= 150.0 km,111.308,80.6
+TOTAL,19543024,Phường Tân Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,81.323,191.6
+TOTAL,19543025,Xã Tam Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,81.802,180.8
+TOTAL,19543026,Xã Tam Nông,Tỉnh Phú Thọ,T road distance <= 150.0 km,68.649,20.1
+TOTAL,19543027,Xã Tam Hồng,Tỉnh Phú Thọ,T road distance <= 150.0 km,50.24,0.4
+TOTAL,19543028,Xã Tam Dương Bắc,Tỉnh Phú Thọ,T road distance <= 150.0 km,66.381,12.6
+TOTAL,19543029,Xã Tam Dương,Tỉnh Phú Thọ,T road distance <= 150.0 km,60.408,51.9
+TOTAL,19543030,Xã Tam Đảo,Tỉnh Phú Thọ,T road distance <= 150.0 km,62.735,15.3
+TOTAL,19543031,Xã Sông Lô,Tỉnh Phú Thọ,T road distance <= 150.0 km,75.918,53.2
+TOTAL,19543032,Xã Sơn Lương,Tỉnh Phú Thọ,T road distance <= 150.0 km,138.124,125.7
+TOTAL,19543033,Xã Sơn Đông,Tỉnh Phú Thọ,T road distance <= 150.0 km,72.923,60.9
+TOTAL,19543034,Xã Quyết Thắng,Tỉnh Phú Thọ,T road distance <= 150.0 km,127.142,131.5
+TOTAL,19543035,Xã Quy Đức,Tỉnh Phú Thọ,T road distance <= 150.0 km,134.342,698.2
+TOTAL,19543036,Xã Quảng Yên,Tỉnh Phú Thọ,T road distance <= 150.0 km,112.999,19.7
+TOTAL,19543037,Xã Phùng Nguyên,Tỉnh Phú Thọ,T road distance <= 150.0 km,78.074,77.2
+TOTAL,19543038,Phường Phúc Yên,Tỉnh Phú Thọ,T road distance <= 150.0 km,37.422,47.5
+TOTAL,19543039,Phường Phú Thọ,Tỉnh Phú Thọ,T road distance <= 150.0 km,97.993,87.8
+TOTAL,19543040,Xã Phù Ninh,Tỉnh Phú Thọ,T road distance <= 150.0 km,89.323,11.9
+TOTAL,19543041,Xã Phú Mỹ,Tỉnh Phú Thọ,T road distance <= 150.0 km,107.11,14.6
+TOTAL,19543042,Xã Phú Khê,Tỉnh Phú Thọ,T road distance <= 150.0 km,118.05,33.8
+TOTAL,19543043,Phường Phong Châu,Tỉnh Phú Thọ,T road distance <= 150.0 km,97.795,47.3
+TOTAL,19543045,Phường Nông Trang,Tỉnh Phú Thọ,T road distance <= 150.0 km,78.908,35.8
+TOTAL,19543046,Xã Nhân Nghĩa,Tỉnh Phú Thọ,T road distance <= 150.0 km,91.955,38.5
+TOTAL,19543047,Xã Nguyệt Đức,Tỉnh Phú Thọ,T road distance <= 150.0 km,45.02,93.1
+TOTAL,19543048,Xã Ngọc Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,128.896,579.7
+TOTAL,19543049,Xã Nật Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,59.456,411.5
+TOTAL,19543050,Xã Mường Vang,Tỉnh Phú Thọ,T road distance <= 150.0 km,133.727,24.9
+TOTAL,19543051,Xã Mường Thàng,Tỉnh Phú Thọ,T road distance <= 150.0 km,100.314,54.8
+TOTAL,19543052,Xã Mường Hoa,Tỉnh Phú Thọ,T road distance <= 150.0 km,121.209,583.4
+TOTAL,19543053,Xã Mường Động,Tỉnh Phú Thọ,T road distance <= 150.0 km,72.686,1887.5
+TOTAL,19543054,Xã Mường Bi,Tỉnh Phú Thọ,T road distance <= 150.0 km,118.397,77.3
+TOTAL,19543055,Xã Minh Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,99.713,153.0
+TOTAL,19543056,Xã Minh Đài,Tỉnh Phú Thọ,T road distance <= 150.0 km,104.578,70.8
+TOTAL,19543057,Xã Mai Hạ,Tỉnh Phú Thọ,T road distance <= 150.0 km,144.214,700.5
+TOTAL,19543058,Xã Mai Châu,Tỉnh Phú Thọ,T road distance <= 150.0 km,128.484,547.3
+TOTAL,19543059,Xã Lương Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,45.131,132.8
+TOTAL,19543060,Xã Long Cốc,Tỉnh Phú Thọ,T road distance <= 150.0 km,111.184,109.7
+TOTAL,19543061,Xã Liên Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,48.787,258.2
+TOTAL,19543062,Xã Liên Minh,Tỉnh Phú Thọ,T road distance <= 150.0 km,105.73,183.1
+TOTAL,19543063,Xã Liên Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,76.469,130.6
+TOTAL,19543064,Xã Liên Châu,Tỉnh Phú Thọ,T road distance <= 150.0 km,52.302,22.1
+TOTAL,19543065,Xã Lập Thạch,Tỉnh Phú Thọ,T road distance <= 150.0 km,77.73,9.0
+TOTAL,19543066,Xã Lâm Thao,Tỉnh Phú Thọ,T road distance <= 150.0 km,81.311,30.1
+TOTAL,19543067,Xã Lai Đồng,Tỉnh Phú Thọ,T road distance <= 150.0 km,125.221,5.9
+TOTAL,19543068,Xã Lạc Thủy,Tỉnh Phú Thọ,T road distance <= 150.0 km,77.41,21.3
+TOTAL,19543069,Xã Lạc Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,111.081,289.1
+TOTAL,19543070,Xã Lạc Lương,Tỉnh Phú Thọ,T road distance <= 150.0 km,85.847,90.1
+TOTAL,19543071,Phường Kỳ Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,69.87,257.5
+TOTAL,19543072,Xã Kim Bôi,Tỉnh Phú Thọ,T road distance <= 150.0 km,79.319,203.3
+TOTAL,19543073,Xã Khả Cửu,Tỉnh Phú Thọ,T road distance <= 150.0 km,111.11,743.0
+TOTAL,19543074,Xã Hy Cương,Tỉnh Phú Thọ,T road distance <= 150.0 km,88.128,44.9
+TOTAL,19543075,Xã Hương Cần,Tỉnh Phú Thọ,T road distance <= 150.0 km,83.537,65.4
+TOTAL,19543076,Xã Hùng Việt,Tỉnh Phú Thọ,T road distance <= 150.0 km,92.318,129.8
+TOTAL,19543077,Xã Hợp Lý,Tỉnh Phú Thọ,T road distance <= 150.0 km,83.608,67.7
+TOTAL,19543078,Xã Hợp Kim,Tỉnh Phú Thọ,T road distance <= 150.0 km,72.809,643.3
+TOTAL,19543079,Xã Hội Thịnh,Tỉnh Phú Thọ,T road distance <= 150.0 km,56.345,127.2
+TOTAL,19543080,Xã Hoàng Cương,Tỉnh Phú Thọ,T road distance <= 150.0 km,112.975,32.3
+TOTAL,19543081,Xã Hoàng An,Tỉnh Phú Thọ,T road distance <= 150.0 km,65.831,4.2
+TOTAL,19543082,Phường Hòa Bình,Tỉnh Phú Thọ,T road distance <= 150.0 km,71.748,85.1
+TOTAL,19543083,Xã Hiền Quan,Tỉnh Phú Thọ,T road distance <= 150.0 km,83.826,4.8
+TOTAL,19543084,Xã Hiền Lương,Tỉnh Phú Thọ,T road distance <= 150.0 km,136.625,115.6
+TOTAL,19543085,Xã Hải Lựu,Tỉnh Phú Thọ,T road distance <= 150.0 km,91.212,38.6
+TOTAL,19543086,Xã Hạ Hòa,Tỉnh Phú Thọ,T road distance <= 150.0 km,135.594,15.8
+TOTAL,19543087,Xã Dũng Tiến,Tỉnh Phú Thọ,T road distance <= 150.0 km,84.731,5.6
+TOTAL,19543089,Xã Đông Thành,Tỉnh Phú Thọ,T road distance <= 150.0 km,101.967,22.5
+TOTAL,19543090,Xã Đồng Lương,Tỉnh Phú Thọ,T road distance <= 150.0 km,86.031,14.7
+TOTAL,19543091,Xã Đoan Hùng,Tỉnh Phú Thọ,T road distance <= 150.0 km,121.437,107.8
+TOTAL,19543092,Xã Đào Xá,Tỉnh Phú Thọ,T road distance <= 150.0 km,70.761,23.1
+TOTAL,19543093,Xã Đạo Trù,Tỉnh Phú Thọ,T road distance <= 150.0 km,77.979,1406.1
+TOTAL,19543094,Xã Đan Thượng,Tỉnh Phú Thọ,T road distance <= 150.0 km,142.324,695.5
+TOTAL,19543095,Xã Dân Chủ,Tỉnh Phú Thọ,T road distance <= 150.0 km,103.645,239.2
+TOTAL,19543096,Xã Đại Đồng,Tỉnh Phú Thọ,T road distance <= 150.0 km,107.472,16.9
+TOTAL,19543097,Xã Đại Đình,Tỉnh Phú Thọ,T road distance <= 150.0 km,69.96,16.7
+TOTAL,19543098,Xã Đà Bắc,Tỉnh Phú Thọ,T road distance <= 150.0 km,91.113,185.3
+TOTAL,19543099,Xã Cự Đồng,Tỉnh Phú Thọ,T road distance <= 150.0 km,72.895,11.4
+TOTAL,19543100,Xã Chí Tiên,Tỉnh Phú Thọ,T road distance <= 150.0 km,105.974,12.9
+TOTAL,19543101,Xã Chí Đám,Tỉnh Phú Thọ,T road distance <= 150.0 km,130.554,1.6
+TOTAL,19543102,Xã Chân Mộng,Tỉnh Phú Thọ,T road distance <= 150.0 km,115.466,56.1
+TOTAL,19543103,Xã Cao Sơn,Tỉnh Phú Thọ,T road distance <= 150.0 km,102.818,596.1
+TOTAL,19543104,Xã Cao Phong,Tỉnh Phú Thọ,T road distance <= 150.0 km,94.435,162.2
+TOTAL,19543105,Xã Cao Dương,Tỉnh Phú Thọ,T road distance <= 150.0 km,52.106,235.3
+TOTAL,19543106,Xã Cẩm Khê,Tỉnh Phú Thọ,T road distance <= 150.0 km,113.878,33.5
+TOTAL,19543107,Xã Bình Xuyên,Tỉnh Phú Thọ,T road distance <= 150.0 km,51.498,26.0
+TOTAL,19543108,Xã Bình Tuyền,Tỉnh Phú Thọ,T road distance <= 150.0 km,50.727,93.1
+TOTAL,19543109,Xã Bình Phú,Tỉnh Phú Thọ,T road distance <= 150.0 km,88.309,12.6
+TOTAL,19543110,Xã Bình Nguyên,Tỉnh Phú Thọ,T road distance <= 150.0 km,44.336,5.2
+TOTAL,19543112,Xã Bằng Luân,Tỉnh Phú Thọ,T road distance <= 150.0 km,147.353,179.9
+TOTAL,19543113,Xã Bản Nguyên,Tỉnh Phú Thọ,T road distance <= 150.0 km,81.725,116.6
+TOTAL,19543114,Phường Âu Cơ,Tỉnh Phú Thọ,T road distance <= 150.0 km,101.653,30.8
+TOTAL,19543115,Xã An Nghĩa,Tỉnh Phú Thọ,T road distance <= 150.0 km,71.756,41.3
+TOTAL,19543116,Xã An Bình,Tỉnh Phú Thọ,T road distance <= 150.0 km,86.516,222.0

@@ -9,6 +9,9 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY app ./app
 RUN pip install .
+# Migrations ship with the image: `docker compose run --rm backend alembic upgrade head`
+COPY alembic.ini ./
+COPY alembic ./alembic
 
 RUN useradd --create-home --uid 10001 app
 USER app

@@ -99,7 +99,7 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
-    environment:
+    environment: &backend-env
       APP_ENV: ${APP_ENV:-development}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ridesharing}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ridesharing}
@@ -107,6 +107,9 @@ services:
       OSRM_CAR_URL: http://osrm-car:5000
       OSRM_MOTORBIKE_URL: http://osrm-motorbike:5000
       CONFIG_BASELINE_PATH: /app/config/mvp_config_baseline_v1.yaml
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      SERVICE_AREA_VERSION: ${SERVICE_AREA_VERSION:-}
+      ALLOW_CANDIDATE_SERVICE_AREA: ${ALLOW_CANDIDATE_SERVICE_AREA:-false}
     volumes:
       - ./config:/app/config:ro
     ports:
@@ -124,6 +127,27 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Phase 1 one-off jobs (profile: service-area). Build CANDIDATE service-area
+  # geometry from the osm_data exports; writes the review bundle to
+  # docs/implementation/service_area/<version>/. Never marks anything APPROVED.
+  # ---------------------------------------------------------------------------
+  service-area-build:
+    profiles: ["service-area"]
+    build: ./backend
+    environment: *backend-env
+    volumes:
+      - ./config:/app/config:ro
+      - osm_data:/osm:ro
+      - ./docs/implementation/service_area:/out
+    networks: [backend]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      osrm-car:
+        condition: service_healthy
+    command: ["python", "-m", "app.modules.trip.service_area_build"]
 
   # ---------------------------------------------------------------------------
   # One-off data preparation (profile: osrm-prep). Idempotent; FORCE=1 rebuilds.

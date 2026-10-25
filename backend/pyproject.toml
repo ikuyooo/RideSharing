@@ -7,18 +7,23 @@ name = "ridesharing-backend"
 version = "0.0.1"
 description = "Ride-sharing platform backend (Revision 9) - FastAPI modular monolith"
 requires-python = ">=3.11"
-# Phase 0 runtime dependencies only. AI / optimisation / blockchain libraries
+# Runtime dependencies up to Phase 1. AI / optimisation / blockchain libraries
 # are added in the phase that first needs them (Revision 9, Section 79).
 dependencies = [
     "fastapi==0.115.12",
     "uvicorn[standard]==0.34.2",
-    "pydantic==2.11.4",
+    "pydantic[email]==2.11.4",
     "pydantic-settings==2.9.1",
     "SQLAlchemy==2.0.41",
     "psycopg[binary]==3.2.9",
     "redis==5.2.1",
     "httpx==0.28.1",
     "PyYAML==6.0.2",
+    # Phase 1
+    "alembic==1.15.2",
+    "GeoAlchemy2==0.17.1",
+    "argon2-cffi==23.1.0",
+    "PyJWT==2.10.1",
 ]
 
 [project.optional-dependencies]
@@ -29,3 +34,8 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "db: needs the compose PostgreSQL/PostGIS server (uses a throwaway test database)",
+    "osrm: needs the compose OSRM car service",
+]

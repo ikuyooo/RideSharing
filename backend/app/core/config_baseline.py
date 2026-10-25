@@ -6,6 +6,7 @@ modules must read parameters from here (and, from Phase 1, from the versioned
 """
 
 from collections.abc import Mapping
+from functools import lru_cache
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -42,3 +43,15 @@ def load_config_baseline(path: Path) -> Mapping[str, Any]:
     if data.get("config_status") != EXPECTED_STATUS:
         raise ConfigBaselineError(f"unexpected config_status: {data.get('config_status')!r}")
     return _freeze(data)
+
+
+@lru_cache
+def _cached(path: Path) -> Mapping[str, Any]:
+    return load_config_baseline(path)
+
+
+def get_config_baseline() -> Mapping[str, Any]:
+    """The baseline at CONFIG_BASELINE_PATH, parsed once per process."""
+    from app.core.settings import get_settings
+
+    return _cached(Path(get_settings().config_baseline_path))

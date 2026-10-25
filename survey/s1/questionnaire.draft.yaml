@@ -1,0 +1,89 @@
+# =============================================================================
+# Survey S1 - questionnaire DRAFT (Revision 9 Section 65; owner decision P1-D5)
+# STATUS: DRAFT - EXPERIMENT_VALUES_PENDING_APPROVAL. Do not publish.
+#
+# Every attribute value carries `source`:
+#   R9:<section>           value stated in Revision 9 / baseline
+#   DERIVED:<method>       computed by a method described in SURVEY_S1_DESIGN_REVIEW.md
+#                          (method itself pending owner approval)
+#   TBD                    no source yet - owner must supply / approve
+# =============================================================================
+survey_id: s1
+draft_version: 1
+language: vi
+estimated_minutes: "4-5"            # R9:65.2
+
+respondent:
+  id: uuid4_generated_server_side   # stable for all answers of one session
+  collected_pii: none               # R9:59.2 - no name, email, student id, phone, IP
+
+part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tasks
+  tasks_per_respondent: 8           # full factorial of the three context factors below
+  context_factors:
+    distance_km: [6, 14]            # R9:65.2
+    weather: [Nắng ráo, Mưa rào]    # R9:65.2
+    urgency: [Đi học/làm đúng giờ, Thong thả]   # R9:65.2
+  alternatives:
+    BIKE_URBAN:
+      label: Xe máy
+      attributes: [price_vnd, travel_min]
+    CAR_URBAN_POOL:
+      label: Taxi ghép
+      attributes: [expected_price_vnd, max_price_if_unmatched_vnd, max_detour_min, match_likelihood, walk_m]
+    CAR_URBAN_PRIVATE:
+      label: Taxi bao xe
+      attributes: [price_vnd, travel_min]
+  levels_by_distance:
+    "14":
+      BIKE_URBAN: {price_vnd: {value: 81000, source: "R9:10.4"}, travel_min: {value: 35, source: "R9:10.4"}}
+      CAR_URBAN_PRIVATE: {price_vnd: {value: 194000, source: "R9:10.4/16.1"}, travel_min: {value: 40, source: "R9:10.4/16.1"}}
+      CAR_URBAN_POOL:
+        expected_price_vnd: {value: 143000, source: "R9:10.4/16.1 (matched with B)", alternative: {value: 145000, source: "R9:20.2 Fare_matched_est"}}
+        max_price_if_unmatched_vnd: {value: 174000, source: "R9:10.4/18.4"}
+        max_detour_min: {value: 12, source: "R9:10.4 (+12 phút)"}
+    "6":
+      BIKE_URBAN: {price_vnd: {value: 40000, source: "DERIVED:B"}, travel_min: {value: 15, source: "DERIVED:B"}}
+      CAR_URBAN_PRIVATE: {price_vnd: {value: 94000, source: "DERIVED:B"}, travel_min: {value: 17, source: "DERIVED:B"}}
+      CAR_URBAN_POOL:
+        expected_price_vnd: {value: 70000, source: "DERIVED:B (Fare_matched_est, d_matched_typical 0.25)"}
+        max_price_if_unmatched_vnd: {value: 84000, source: "DERIVED:B (Unmatched_i formula, baseline 2.1)"}
+        max_detour_min: {value: 5, source: "DERIVED:B"}
+  rotated_attributes:
+    match_likelihood: {levels: [Cao, Trung bình, Thấp], source: "R9:65.2"}
+    walk_m: {levels: [0, 200], source: "R9:65.2"}
+  independent_price_variation: {levels: TBD, source: TBD}   # see review section 3.3
+
+part_1b:                            # R9:65.2 - intercity, 2 tasks
+  tasks_per_respondent: 2
+  alternatives:
+    CAR_INTERCITY_POOL:
+      label: Taxi ghép liên tỉnh (đặt trước 3–5 ngày)
+      seat_price_vnd: {levels: [180000, 220000], source: "R9:28.2 / 65.2"}
+      fill_likelihood: {levels: TBD, source: TBD}
+      lead_days: {value: "3–5", source: "R9:65.2"}
+    CAR_INTERCITY_PRIVATE:
+      label: Taxi bao xe liên tỉnh (đi ngay, chủ động)
+      price_vnd: {value: 637000, source: "R9:25.2 / 65.2 (Hà Đông → TP Hưng Yên, 65 km)"}
+    OTHER: {label: Phương tiện khác / Không đi, source: "R9:65.2"}
+
+part_2_h4:                          # R9:65.2 / 16.1 - fairness, 3 Likert ratings + 1 choice
+  scenario:
+    trip_total_vnd: {value: 248500, source: "R9:16.1 PlanFare"}
+    passenger_a: {distance_km: 14, detour_pct: 25, source: "R9:16.1"}
+    passenger_b: {distance_km: 9, detour_pct: 0, source: "R9:16.1"}
+  methods:                          # shown with neutral labels X/Y/Z in randomised order
+    A_proportional: {a_discount_pct: 24.0, b_discount_pct: 24.0, source: "R9:65.2 / 16.1"}
+    B_shapley_equal_split: {a_discount_pct: 20.2, b_discount_pct: 29.5, source: "R9:65.2 / 16.1"}
+    C_inconvenience_weighted: {a_discount_pct: 26.1, b_discount_pct: 20.9, source: "R9:65.2 / 16.1"}
+  likert_scale: {min: 1, max: 5, source: "R9:65.2"}
+  preferred_method_question: true   # R9:65.2
+
+part_3_demographics:                # R9:65.2 - minimal, anonymous
+  group: {options: [Sinh viên, Người đi làm], source: "R9:65.1"}
+  ride_hailing_trips_per_week: {options: TBD, source: TBD}
+  usual_trip_distance: {options: TBD, source: TBD}
+  intercity_trips_per_month: {options: TBD, source: TBD}
+
+quotas:                             # R9:65.1
+  target_respondents: {range: [100, 200], final: TBD}
+  group_share: {min: 0.40, max: 0.60}

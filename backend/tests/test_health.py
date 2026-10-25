@@ -16,6 +16,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("OSRM_MOTORBIKE_URL", "http://127.0.0.1:1")
     monkeypatch.setenv("CONFIG_BASELINE_PATH", str(REPO_ROOT / "config" / "mvp_config_baseline_v1.yaml"))
     monkeypatch.setenv("DEPENDENCY_TIMEOUT_S", "1")
+    monkeypatch.setenv("JWT_SECRET", "test-secret")
 
     from app.core.settings import get_settings
 

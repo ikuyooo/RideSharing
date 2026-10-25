@@ -4,9 +4,11 @@ Nền tảng đặt xe thông minh đa dịch vụ — `BIKE_URBAN`, `CAR_URBAN_
 `CAR_INTERCITY_PRIVATE`, `CAR_INTERCITY_POOL` — kiến trúc **Modular Monolith** (FastAPI),
 định giá ghép có chặn hai đầu, AI Learning-to-Rank và Blockchain Escrow.
 
-> **Trạng thái hiện tại: Phase 0 (hạ tầng).** Chưa có nghiệp vụ nào (identity, trip, pricing,
-> booking, AI, escrow…) được triển khai. Xem
-> [docs/implementation/PHASE_0_COMPLETION_REPORT.md](docs/implementation/PHASE_0_COMPLETION_REPORT.md).
+> **Trạng thái hiện tại:** P0 `PHASE_0_CONDITIONAL__REVIEW_REQUIRED` (SF-06 mở) —
+> [báo cáo P0](docs/implementation/PHASE_0_COMPLETION_REPORT.md).
+> **Phase 1 đang triển khai** (schema, identity, driver/KYC mock, Trip Intent, vùng phục vụ ứng viên,
+> khảo sát S1 nháp) — [báo cáo tiến độ P1](docs/implementation/PHASE_1_PROGRESS_REPORT.md).
+> Chưa có pricing, booking, AI, escrow.
 
 ## Tài liệu chuẩn (đã khóa — không sửa)
 
@@ -104,13 +106,39 @@ Cập nhật bản đồ mới: chạy `osm-fetch` với `FORCE=1`, sau đó hai
 - Dữ liệu bền vững nằm trong named volumes: `pgdata`, `redisdata`, `osm_data`, `osrm_car_data`,
   `osrm_motorbike_data`. `docker compose down` giữ nguyên volume; **`down -v` xóa toàn bộ dữ liệu**.
 
+## Phase 1 — schema, dữ liệu cấu hình, vùng phục vụ
+
+```bash
+# Migration (Alembic) và seed bảng pricing_configs (idempotent, bất biến)
+docker compose run --rm --no-deps backend alembic upgrade head
+docker compose run --rm --no-deps backend python -m app.modules.pricing.seed
+
+# Tạo tài khoản ADMIN (admin không tự đăng ký được)
+docker compose run --rm --no-deps -e ADMIN_PASSWORD=... backend \
+  python -m app.modules.identity.cli create-admin --email admin@example.com
+
+# Vùng phục vụ ỨNG VIÊN (P1-D1/D3) — kết quả là CANDIDATE, cần Chủ dự án phê duyệt
+docker compose --profile osrm-prep run --rm --no-deps --entrypoint sh osm-fetch \
+  /scripts/export_service_area_sources.sh          # Git Bash: thêm MSYS_NO_PATHCONV=1
+docker compose --profile service-area run --rm service-area-build
+docker compose --profile service-area run --rm service-area-build \
+  python -m app.modules.trip.boundary_eval --version <service_area_version>
+```
+
+Bundle trình duyệt nằm ở `docs/implementation/service_area/<version>/REVIEW.md`. Phân loại chuyến
+(`POST /api/trip-requests`) dùng `SERVICE_AREA_VERSION`; nó trả `503` khi chưa cấu hình hoặc
+phiên bản chưa được phê duyệt (`ALLOW_CANDIDATE_SERVICE_AREA=true` chỉ dành cho phát triển).
+
+API P1: `/api/auth/{register,login,refresh,logout}`, `/api/users/me`, `/api/driver/{profile,vehicles,
+kyc/submit,settings,location}`, `/api/admin/drivers/{id}/kyc-review`, `/api/trip-requests`.
+
 ## Phát triển backend
 
 ```bash
 cd backend
 python -m venv .venv && . .venv/Scripts/activate     # Linux/macOS: . .venv/bin/activate
 pip install -e ".[dev]"
-pytest
+pytest          # test có marker `db`/`osrm` dùng stack compose (DB test riêng `ridesharing_test`)
 ```
 
 Lưu ý khi repo nằm trong OneDrive: nên đặt virtualenv ngoài thư mục đồng bộ.
