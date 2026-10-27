@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.modules.routing.service import RouteNotFound, RoutingUnavailable
+from app.modules.routing.service import PointReach, Reachability, RouteNotFound, RoutingUnavailable
 from tests.api_helpers import client, new_admin, new_user  # noqa: F401
 
 pytestmark = pytest.mark.db
@@ -28,6 +28,11 @@ URBAN_B = {"lat": 21.05, "lon": 105.85}
 OUTSIDE_URBAN = {"lat": 20.5, "lon": 105.5}
 OUTSIDE_URBAN_2 = {"lat": 20.6, "lon": 105.4}
 OUTSIDE_TOTAL = {"lat": 22.0, "lon": 107.0}
+# SYNTHETIC tier-2 parameters (GEO-03) stored with the TOTAL row, as the build does.
+SERVICEABILITY = '{"anchor": {"lon": 105.85, "lat": 21.03}, "max_road_km": 150.0, "max_snap_m": 300.0}'
+# SYNTHETIC EXCLUDED square (an "island" without road) inside TOTAL, outside URBAN.
+EXCLUDED_WKT = "MULTIPOLYGON(((105.2 20.2,105.3 20.2,105.3 20.3,105.2 20.3,105.2 20.2)))"
+IN_EXCLUDED = {"lat": 20.25, "lon": 105.25}
 
 
 class FakeDistance:
@@ -43,26 +48,47 @@ class FakeDistance:
         return self.km
 
 
+class FakeReach:
+    """Injected tier-2 OSRM /table answer (per-point snap / anchor distance)."""
+
+    def __init__(self) -> None:
+        self.pickup = PointReach(snap_m=10.0, anchor_road_km=20.0)
+        self.dropoff = PointReach(snap_m=10.0, anchor_road_km=20.0)
+        self.pickup_to_dropoff_km: float | None = 10.0
+        self.error: Exception | None = None
+        self.calls = 0
+
+    def __call__(self, anchor: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> Reachability:
+        self.calls += 1
+        assert anchor == (105.85, 21.03)
+        if self.error:
+            raise self.error
+        return Reachability(self.pickup, self.dropoff, self.pickup_to_dropoff_km)
+
+
 @pytest.fixture()
 def areas(db_session: Session) -> None:
     for area_type, wkt in (("TOTAL", TOTAL_WKT), ("URBAN", URBAN_WKT)):
         db_session.execute(text(
             "INSERT INTO service_areas (area_type, service_area_version, status, geom, source_json, approved_at, "
             "approval_reference) VALUES (:t, :v, 'APPROVED', ST_GeomFromText(:w, 4326), "
-            "'{\"synthetic\": true}', now(), 'SYNTHETIC TEST DATA - not a real approval')"),
-            {"t": area_type, "v": VERSION, "w": wkt})
+            "CAST(:src AS jsonb), now(), 'SYNTHETIC TEST DATA - not a real approval')"),
+            {"t": area_type, "v": VERSION, "w": wkt,
+             "src": '{"synthetic": true' + (', "serviceability": ' + SERVICEABILITY if area_type == "TOTAL" else "") + "}"})
     db_session.commit()
 
 
 @pytest.fixture()
 def fake_distance(client: TestClient, monkeypatch: pytest.MonkeyPatch, areas: None) -> Iterator[FakeDistance]:
     from app.core.settings import get_settings
-    from app.modules.trip.api import get_distance_fn
+    from app.modules.trip.api import get_distance_fn, get_reach_fn
 
     monkeypatch.setenv("SERVICE_AREA_VERSION", VERSION)
     get_settings.cache_clear()
     fake = FakeDistance()
+    fake.reach = FakeReach()  # type: ignore[attr-defined]
     client.app.dependency_overrides[get_distance_fn] = lambda: fake
+    client.app.dependency_overrides[get_reach_fn] = lambda: fake.reach  # type: ignore[attr-defined]
     yield fake
     client.app.dependency_overrides.clear()
 
@@ -205,3 +231,89 @@ def test_trip_coordinates_not_logged(client: TestClient, fake_distance: FakeDist
     precise = {"lat": 21.012345, "lon": 105.812345}
     assert post(client, headers, pickup=precise).status_code == 201
     assert "21.0123" not in caplog.text and "105.8123" not in caplog.text
+
+
+# --- GEO-03 / GEO-04: two-tier service area -----------------------------------------------
+
+
+def _error(resp: object) -> dict:
+    assert resp.status_code == 422, resp.text  # type: ignore[attr-defined]
+    return resp.json()["error"]  # type: ignore[attr-defined]
+
+
+@pytest.mark.parametrize("km,ok", [(150.0, True), (150.001, False)])
+def test_tier2_road_limit_exactly_150_accepted_beyond_rejected(client: TestClient, fake_distance: FakeDistance,
+                                                               km: float, ok: bool) -> None:
+    _, headers = new_user(client)
+    fake_distance.km = 60.0
+    fake_distance.reach.dropoff = PointReach(snap_m=5.0, anchor_road_km=km)  # type: ignore[attr-defined]
+    resp = post(client, headers, dropoff=OUTSIDE_URBAN)
+    if ok:
+        assert resp.status_code == 201 and resp.json()["mode"] == "INTERCITY"
+    else:
+        err = _error(resp)
+        assert err["code"] == "OUT_OF_SERVICE_AREA"
+        assert err["details"]["dropoff"] == {"reason": "BEYOND_MAX_ROAD_DISTANCE", "layer": "SERVICEABILITY",
+                                             "anchor_road_km": 150.001, "snap_m": 5.0}
+        assert err["details"]["pickup"]["reason"] is None
+        assert fake_distance.calls == 0  # rejected in step 1, no pickup-dropoff routing
+
+
+@pytest.mark.parametrize("snap,reason", [(300.0, None), (300.1, "NO_ROAD_ACCESS")])
+def test_tier2_snap_distance_limit(client: TestClient, fake_distance: FakeDistance, snap: float,
+                                   reason: str | None) -> None:
+    _, headers = new_user(client)
+    fake_distance.reach.pickup = PointReach(snap_m=snap, anchor_road_km=5.0)  # type: ignore[attr-defined]
+    resp = post(client, headers)
+    if reason is None:
+        assert resp.status_code == 201
+    else:
+        assert _error(resp)["details"]["pickup"]["reason"] == reason
+
+
+def test_tier2_unroutable_points_and_routes(client: TestClient, fake_distance: FakeDistance) -> None:
+    _, headers = new_user(client)
+    reach = fake_distance.reach  # type: ignore[attr-defined]
+    reach.dropoff = PointReach(snap_m=5.0, anchor_road_km=None)
+    err = _error(post(client, headers, dropoff=OUTSIDE_URBAN))
+    assert err["code"] == "OUT_OF_SERVICE_AREA" and err["details"]["dropoff"]["reason"] == "NOT_ROUTABLE_FROM_ANCHOR"
+
+    reach.dropoff = PointReach(snap_m=5.0, anchor_road_km=40.0)
+    reach.pickup_to_dropoff_km = None  # both points served, but nothing joins them
+    assert _error(post(client, headers, dropoff=OUTSIDE_URBAN))["code"] == "ROUTE_NOT_FOUND"
+
+    reach.error = RouteNotFound("NoSegment")  # OSRM could not snap at all
+    err = _error(post(client, headers))
+    assert err["details"]["pickup"]["reason"] == "NO_ROAD_ACCESS"
+
+    reach.error = RoutingUnavailable("down")  # no fallback
+    resp = post(client, headers)
+    assert resp.status_code == 503 and resp.json()["error"]["code"] == "ROUTING_UNAVAILABLE"
+
+
+def test_tier1_polygon_rejections_need_no_routing(client: TestClient, fake_distance: FakeDistance,
+                                                  db_session: Session) -> None:
+    _, headers = new_user(client)
+    err = _error(post(client, headers, dropoff=OUTSIDE_TOTAL))
+    assert err["details"]["dropoff"] == {"reason": "OUTSIDE_TOTAL_POLYGON", "layer": "POLYGON",
+                                         "anchor_road_km": None, "snap_m": None}
+    db_session.execute(text(
+        "INSERT INTO service_areas (area_type, service_area_version, status, geom, source_json, approved_at, "
+        "approval_reference) VALUES ('EXCLUDED', :v, 'APPROVED', ST_GeomFromText(:w, 4326), '{\"synthetic\": true}', "
+        "now(), 'SYNTHETIC TEST DATA')"), {"v": VERSION, "w": EXCLUDED_WKT})
+    db_session.commit()
+    err = _error(post(client, headers, dropoff=IN_EXCLUDED))
+    assert err["code"] == "OUT_OF_SERVICE_AREA"
+    assert err["details"]["dropoff"]["reason"] == "UNSERVICEABLE_COMPONENT"
+    assert fake_distance.reach.calls == 0 and fake_distance.calls == 0  # type: ignore[attr-defined]
+    assert post(client, headers, dropoff=OUTSIDE_URBAN).status_code == 201  # outside the EXCLUDED part
+
+
+def test_version_without_serviceability_layer_is_refused(client: TestClient, fake_distance: FakeDistance,
+                                                        db_session: Session) -> None:
+    _, headers = new_user(client)
+    db_session.execute(text("UPDATE service_areas SET source_json = source_json - 'serviceability' "
+                            "WHERE service_area_version = :v"), {"v": VERSION})
+    db_session.commit()
+    resp = post(client, headers)
+    assert resp.status_code == 503 and resp.json()["error"]["code"] == "SERVICE_AREA_NOT_CONFIGURED"

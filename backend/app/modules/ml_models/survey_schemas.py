@@ -9,6 +9,13 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class StartIn(_Strict):
+    """D1 is asked before the first task so the group quota can be applied at
+    session start (survey decision 8)."""
+
+    group: Literal["STUDENT", "WORKER"]
+
+
 class ChoiceIn(_Strict):
     task_id: str = Field(max_length=64)
     chosen: str = Field(max_length=32)
@@ -20,16 +27,17 @@ class FairnessIn(_Strict):
 
 
 class DemographicsIn(_Strict):
-    """D2-D4 answer bins are TBD (pending owner approval); until then only null is accepted."""
+    """D2-D4 with non-overlapping bins (survey decision 6; codes defined in
+    survey/s1/questionnaire.draft.yaml part_3_demographics)."""
 
-    ride_hailing_trips_per_week: None = None
-    usual_trip_distance: None = None
-    intercity_trips_per_month: None = None
+    ride_hailing_trips_per_week: Literal["0", "1-2", "3-5", "6-10", "11+"]
+    usual_trip_distance: Literal["LT3", "3-LT7", "7-LT15", "15-LT30", "30+"]
+    intercity_trips_per_month: Literal["0", "1", "2-3", "4-7", "8+"]
 
 
 class SubmitIn(_Strict):
-    group: Literal["STUDENT", "WORKER"]
+    start_token: str = Field(max_length=128)
     choices: list[ChoiceIn] = Field(max_length=20)
     fairness: list[FairnessIn] = Field(max_length=3)
     preferred_label: Literal["X", "Y", "Z"]
-    demographics: DemographicsIn = DemographicsIn()
+    demographics: DemographicsIn

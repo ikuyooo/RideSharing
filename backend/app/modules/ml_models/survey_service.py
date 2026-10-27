@@ -6,7 +6,11 @@ request. RESEARCH collection is refused until the owner releases the survey
 """
 
 import csv
+import hashlib
+import hmac
 import io
+import math
+import time
 import uuid
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -21,7 +25,7 @@ from app.core.errors import ApiError
 from app.core.settings import Settings
 from app.modules.ml_models.models import SurveyRespondent, SurveyResponse
 from app.modules.ml_models.survey_design import N_BLOCKS, build_design
-from app.modules.ml_models.survey_schemas import SubmitIn
+from app.modules.ml_models.survey_schemas import StartIn, SubmitIn
 
 GROUP_CODES = {"STUDENT": "STUDENT", "WORKER": "WORKER"}
 
@@ -39,27 +43,63 @@ def _minute(dt: datetime) -> datetime:
     return dt.replace(second=0, microsecond=0)
 
 
+def _now_ms() -> int:
+    return time.time_ns() // 1_000_000
+
+
+def _token_mac(secret: str, respondent_id: uuid.UUID, start_ms: int) -> str:
+    msg = f"s1-start|{respondent_id}|{start_ms}".encode()
+    return hmac.new(secret.encode(), msg, hashlib.sha256).hexdigest()[:32]
+
+
+def start_token(secret: str, respondent_id: uuid.UUID, start_ms: int) -> str:
+    """Signed start time kept by the browser, so the database never stores a
+    timestamp finer than the minute; only the duration is kept (QC2)."""
+    return f"{start_ms}.{_token_mac(secret, respondent_id, start_ms)}"
+
+
+def duration_from_token(secret: str, respondent_id: uuid.UUID, token: str, now_ms: int) -> int:
+    start_ms, _, mac = token.partition(".")
+    if not start_ms.isdigit() or not hmac.compare_digest(mac, _token_mac(secret, respondent_id, int(start_ms))):
+        raise ApiError(422, "INVALID_START_TOKEN", "The survey session token is invalid")
+    return max(0, (now_ms - int(start_ms)) // 1000)
+
+
+def group_cap(q: dict[str, Any]) -> int:
+    """Survey decision 8: a group is closed once it holds max share x target valid answers."""
+    quotas = q["quotas"]
+    return math.floor(quotas["group_share"]["max"] * quotas["target_valid_respondents"])
+
+
 def _require_collectable(settings: Settings) -> None:
     if settings.survey_dataset == "RESEARCH" and not settings.survey_s1_released:
         raise ApiError(403, "SURVEY_NOT_RELEASED",
                        "Research data collection is disabled until the owner releases survey S1")
 
 
-def start_session(session: Session, settings: Settings) -> SurveyRespondent:
+def start_session(session: Session, settings: Settings, body: StartIn) -> tuple[SurveyRespondent, str]:
     _require_collectable(settings)
     q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    completed_in_group = session.scalar(select(func.count()).select_from(SurveyRespondent).where(
+        SurveyRespondent.dataset == settings.survey_dataset, SurveyRespondent.respondent_group == body.group,
+        SurveyRespondent.completed_at.is_not(None))) or 0
+    if completed_in_group >= group_cap(q):
+        raise ApiError(409, "QUOTA_FULL_FOR_GROUP",
+                       "Cảm ơn bạn! Nhóm của bạn đã đủ số câu trả lời cần thiết.", {"group": body.group})
     count = session.scalar(select(func.count()).select_from(SurveyRespondent)
                            .where(SurveyRespondent.dataset == settings.survey_dataset)) or 0
     respondent_id = uuid.uuid4()
     block = count % N_BLOCKS
+    now_ms = _now_ms()
     respondent = SurveyRespondent(
         respondent_id=respondent_id, dataset=settings.survey_dataset, survey_id=q["survey_id"],
         questionnaire_version=questionnaire_version(q), design_block=block,
-        design_json=build_design(q, respondent_id, block), started_at=_minute(datetime.now(UTC)),
+        design_json=build_design(q, respondent_id, block), respondent_group=body.group,
+        started_at=_minute(datetime.fromtimestamp(now_ms / 1000, UTC)),
     )
     session.add(respondent)
     session.commit()
-    return respondent
+    return respondent, start_token(settings.jwt_secret, respondent_id, now_ms)
 
 
 def submit(session: Session, settings: Settings, respondent_id: uuid.UUID, body: SubmitIn) -> SurveyRespondent:
@@ -69,6 +109,8 @@ def submit(session: Session, settings: Settings, respondent_id: uuid.UUID, body:
         raise ApiError(404, "NOT_FOUND", "Survey session not found")
     if respondent.completed_at is not None:
         raise ApiError(409, "ALREADY_SUBMITTED", "This survey session was already submitted")
+    now_ms = _now_ms()
+    duration_s = duration_from_token(settings.jwt_secret, respondent_id, body.start_token, now_ms)
     design = respondent.design_json
     tasks = {t["task_id"]: t for t in design["tasks"]}
     choices = {c.task_id: c.chosen for c in body.choices}
@@ -88,18 +130,24 @@ def submit(session: Session, settings: Settings, respondent_id: uuid.UUID, body:
     for label, likert in ratings.items():
         session.add(SurveyResponse(respondent_id=respondent_id, part="2", item_id=f"H4-{label}",
                                    answer_json={"likert": likert, "preferred": label == body.preferred_label}))
-    respondent.respondent_group = body.group
     respondent.demographics_json = body.demographics.model_dump()
-    respondent.completed_at = _minute(datetime.now(UTC))
-    respondent.quality_flags = quality_flags(design, choices, ratings)
+    respondent.completed_at = _minute(datetime.fromtimestamp(now_ms / 1000, UTC))
+    respondent.duration_s = duration_s
+    q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    respondent.quality_flags = quality_flags(design, choices, ratings, duration_s,
+                                             int(q["quality_rules"]["QC2"]["flag_below_seconds"]))
     session.commit()
     return respondent
 
 
-def quality_flags(design: dict[str, Any], choices: dict[str, str], ratings: dict[str, int]) -> list[str]:
-    """QC3 / QC4 of SURVEY_S1_DESIGN_REVIEW (flags only; nothing is discarded).
-    QC2 (completion-time threshold) and QC5 (attention check) await approval."""
+def quality_flags(design: dict[str, Any], choices: dict[str, str], ratings: dict[str, int],
+                  duration_s: int, qc2_below_s: int) -> list[str]:
+    """QC2 / QC3 / QC4 of SURVEY_S1_DESIGN_REVIEW - flags only, nothing is discarded
+    (survey decision 7: a short completion time is flagged, never auto-excluded;
+    the rule is published in the questionnaire before collection)."""
     flags = []
+    if duration_s < qc2_below_s:
+        flags.append("QC2_FAST_COMPLETION")
     positions = [next(c["position"] for c in t["cards"] if c["alternative"] == choices[t["task_id"]])
                  for t in design["tasks"] if t["part"] == "1A"]
     if len(set(positions)) == 1:
@@ -123,7 +171,7 @@ def _csv(rows: list[dict[str, Any]], columns: list[str]) -> str:
 
 RESPONDENT_COLUMNS = ["respondent_id", "questionnaire_version", "design_block", "group",
                       "ride_hailing_trips_per_week", "usual_trip_distance", "intercity_trips_per_month",
-                      "started_at_utc", "completed_at_utc", "quality_flags"]
+                      "started_at_utc", "completed_at_utc", "duration_s", "quality_flags"]
 CHOICE_COLUMNS = ["respondent_id", "part", "task_index", "task_id", "distance_km", "weather", "urgency",
                   "alternative", "position", "price_vnd", "max_price_if_unmatched_vnd", "travel_min",
                   "max_detour_min", "match_likelihood", "fill_likelihood", "walk_m", "chosen"]
@@ -142,7 +190,7 @@ def export_table(session: Session, dataset: str, table: str) -> str:
         rows = [{"respondent_id": r.respondent_id, "questionnaire_version": r.questionnaire_version,
                  "design_block": r.design_block, "group": r.respondent_group, **(r.demographics_json or {}),
                  "started_at_utc": r.started_at.isoformat(), "completed_at_utc": r.completed_at.isoformat(),
-                 "quality_flags": "|".join(r.quality_flags or [])} for r in respondents]
+                 "duration_s": r.duration_s, "quality_flags": "|".join(r.quality_flags or [])} for r in respondents]
         return _csv(rows, RESPONDENT_COLUMNS)
     if table == "choices":
         rows = []
@@ -173,6 +221,23 @@ def quota(session: Session, dataset: str, settings: Settings) -> dict[str, Any]:
                                 .group_by(SurveyRespondent.respondent_group)).tuples().all())
     total = sum(rows.values())
     q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))["quotas"]
+    questionnaire = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    cap = group_cap(questionnaire)
     return {"dataset": dataset, "completed": total, "by_group": rows,
             "share_by_group": {g: round(n / total, 4) for g, n in rows.items()} if total else {},
-            "group_share_band": q["group_share"], "target_respondents": q["target_respondents"]}
+            "group_share_band": q["group_share"], "target_valid_respondents": q["target_valid_respondents"],
+            "group_cap": cap, "closed_groups": sorted(g for g, n in rows.items() if n >= cap)}
+
+
+def demographics_options(settings: Settings) -> dict[str, Any]:
+    q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    return {k: {"question": v["question"], "options": v["options"]}
+            for k, v in q["part_3_demographics"].items() if k != "group"}
+
+
+def delete_respondent(session: Session, respondent_id: uuid.UUID) -> None:
+    respondent = session.get(SurveyRespondent, respondent_id)
+    if respondent is None:
+        raise ApiError(404, "NOT_FOUND", "Survey session not found")
+    session.delete(respondent)  # survey_responses rows cascade (FK ON DELETE CASCADE)
+    session.commit()

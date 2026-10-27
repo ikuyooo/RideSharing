@@ -27,7 +27,7 @@ from app.core.config_baseline import get_config_baseline
 from app.core.settings import get_settings
 from app.modules.routing.service import OsrmCarDistance, RouteNotFound, RoutingUnavailable
 from app.modules.trip import rules
-from app.modules.trip.service import point_membership
+from app.modules.trip.service import ActiveAreas, Serviceability, assess, point_membership
 
 Lonlat = tuple[float, float]
 CANDIDATE_PLACES = {"village", "hamlet", "neighbourhood", "quarter", "suburb", "town", "city", "isolated_dwelling"}
@@ -37,6 +37,18 @@ LA_PHU = "node/12147486706"     # La Phù (Section 72.2)
 PHO_HIEN = "node/13155709564"   # Phố Hiến - TP Hưng Yên representative (A8)
 HA_DONG = "node/13709983624"    # Hà Đông (Section 25.2 example origin)
 ANCHOR = "node/74132064"        # Hà Nội admin_centre (A4)
+HOAN_KIEM = "node/13709921432"  # Hoàn Kiếm (Section 2.3)
+# Landmark trips to Hoàn Kiếm (owner "PHASE 1 FINAL CLOSURE": Đông Anh, An Khánh, La Phù,
+# Tùng Thiện, Phố Hiến). Expected = Revision 9 where it states one, else INFO.
+LANDMARK_TRIPS = (
+    ("Đông Anh (town node) → Hoàn Kiếm", "node/13799910539", "URBAN",
+     "R9 §2.3 lists Đông Anh as urban; GEO-01 geometry PENDING - reached only through the 15 km buffer"),
+    ("An Khánh (Splendora) → Hoàn Kiếm", "way/1565297218", "URBAN", "R9 §2.3 lists An Khánh as urban"),
+    ("La Phù → Hoàn Kiếm", "node/12147486706", "INFO", "La Phù is outside the urban polygon (§72.2)"),
+    ("Tùng Thiện (Xuân Khanh) → Hoàn Kiếm", "node/12629466848", "INTERCITY", "GEO-02: Tùng Thiện not urban"),
+    ("Phố Hiến → Hoàn Kiếm", "node/13155709564", "INTERCITY", "A8 representative of TP Hưng Yên"),
+)
+SAMPLE_POINTS = 400  # seeded random points in the accept-able polygon (tier-2 statistics)
 
 
 def load_places(path: Path) -> dict[str, dict[str, Any]]:
@@ -93,9 +105,15 @@ def main() -> None:
     with Session(engine) as session:
         status = dict(session.execute(text("SELECT area_type, status FROM service_areas WHERE service_area_version = :v"),
                                       {"v": args.version}).tuples().all())
-        if set(status) != {"URBAN", "TOTAL"}:
+        if not {"URBAN", "TOTAL"} <= set(status):
             raise SystemExit(f"version {args.version} not found")
         geometry_status = "/".join(sorted(set(status.values())))
+        raw = session.execute(text("SELECT source_json->'serviceability' FROM service_areas "
+                                   "WHERE service_area_version = :v AND area_type = 'TOTAL'"), {"v": args.version}).scalar_one()
+        serviceability = None if raw is None else Serviceability(
+            anchor=(float(raw["anchor"]["lon"]), float(raw["anchor"]["lat"])),
+            max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]))
+        areas = ActiveAreas(version=args.version, status=geometry_status, serviceability=serviceability)
 
         def point(ref: str) -> Lonlat:
             row = session.execute(text("SELECT ST_X(p), ST_Y(p) FROM (SELECT ST_PointOnSurface(ST_MakeValid("
@@ -115,9 +133,13 @@ def main() -> None:
                                    "pickup_urban": pa["URBAN"], "dropoff_urban": pb["URBAN"],
                                    "pickup_total": pa["TOTAL"], "dropoff_total": pb["TOTAL"], "note": note} | extra
             try:
-                c = rules.classify(pa["TOTAL"], pb["TOTAL"], pa["URBAN"], pb["URBAN"],
-                                   lambda: client.road_distance(a, b).km, buffer_km)
-                row |= {"actual": c.mode or c.error_code, "branch": c.step, "direct_distance_km": c.direct_distance_km}
+                # Production code path: polygon tier, then (when the version has it) tier 2.
+                res = assess(session, areas, a, b, lambda x, y: client.road_distance(x, y).km,
+                             client.reachability, buffer_km)
+                c = res.classification
+                row |= {"actual": c.mode or c.error_code, "branch": c.step, "direct_distance_km": c.direct_distance_km,
+                        "pickup_tier": res.pickup.as_json(), "dropoff_tier": res.dropoff.as_json(),
+                        "tier2_applied": res.tier2_applied}
             except (RouteNotFound, RoutingUnavailable) as exc:
                 row |= {"actual": type(exc).__name__, "branch": "routing", "direct_distance_km": None}
             cases.append(row)
@@ -168,7 +190,55 @@ def main() -> None:
             if sel:
                 classify(f"limit {label} from anchor", "2.3 / Baseline max_total_service_radius_km", expected, ANCHOR,
                          sel[1], anchor, sel[2], selected_road_km=round(sel[0], 3),
-                         note="membership is decided by the unit polygon (unit chosen by its representative point)")
+                         note=("tier 2 checks the point's own road distance (GEO-03)" if serviceability else
+                               "membership is decided by the unit polygon (unit chosen by its representative point)"))
+
+        tier2_stats: dict[str, Any] | None = None
+        if serviceability:
+            hk = point(HOAN_KIEM)
+            for case, ref, expected, note in LANDMARK_TRIPS:
+                if ref in places:
+                    classify(case, "landmark (GEO closure)", expected, ref, HOAN_KIEM, point(ref), hk, note=note)
+            # Seeded random points in the accept-able polygon (TOTAL minus EXCLUDED): tier-2 outcome per point.
+            pts = session.execute(text("""SELECT ST_X(g), ST_Y(g) FROM (SELECT (ST_Dump(ST_GeneratePoints(
+                    ST_Difference(t.geom, COALESCE(e.geom, ST_GeomFromText('POLYGON EMPTY', 4326))), :n, 1))).geom AS g
+                FROM service_areas t LEFT JOIN service_areas e
+                  ON e.service_area_version = t.service_area_version AND e.area_type = 'EXCLUDED'
+                WHERE t.service_area_version = :v AND t.area_type = 'TOTAL') s"""),
+                {"n": SAMPLE_POINTS, "v": args.version}).all()
+            outcome: dict[str, list[tuple[float, float, float | None, float]]] = {}
+            for i in range(0, len(pts), 150):
+                batch = [(float(x), float(y)) for x, y in pts[i:i + 150]]
+                coords = ";".join(f"{x:.6f},{y:.6f}" for x, y in [serviceability.anchor, *batch])
+                body = httpx.get(f"{settings.osrm_car_url}/table/v1/driving/{coords}",
+                                 params={"sources": "0", "annotations": "distance"},
+                                 headers={"Connection": "close"}, timeout=60).json()
+                for j, (x, y) in enumerate(batch):
+                    d = body["distances"][0][j + 1]
+                    km = None if d is None else d / 1000
+                    snap = body["destinations"][j + 1]["distance"]
+                    reason = rules.point_reason(snap, km, serviceability.max_snap_m, serviceability.max_road_km) or "SERVED"
+                    outcome.setdefault(reason, []).append((x, y, km, snap))
+            tier2_stats = {"sample": f"{len(pts)} points, ST_GeneratePoints seed 1 over TOTAL minus EXCLUDED",
+                           "by_outcome": {k: len(v) for k, v in sorted(outcome.items())}}
+            # Real cases for the unserviceable kinds found in the sample (first point of each kind).
+            for reason, expected_reason in (("BEYOND_MAX_ROAD_DISTANCE", "BEYOND_MAX_ROAD_DISTANCE"),
+                                            ("NO_ROAD_ACCESS", "NO_ROAD_ACCESS"),
+                                            ("NOT_ROUTABLE_FROM_ANCHOR", "NOT_ROUTABLE_FROM_ANCHOR")):
+                if outcome.get(reason):
+                    x, y, km, snap = outcome[reason][0]
+                    classify(f"inside polygon, {reason} (tier 2)", "GEO-03", "OUT_OF_SERVICE_AREA", HOAN_KIEM,
+                             "sample point", hk, (x, y), note=f"sampled point: anchor road km {km}, snap {round(snap, 1)} m",
+                             expected_reason=expected_reason)
+            excl = session.execute(text("""SELECT ST_X(p), ST_Y(p), km2 FROM (
+                    SELECT ST_PointOnSurface(d.geom) AS p, ST_Area(d.geom::geography) / 1e6 AS km2
+                    FROM (SELECT (ST_Dump(geom)).geom FROM service_areas
+                          WHERE service_area_version = :v AND area_type = 'EXCLUDED') d
+                    ORDER BY ST_Area(d.geom) DESC LIMIT 1) s"""), {"v": args.version}).first()
+            if excl:
+                classify("point in largest EXCLUDED component (tier 1)", "GEO-04", "OUT_OF_SERVICE_AREA", HOAN_KIEM,
+                         "EXCLUDED component", hk, (float(excl[0]), float(excl[1])),
+                         note=f"component {round(excl[2], 4)} km²", expected_reason="UNSERVICEABLE_COMPONENT")
 
         # A8 context: Hà Đông -> Phố Hiến vs the 65 km example of Section 25.2.
         try:
@@ -180,7 +250,9 @@ def main() -> None:
             context = {"case": "A8 context", "error": type(exc).__name__}
 
     for c in cases:
-        ok = c["actual"] == c["expected"]
+        ok = c["actual"] == c["expected"] or c["expected"] == "INFO"
+        if ok and c.get("expected_reason"):
+            ok = c.get("dropoff_tier", {}).get("reason") == c["expected_reason"]
         if ok and c.get("expected_branch") and c["branch"] != c["expected_branch"]:
             c["result_on_candidate"] = f"PASS (mode) / branch {c['branch']} ≠ expected {c['expected_branch']}"
         else:
@@ -197,7 +269,8 @@ def main() -> None:
                 and "sa_rules_candidate_v1" in (out_dir / "REVIEW.md").read_text(encoding="utf-8"):
             raise SystemExit(f"refusing to overwrite original evidence {path}; pass --report-name")
     json_path.write_text(
-        json.dumps({"cases": cases, "context_checks": [context]}, ensure_ascii=False, indent=2), encoding="utf-8")
+        json.dumps({"cases": cases, "context_checks": [context], "tier2_sample": tier2_stats},
+                   ensure_ascii=False, indent=2), encoding="utf-8")
     lines = [
         f"# Geographic edge cases on real data — `{args.version}` ({geometry_status})",
         "",
@@ -211,6 +284,12 @@ def main() -> None:
           f"{c['direct_distance_km'] if c['direct_distance_km'] is not None else c.get('selected_road_km', '—')} | {c['expected']} | "
           f"{c['actual']} | {c['branch']} | **{c['result_on_candidate']}** | {c['acceptance_status']} |" for c in cases],
         "",
+        *([f"Tier-2 reasons (GEO-03): " + "; ".join(
+            f"{c['case']}: pickup {c.get('pickup_tier', {}).get('reason')}, dropoff {c.get('dropoff_tier', {}).get('reason')}"
+            f" (anchor km {c.get('dropoff_tier', {}).get('anchor_road_km')}, snap {c.get('dropoff_tier', {}).get('snap_m')} m)"
+            for c in cases if c.get("tier2_applied") or c.get("expected_reason")), "",
+           "Seeded sample of the accept-able polygon:", "", "```json", json.dumps(tier2_stats, ensure_ascii=False, indent=2),
+           "```", ""] if tier2_stats else []),
         "Context check (A8):",
         "",
         "```json",

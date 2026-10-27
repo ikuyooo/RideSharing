@@ -1,0 +1,56 @@
+{
+  "service_area_version": "sa-cand-7da7fbe2e01b",
+  "points": 150,
+  "seed": 1,
+  "place_kinds": [
+    "suburb",
+    "quarter",
+    "neighbourhood",
+    "village",
+    "hamlet",
+    "town"
+  ],
+  "osrm": "v5.27.1 (P0 extract; car.lua / motorbike.lua)",
+  "profiles": {
+    "car": {
+      "6": {
+        "pairs": 1018,
+        "median_km": 6.017,
+        "median_min": 8.8,
+        "p25_min": 8.07,
+        "p75_min": 9.42,
+        "median_kmh": 41.23
+      },
+      "14": {
+        "pairs": 1208,
+        "median_km": 13.977,
+        "median_min": 18.32,
+        "p25_min": 17.42,
+        "p75_min": 19.15,
+        "median_kmh": 45.86,
+        "revision9_min": 40,
+        "revision9_over_osrm": 2.183
+      }
+    },
+    "motorbike": {
+      "6": {
+        "pairs": 1073,
+        "median_km": 6.027,
+        "median_min": 9.57,
+        "p25_min": 9.04,
+        "p75_min": 10.23,
+        "median_kmh": 37.71
+      },
+      "14": {
+        "pairs": 1213,
+        "median_km": 14.0,
+        "median_min": 20.63,
+        "p25_min": 19.91,
+        "p75_min": 21.61,
+        "median_kmh": 40.65,
+        "revision9_min": 35,
+        "revision9_over_osrm": 1.697
+      }
+    }
+  }
+}

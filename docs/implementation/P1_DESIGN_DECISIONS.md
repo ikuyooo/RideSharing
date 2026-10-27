@@ -67,3 +67,26 @@ Revision 9, Baseline v1 hay Decision Register.
 | `service_area_compare` | So sánh hai phiên bản (diện tích, thành phần, đơn vị, điểm đổi trạng thái trên mọi node `place=*` trong bbox, ảnh hưởng phân loại) |
 | Khảo sát S1 (bản nháp dev) | Bảng `survey_respondents` (kỹ thuật) + `survey_responses` (Mục 54) — migration `0002`; `dataset` TEST/RESEARCH theo cấu hình (`SURVEY_DATASET`, `SURVEY_S1_RELEASED`); thiết kế 2×2×2, xoay khối `(i + 2k) mod 6`; QC3/QC4 chỉ gắn cờ; export CSV; `SurveyClientAddressFilter` xóa địa chỉ client khỏi log truy cập của đường dẫn khảo sát |
 | Export places | Thêm `leisure=stadium`, `amenity=bus_station`, `landuse=residential` để có điểm/polygon có tên làm bằng chứng |
+
+## 4. Quyết định "PHASE 1 FINAL CLOSURE" (2026-10-27) — cách hiện thực
+
+| Mã | Quyết định của Chủ dự án | Hiện thực | Còn chờ |
+|---|---|---|---|
+| GEO-01 | Đông Anh: phạm vi tra cứu Thư Lâm / Đông Anh / Phúc Thịnh; không lấy nguyên xã; chỉ dùng dữ liệu OSM có bằng chứng | Bỏ quy tắc U2 `Xã Đông Anh`. Tìm trong snapshot: có quan hệ lịch sử `relation/17627914` "Thị trấn Đông Anh" (`boundary=historic`, admin_level 8) nhưng **vòng ranh giới hở** (9 way → 1 chuỗi không khép, osmium không dựng được vùng); không có polygon khu dân cư/đô thị có tên gắn với thị trấn cũ. → `PENDING_GEOMETRY_EVIDENCE`; không tự khép/vẽ | Bằng chứng hình học hoặc quyết định khác |
+| GEO-02 | Bỏ Tùng Thiện; bỏ quy tắc "mọi phường"; danh sách có kiểm soát, truy vết nguồn | `urban.include_units`: 48 phường NQ 1656 k1–k48 (hình thành từ phường của các quận cũ) + Xã Gia Lâm (k109); mỗi dòng có mã QĐ19 + khoản NQ1656, pipeline đối chiếu với bảng chính thức. Loại: Tùng Thiện (k51), Sơn Tây (k50), Chương Mỹ (k49, chờ duyệt) | Xác nhận Sơn Tây, Chương Mỹ |
+| GEO-03 | Giữ anchor node 74132064 và giới hạn 150 km; hai lớp kiểm tra; từ chối điểm > 150 km / không định tuyến | **Lớp 1:** polygon TOTAL (đơn vị có điểm đại diện **hoặc** một điểm mẫu ≤ 150 km — `tier1_rule: any_sample_within`) trừ lớp `EXCLUDED`. **Lớp 2:** mỗi pickup/dropoff, một request OSRM `/table`: snap ≤ `max_snap_m`, có tuyến từ anchor, khoảng cách đường bộ ≤ 150 km (đúng 150 km được nhận), pickup→dropoff có tuyến. Tham số lưu trong `service_areas.source_json.serviceability` | `max_snap_m = 300` là **tham số triển khai chờ xác nhận** |
+| GEO-04 | Giữ polygon gốc; đảo không phục vụ được phải bị loại hoặc chặn tin cậy | Lớp `EXCLUDED` riêng (migration `0003`): thành phần TOTAL không có đường ô tô định tuyến được bên trong (thăm dò 1 + 4 điểm/thành phần) hoặc không có tuyến từ anchor. TOTAL gốc giữ nguyên | — |
+| GEO-05 | Splendora = Bắc An Khánh theo tên; đối chiếu vị trí chủ đầu tư | Giữ 3 polygon Splendora (U3), ghi chú địa chỉ chủ đầu tư "Km10+600 Đại lộ Thăng Long, Sơn Đồng" | — |
+| GEO-06 | Đối chiếu mã/khoản với văn bản chính thức | Đọc trực tiếp PDF ký số QĐ 19/2025/QĐ-TTg (Phụ lục II, Hà Nội 126 đơn vị) và NQ 1656/NQ-UBTVQH15 (Điều 1); bảng `config/official/hanoi_units_qd19_nq1656.csv`; pipeline kiểm 126/126 tên OSM | — |
+
+### Bổ sung kỹ thuật mới (không có trong Revision 9)
+
+| Hạng mục | Nội dung |
+|---|---|
+| Lớp `EXCLUDED` (`service_areas.area_type`) | Migration `0003`; vùng chấp nhận = TOTAL − EXCLUDED; TOTAL gốc giữ nguyên |
+| Lý do từ chối không gian | Mã lỗi vẫn là `OUT_OF_SERVICE_AREA` (Mục 2.3); `details.pickup/dropoff.reason` ∈ `OUTSIDE_TOTAL_POLYGON`, `UNSERVICEABLE_COMPONENT` (lớp 1), `NO_ROAD_ACCESS`, `NOT_ROUTABLE_FROM_ANCHOR`, `BEYOND_MAX_ROAD_DISTANCE` (lớp 2) |
+| Phiên bản thiếu lớp 2 | Trip API trả 503 `SERVICE_AREA_NOT_CONFIGURED` nếu `source_json` không có `serviceability` (v1/v2 không dùng được cho API nữa; vẫn đánh giá được bằng `boundary_eval`) |
+| Bằng chứng ranh giới lịch sử | `scripts/osm/export_historic_boundaries.sh` + `MANIFEST_HISTORIC` (tách khỏi `MANIFEST` để version id v1/v2 tái lập được) |
+| Ảnh Docker dùng chung | `backend` và `service-area-build` cùng tag `ridesharing-backend:local` (trước đây `service-area-build` có ảnh riêng, dễ chạy mã cũ) |
+| Chống ghi đè bằng chứng | `ensure_new_bundle`: không ghi vào bundle đã tồn tại; chạy lại dùng `--out` khác |
+| Khảo sát | Nhóm chọn trước khi bắt đầu phiên (quota trần 90/nhóm); `duration_s` (migration `0004`) tính từ start token ký HMAC; QC2 chỉ gắn cờ; rate limit Redis khóa băm; xóa theo mã phiên (ADMIN) |

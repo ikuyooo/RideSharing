@@ -41,3 +41,26 @@ Bảng gốc ở trên được giữ nguyên. Phiên bản ứng viên mới: *
 | SF-P1-11 | Quy tắc U1 ("mọi phường") đưa **Phường Tùng Thiện** (khu vực Sơn Tây cũ, ~55,9 km², tách rời khối chính) vào nội đô; Mục 2.3 nói "quận nội thành và khu đô thị vệ tinh **liền kề**" | `components.csv` (URBAN) | Quyết định giữ hay loại các phường không liền kề | P1 |
 | SF-P1-12 | Chọn đơn vị theo điểm đại diện: 47 đơn vị được chọn có phần > 150 km; 32 đơn vị bị loại có phần ≤ 150 km (Thanh Hóa 27, Lạng Sơn 15, Lào Cai 7…) | `sensitivity_150km.csv` | (a) chấp nhận sai lệch ở mức đơn vị; (b) cơ chế kiểm tra điểm đón/trả thực tế: khoảng cách OSRM từ điểm gốc ≤ 150 km tại thời điểm đặt — **là quy tắc nghiệp vụ mới, chưa áp dụng**, cần ghi quyết định | P1/P2 |
 | SF-P1-13 | 312 mảnh đảo không có đường định tuyến (29,4 km²) nằm trong vùng tổng; theo A9 không sẵn sàng phục vụ | `components.csv` (NO_ROUTABLE_ROAD_INSIDE) | Loại các mảnh này khỏi vùng tổng (giảm 332 → ~20 thành phần) — **chưa áp dụng**, cần duyệt quy tắc | P1 |
+
+## Trạng thái sau quyết định "PHASE 1 FINAL CLOSURE" (2026-10-27) — ứng viên `sa-cand-7da7fbe2e01b`
+
+| Mã | Quyết định | Xử lý | Trạng thái |
+|---|---|---|---|
+| SF-P1-01 | GEO-06 | Đọc trực tiếp PDF ký số QĐ 19/2025/QĐ-TTg (Phụ lục II, 126 đơn vị Hà Nội) và NQ 1656/NQ-UBTVQH15 (k1–k54, k97–k120); mọi mã/khoản dùng ở v2/v3 trùng khớp; 126/126 tên OSM khớp (`OFFICIAL_SOURCE_VERIFICATION.md`) | **Đã xử lý (OFFICIALLY_VERIFIED cho mã + khoản; hình học vẫn là OSM)** |
+| SF-P1-02 | GEO-05 | La Phù lịch sử (`relation/11367506`) dựng được: 0 km² chồng U3; Phenikaa → La Phù = URBAN 2b. Splendora: vị trí chủ đầu tư (Sơn Đồng) khớp polygon OSM | Đạt trên ứng viên; An Khánh lịch sử: vòng hở 1,2 km (PENDING) |
+| SF-P1-04 | GEO-01 | Đông Anh: không lấy nguyên xã; không có bằng chứng hình học của thị trấn cũ | **PENDING_GEOMETRY_EVIDENCE** → SF-P1-14 |
+| SF-P1-11 | GEO-02 | Tùng Thiện loại khỏi nội đô; danh sách có kiểm soát 49 đơn vị | **Đã xử lý**; Sơn Tây / Chương Mỹ → SF-P1-20 |
+| SF-P1-12 | GEO-03 | Hai lớp: polygon (điểm đại diện hoặc điểm mẫu ≤ 150 km) + kiểm tra từng điểm. 47/47 đơn vị vẫn trong polygon (điểm > 150 km bị lớp 2 chặn); 28/32 đơn vị nay vào polygon | Đã xử lý; phần dư → SF-P1-15 |
+| SF-P1-13 | GEO-04 | Lớp `EXCLUDED` 324 thành phần / 29,158 km² (không đường bên trong); polygon gốc giữ nguyên | **Đã xử lý** |
+
+### Phát hiện mới
+
+| Mã | Phát hiện | Bằng chứng | Cần quyết định | Ảnh hưởng |
+|---|---|---|---|---|
+| SF-P1-14 | Mục 2.3 liệt kê **Đông Anh** là nội đô, nhưng không có hình học có căn cứ cho thị trấn cũ (quan hệ lịch sử hở 1.885,6 m) → nội đô v3 không gồm Đông Anh; **Đông Anh → Hoàn Kiếm = INTERCITY (19,678 km)** | `GEOMETRY_REVIEW_P1_FINAL_CLOSURE.md` §2, `TRIP_CLASSIFICATION_EVAL.md` | (a) chấp nhận; (b) polygon Global Gate kiểu U3; (c) ranh giới có nguồn do Chủ dự án cung cấp | P1 |
+| SF-P1-15 | Quy tắc điểm mẫu (16 điểm/đơn vị) bỏ sót 4 đơn vị có mép mỏng ≤ 150 km (Hàm Rồng, Vĩnh Lộc, Bao La, Yên Bình; mẫu v2 thấy 147,8–149,6 km) → điểm hợp lệ ở mép bị từ chối | `sensitivity_150km.csv` v2/v3 | Lấy mẫu dày hơn / hợp nhất các lần lấy mẫu / chấp nhận | P1 |
+| SF-P1-16 | Ngưỡng snap 300 m (tham số triển khai) từ chối 32% điểm mẫu A4 và 29,5% điểm mẫu đều theo diện tích trong vùng chấp nhận (`NO_ROAD_ACCESS`) | REVIEW.md §13, `TRIP_CLASSIFICATION_EVAL.md` | Xác nhận hoặc đổi `max_snap_m` | P1 |
+| SF-P1-17 | Profile car của OSRM cho phép phà: các thành phần đảo có đường (Cát Bà 167 km², 141,5 km) được coi là định tuyến được, có thể qua phà | `components.csv` (serviceable) | Có tính chặng phà là "kết nối đường bộ" không | P1/P2 |
+| SF-P1-18 | Thời gian OSRM là dòng tự do: 14 km car 18,3 phút / xe máy 20,6 phút so với 40 / 35 phút ở Mục 10.4 (×2,18 / ×1,70); xe máy chậm hơn ô tô (SF-05, V-03) | `docs/implementation/survey/evidence/s1_6km_eta_osrm.json` | Phương pháp ETA 6 km (hiệu chỉnh theo ví dụ 14 km) | P1 (S1) |
+| SF-P1-19 | Splendora: chủ đầu tư công bố 81,2 ha tại Sơn Đồng; polygon OSM 32,0 ha; báo chí 245 ha (km 8+400–10+700, 4 xã cũ) | `GEOMETRY_REVIEW_P1_FINAL_CLOSURE.md` §6 | Chấp nhận phạm vi polygon OSM hiện có | P1 |
+| SF-P1-20 | Danh sách nội đô có kiểm soát loại Phường Sơn Tây (k50) và Phường Chương Mỹ (k49, phần lớn từ huyện Chương Mỹ nhưng có phường Biên Giang/Đồng Mai của quận Hà Đông cũ) | REVIEW.md §12 | Xác nhận | P1 |

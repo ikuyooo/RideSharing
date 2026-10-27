@@ -18,6 +18,11 @@ def get_distance_fn(settings: Settings = Depends(get_settings)) -> service.Dista
     return service.osrm_distance_fn(settings)
 
 
+def get_reach_fn(settings: Settings = Depends(get_settings)) -> service.ReachFn:
+    """Overridable in tests; production uses one OSRM car /table request (GEO-03)."""
+    return service.osrm_reach_fn(settings)
+
+
 @router.post("/api/trip-requests", response_model=TripRequestOut, status_code=status.HTTP_201_CREATED)
 def create_trip_request(
     body: TripRequestIn,
@@ -25,8 +30,9 @@ def create_trip_request(
     session: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
     distance_fn: service.DistanceFn = Depends(get_distance_fn),
+    reach_fn: service.ReachFn = Depends(get_reach_fn),
 ) -> TripRequestOut:
-    return service.create_trip_request(session, user.id, body, settings, distance_fn)
+    return service.create_trip_request(session, user.id, body, settings, distance_fn, reach_fn)
 
 
 @router.get("/api/trip-requests/{trip_id}", response_model=TripRequestOut)

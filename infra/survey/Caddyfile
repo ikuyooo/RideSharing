@@ -1,0 +1,68 @@
+# Survey S1 public entry point - PREPARED, NOT DEPLOYED.
+# Requires: a domain whose DNS A/AAAA record points at the survey server
+# (SURVEY_DOMAIN), ports 80/443 reachable, and the owner's release decision.
+# Caddy obtains and renews the TLS certificate automatically (ACME).
+#
+# Only the anonymous survey routes are public. Everything else - /api/admin/*,
+# /docs, /openapi.json, /health/*, the trip / identity APIs - is answered 404 here
+# and stays reachable only on 127.0.0.1 of the server (SSH tunnel for admins).
+{
+	email {$ACME_EMAIL}
+	# No client addresses in Caddy's own logs (see the access log below).
+	log default {
+		output stderr
+		format json
+		level WARN
+	}
+}
+
+{$SURVEY_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		Permissions-Policy "geolocation=(), camera=(), microphone=()"
+		# The form is one self-contained page (inline script/style, same-origin API).
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+		-Server
+	}
+
+	# Request bodies of the survey API are small; refuse anything larger.
+	request_body {
+		max_size 64KB
+	}
+
+	@survey path /survey/s1 /api/survey/s1/sessions /api/survey/s1/sessions/*/submit
+	handle @survey {
+		# uvicorn runs with --proxy-headers --forwarded-allow-ips=<this proxy> so the
+		# app can rate-limit per client; the address is only hashed (survey_guard.py).
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		respond 404
+	}
+
+	# Access log WITHOUT client address, user agent or headers (Section 59.2).
+	log {
+		output file /data/logs/survey_access.log {
+			roll_size 10MiB
+			roll_keep 5
+			roll_keep_for 720h
+		}
+		format filter {
+			wrap json
+			fields {
+				request>remote_ip delete
+				request>remote_port delete
+				request>client_ip delete
+				request>headers delete
+				request>tls delete
+				resp_headers delete
+			}
+		}
+	}
+}

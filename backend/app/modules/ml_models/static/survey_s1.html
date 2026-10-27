@@ -29,8 +29,13 @@
   <div class="draft">BẢN NHÁP — CHƯA PHÁT HÀNH. Chỉ dùng thử nội bộ; dữ liệu ghi vào tập TEST, không phải dữ liệu nghiên cứu.
     Các giá trị "chờ duyệt" chưa được Chủ dự án phê duyệt.</div>
   <h1>Khảo sát lựa chọn phương tiện di chuyển (S1)</h1>
-  <p>Khoảng 4–5 phút. Hoàn toàn ẩn danh: không hỏi họ tên, email, mã sinh viên hay số điện thoại. Bạn có thể dừng bất cứ lúc nào.</p>
-  <div id="app"><button id="start">Đồng ý tham gia</button></div>
+  <p>Khoảng 4–5 phút. Hoàn toàn ẩn danh: không hỏi họ tên, email, mã sinh viên hay số điện thoại; không lưu địa chỉ IP.
+    Bạn có thể dừng bất cứ lúc nào. Câu trả lời chỉ dùng cho đồ án nghiên cứu, được lưu trong thời hạn công bố tại
+    thông báo nghiên cứu và có thể yêu cầu xóa bằng mã phiên hiển thị khi hoàn thành.</p>
+  <div id="app"><div class="q"><b>Bạn hiện là:</b><br>
+      <label><input type="radio" name="g" value="STUDENT"> Sinh viên</label>
+      <label><input type="radio" name="g" value="WORKER"> Người đã đi làm</label></div>
+    <button id="start">Đồng ý tham gia</button> <span id="smsg"></span></div>
 </main>
 <script>
 const fmt = v => v === "TBD" || v === undefined ? '<span class="tbd">chờ duyệt</span>'
@@ -47,7 +52,7 @@ function cardHtml(task, c) {
   if (c.match_likelihood) rows.push(`Khả năng ghép: ${LIKE[c.match_likelihood]}`);
   if (c.walk_m !== undefined) rows.push(`Đi bộ ra điểm đón: ${c.walk_m} m`);
   if (c.lead_days) rows.push(`Đặt trước: ${c.lead_days} ngày`);
-  if (c.fill_likelihood !== undefined) rows.push(`Khả năng đủ khách: ${fmt(c.fill_likelihood)}`);
+  if (c.fill_likelihood_text !== undefined) rows.push(`Khả năng đủ khách (giả định): ${c.fill_likelihood_text}`);
   return `<label class="card"><input type="radio" name="${task.task_id}" value="${c.alternative}" required>
     <b>${c.label}</b>${rows.join("<br>")}</label>`;
 }
@@ -55,10 +60,7 @@ function cardHtml(task, c) {
 function render(d) {
   const t1a = d.tasks.filter(t => t.part === "1A"), t1b = d.tasks.filter(t => t.part === "1B");
   const sc = d.scenario;
-  let h = `<form id="f">
-    <div class="q"><b>Bạn hiện là:</b><br>
-      <label><input type="radio" name="group" value="STUDENT" required> Sinh viên</label>
-      <label><input type="radio" name="group" value="WORKER"> Người đã đi làm</label></div>`;
+  let h = `<form id="f">`;
   t1a.forEach((t, i) => {
     h += `<div class="q"><div class="ctx">Tình huống ${i + 1}/${t1a.length}: đi <b>${t.context.distance_km} km</b> trong nội đô Hà Nội ·
       ${t.context.weather} · ${t.context.urgency}</div><div class="cards">${t.cards.map(c => cardHtml(t, c)).join("")}</div></div>`;
@@ -76,14 +78,18 @@ function render(d) {
   });
   h += `<p><b>Bạn sẵn sàng sử dụng cách nào nhất?</b> ${d.fairness.map(f =>
       `<label><input type="radio" name="preferred" value="${f.display_label}" required> ${f.display_label}</label>`).join(" ")}</p></div>
-    <div class="q ctx">Câu hỏi về tần suất đặt xe / cự ly / đi liên tỉnh: <span class="tbd">các khoảng lựa chọn chờ duyệt</span>.</div>
+    <div class="q">${Object.entries(session.demographics_options).map(([k, q]) => `<p><b>${q.question}</b><br>${q.options.map(o =>
+      `<label><input type="radio" name="${k}" value="${o.code}" required> ${o.text}</label>`).join(" ")}</p>`).join("")}</div>
     <button type="submit">Gửi câu trả lời</button> <span id="msg"></span></form>`;
   document.getElementById("app").innerHTML = h;
   document.getElementById("f").addEventListener("submit", submit);
 }
 
 async function start() {
-  const r = await fetch("/api/survey/s1/sessions", {method: "POST"});
+  const g = document.querySelector('input[name="g"]:checked');
+  if (!g) { document.getElementById("smsg").innerHTML = '<span class="err">Vui lòng chọn nhóm</span>'; return; }
+  const r = await fetch("/api/survey/s1/sessions", {method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({group: g.value})});
   const body = await r.json();
   if (!r.ok) { document.getElementById("app").innerHTML = `<p class="err">${body.error?.message || "Không thể bắt đầu"}</p>`; return; }
   session = body;
@@ -95,7 +101,8 @@ async function submit(ev) {
   ev.preventDefault();
   const fd = new FormData(ev.target), d = session.design;
   const payload = {
-    group: fd.get("group"),
+    start_token: session.start_token,
+    demographics: Object.fromEntries(Object.keys(session.demographics_options).map(k => [k, fd.get(k)])),
     choices: d.tasks.map(t => ({task_id: t.task_id, chosen: fd.get(t.task_id)})),
     fairness: d.fairness.map(f => ({display_label: f.display_label, likert: Number(fd.get("likert_" + f.display_label))})),
     preferred_label: fd.get("preferred"),
@@ -103,7 +110,7 @@ async function submit(ev) {
   const r = await fetch(`/api/survey/s1/sessions/${session.respondent_id}/submit`,
     {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)});
   const body = await r.json();
-  document.getElementById("msg").innerHTML = r.ok ? '<span class="ok">Cảm ơn bạn! (dữ liệu TEST)</span>'
+  document.getElementById("msg").innerHTML = r.ok ? `<span class="ok">Cảm ơn bạn! (dữ liệu ${session.dataset}) — mã phiên: ${session.respondent_id}</span>`
     : `<span class="err">${body.error?.message || "Lỗi"}</span>`;
   if (r.ok) ev.target.querySelector("button").disabled = true;
 }

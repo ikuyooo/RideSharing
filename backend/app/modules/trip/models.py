@@ -38,6 +38,9 @@ VEHICLE_PREFERENCES = ("BIKE", "CAR", "ANY")
 RIDE_PREFERENCES = ("PRIVATE", "POOL", "ANY")
 BOOKING_TYPES = ("NOW", "SCHEDULED")
 AREA_TYPES = ("URBAN", "TOTAL")  # urban_service_area / total_service_area (Section 2.3)
+# GEO-03/GEO-04 technical addition: parts of the raw TOTAL polygon that cannot be
+# served (accept-able area = TOTAL minus EXCLUDED); optional per version.
+LAYER_TYPES = (*AREA_TYPES, "EXCLUDED")
 # CANDIDATE until the owner approves a concrete geometry (P1-D1 / P1-D3).
 AREA_STATUSES = ("CANDIDATE", "APPROVED", "RETIRED")
 
@@ -110,7 +113,7 @@ class ServiceArea(Base):
     approval_reference: Mapped[str | None] = mapped_column(Text)
 
     __table_args__ = (
-        in_check("area_type", AREA_TYPES, "area_type"),
+        in_check("area_type", LAYER_TYPES, "area_type"),
         in_check("status", AREA_STATUSES, "status"),
         UniqueConstraint("area_type", "service_area_version"),
         CheckConstraint("status <> 'APPROVED' OR approved_at IS NOT NULL", name="approved_has_timestamp"),

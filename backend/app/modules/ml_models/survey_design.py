@@ -6,8 +6,10 @@ as pending and never replaced by invented numbers (owner decision P1-D5).
 Part 1A: full factorial of the three Section 65.2 context factors (2x2x2 = 8
 tasks), random order per respondent. The pool card's rotated attributes
 (match likelihood x walk = 6 combinations) follow a block rotation:
-combo(context i, block k) = (i + 2k) mod 6, so the three blocks start at
-different combinations. Card positions are shuffled per task.
+combo(context i, block k) = (i + 2(k mod 3)) mod 6, so the three rotations start
+at different combinations. Part 1B pairs the two seat prices with the two
+hypothetical fill-likelihood levels; block k // 3 selects which pairing, so both
+pairings appear equally across the 6 blocks. Card positions are shuffled per task.
 """
 
 import itertools
@@ -18,7 +20,7 @@ from typing import Any
 TBD = "TBD"
 LIKELIHOOD_CODES = {"Cao": "HIGH", "Trung bình": "MEDIUM", "Thấp": "LOW"}
 FAIRNESS_LABELS = ("X", "Y", "Z")
-N_BLOCKS = 3
+N_BLOCKS = 6  # 3 Part-1A rotations x 2 Part-1B pairings
 
 
 def _value(spec: Any) -> Any:
@@ -32,14 +34,14 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
     rng = random.Random(respondent_id.int)
     p1a = q["part_1a"]
     factors = p1a["context_factors"]
-    contexts = list(itertools.product(factors["distance_km"], factors["weather"], factors["urgency"]))
+    contexts = list(itertools.product(*(factors[k]["levels"] for k in ("distance_km", "weather", "urgency"))))
     rotated = p1a["rotated_attributes"]
     combos = list(itertools.product(rotated["match_likelihood"]["levels"], rotated["walk_m"]["levels"]))
 
     tasks_1a = []
     for i, (distance, weather, urgency) in enumerate(contexts):
         levels = p1a["levels_by_distance"][str(distance)]
-        likelihood, walk = combos[(i + 2 * block) % len(combos)]
+        likelihood, walk = combos[(i + 2 * (block % 3)) % len(combos)]
         cards = [
             {"alternative": "BIKE_URBAN", "label": p1a["alternatives"]["BIKE_URBAN"]["label"],
              "price_vnd": _value(levels["BIKE_URBAN"]["price_vnd"]), "travel_min": _value(levels["BIKE_URBAN"]["travel_min"])},
@@ -63,10 +65,12 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
     p1b = q["part_1b"]
     pool_b = p1b["alternatives"]["CAR_INTERCITY_POOL"]
     tasks_1b = []
-    for seat_price in pool_b["seat_price_vnd"]["levels"]:
+    fill_levels = pool_b["fill_likelihood"]["levels"]
+    for j, seat_price in enumerate(pool_b["seat_price_vnd"]["levels"]):
+        fill = fill_levels[(j + block // 3) % len(fill_levels)]
         cards = [
             {"alternative": "CAR_INTERCITY_POOL", "label": pool_b["label"], "price_vnd": seat_price,
-             "fill_likelihood": TBD if pool_b["fill_likelihood"]["levels"] == TBD else pool_b["fill_likelihood"]["levels"],
+             "fill_likelihood": fill["code"], "fill_likelihood_text": fill["text"],
              "lead_days": pool_b["lead_days"]["value"]},
             {"alternative": "CAR_INTERCITY_PRIVATE", "label": p1b["alternatives"]["CAR_INTERCITY_PRIVATE"]["label"],
              "price_vnd": p1b["alternatives"]["CAR_INTERCITY_PRIVATE"]["price_vnd"]["value"]},

@@ -98,6 +98,9 @@ services:
 
   backend:
     build: ./backend
+    # One tag shared with service-area-build, so `docker compose build backend`
+    # refreshes the code both run (a separate image once ran stale pipeline code).
+    image: ridesharing-backend:local
     restart: unless-stopped
     environment: &backend-env
       APP_ENV: ${APP_ENV:-development}
@@ -140,6 +143,7 @@ services:
   service-area-build:
     profiles: ["service-area"]
     build: ./backend
+    image: ridesharing-backend:local
     environment: *backend-env
     volumes:
       - ./config:/app/config:ro

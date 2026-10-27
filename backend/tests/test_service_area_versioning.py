@@ -84,3 +84,45 @@ def test_classification_refuses_retired_or_unapproved(db_engine: Engine, monkeyp
     finally:
         with db_engine.begin() as conn:
             conn.execute(text("DELETE FROM service_areas WHERE service_area_version = 'test-gate'"))
+
+
+def test_existing_bundle_is_never_overwritten(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """Evidence anti-overwrite: a second run must go to another --out directory."""
+    sab.ensure_new_bundle(tmp_path / "sa-cand-new")          # absent: allowed
+    (tmp_path / "sa-cand-new").mkdir()
+    sab.ensure_new_bundle(tmp_path / "sa-cand-new")          # empty: allowed
+    (tmp_path / "sa-cand-new" / "REVIEW.md").write_text("reviewed", encoding="utf-8")
+    with pytest.raises(SystemExit, match="refusing to overwrite"):
+        sab.ensure_new_bundle(tmp_path / "sa-cand-new")
+
+
+def test_excluded_layer_is_persisted_and_empty_mask_is_stable(db_engine: Engine, synthetic_units: None) -> None:
+    """GEO-04: EXCLUDED is its own layer next to the raw TOTAL; an empty mask is valid and stable."""
+    empty = "SELECT COALESCE(ST_Multi(ST_Union(geom)), ST_GeomFromText('MULTIPOLYGON EMPTY', 4326)) " \
+            f"FROM {sab.SCHEMA}.units WHERE osm_id = ANY(:ids)"
+    with db_engine.begin() as conn:
+        assert sab.persist(conn, "test-v2", "TOTAL", sab.geometry_sql("units"), {"ids": [1, 2, 3]}, {}) == "inserted"
+        assert sab.persist(conn, "test-v2", "EXCLUDED", empty, {"ids": [3]}, {}) == "inserted"
+        assert sab.persist(conn, "test-v2", "EXCLUDED", empty, {"ids": [3]}, {}) == "unchanged (ST_Equals)"
+        assert sab.persist(conn, "test-v3", "EXCLUDED", empty, {"ids": []}, {}) == "inserted"
+        assert sab.persist(conn, "test-v3", "EXCLUDED", empty, {"ids": []}, {}) == "unchanged (ST_Equals)"
+        raw = conn.execute(text("SELECT ST_Area(geom) FROM service_areas WHERE service_area_version = 'test-v2' "
+                                "AND area_type = 'TOTAL'")).scalar_one()
+        assert raw == pytest.approx(0.03)  # the raw TOTAL keeps the excluded unit
+
+
+def test_tier1_sampled_point_rule_adds_partly_within_units() -> None:
+    """GEO-03 / SF-P1-12: a unit whose representative point is beyond the limit but with
+    a sampled point within it enters the polygon; its points beyond are left to tier 2."""
+    b = _build({"rules_id": "r", "total": {"tier1_rule": "any_sample_within"}})
+    info = {7: {"name": "U7", "province": "P", "road_km": 151.2, "snap_m": 12.0},
+            8: {"name": "U8", "province": "P", "road_km": 149.0, "snap_m": 3.0}}
+    total = [{"osm_id": 8, "name": "U8", "province": "P", "road_km": 149.0, "snap_m": 3.0, "rule": "T"}]
+    sens = [{"osm_id": 7, "verdict": "EXCLUDED_PARTLY_WITHIN_LIMIT", "included": False},
+            {"osm_id": 8, "verdict": "INCLUDED_PARTLY_BEYOND_LIMIT", "included": True}]
+    added = sab.apply_tier1_samples(total, sens, info, b)
+    assert [a["osm_id"] for a in added] == [7] and [t["osm_id"] for t in total] == [7, 8]
+    assert sens[0]["verdict"] == "INCLUDED_PARTLY_BEYOND_LIMIT" and sens[0]["included"] is True
+    legacy = [{"osm_id": 8}]
+    v2_rules = _build({"rules_id": "r", "total": {"province_scope": "all_within_range"}})  # no tier1_rule
+    assert sab.apply_tier1_samples(legacy, sens, info, v2_rules) == [] and legacy == [{"osm_id": 8}]

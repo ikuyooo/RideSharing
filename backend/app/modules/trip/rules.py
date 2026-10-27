@@ -57,6 +57,33 @@ def classify(
 # --- Section 6: allowed_service_codes ------------------------------------------------
 
 
+# --- Service-area membership, two tiers (owner decision GEO-03; NOT a Revision 9 formula) ---
+# Tier 1: the point lies in the TOTAL polygon and not in its EXCLUDED layer.
+# Tier 2: the point itself is served - it snaps to the car road network within
+# max_snap_m, is routable from the anchor, and its road distance from the anchor
+# is <= max_total_service_radius_km (exactly the limit is accepted).
+POLYGON_REASONS = ("OUTSIDE_TOTAL_POLYGON", "UNSERVICEABLE_COMPONENT")
+POINT_REASONS = ("NO_ROAD_ACCESS", "NOT_ROUTABLE_FROM_ANCHOR", "BEYOND_MAX_ROAD_DISTANCE")
+
+
+def polygon_reason(in_total: bool, in_excluded: bool) -> str | None:
+    if not in_total:
+        return "OUTSIDE_TOTAL_POLYGON"
+    if in_excluded:
+        return "UNSERVICEABLE_COMPONENT"
+    return None
+
+
+def point_reason(snap_m: float, anchor_road_km: float | None, max_snap_m: float, max_road_km: float) -> str | None:
+    if snap_m > max_snap_m:
+        return "NO_ROAD_ACCESS"
+    if anchor_road_km is None:
+        return "NOT_ROUTABLE_FROM_ANCHOR"
+    if anchor_road_km > max_road_km:
+        return "BEYOND_MAX_ROAD_DISTANCE"
+    return None
+
+
 @dataclass(frozen=True)
 class Rejection:
     service_code: str

@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # owner's release flag below.
     survey_dataset: Literal["TEST", "RESEARCH"] = "TEST"
     survey_s1_released: bool = False
+    # Anti-spam per client address (hashed, never stored); technical defaults.
+    survey_rate_limit_starts_per_hour: int = 10
+    survey_rate_limit_submits_per_hour: int = 20
 
     @field_validator("service_area_version", mode="before")
     @classmethod

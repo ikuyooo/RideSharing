@@ -1,0 +1,7 @@
+name,qd19_code,nq1656,status,reason
+Phường Tùng Thiện,09604,k51,EXCLUDED - OWNER_DECISION_GEO-02,former thị xã Sơn Tây; stays in the TOTAL area
+Phường Sơn Tây,09574,k50,EXCLUDED - CONTROLLED_LIST,"former thị xã Sơn Tây; not a quận nội thành, not named in R9 Section 2.3 - owner may confirm"
+Phường Chương Mỹ,10015,k49,EXCLUDED - OWNER_REVIEW,mainly former huyện Chương Mỹ (thị trấn Chúc Sơn + 5 xã); only phường Biên Giang and the rest of Đồng Mai were quận Hà Đông
+Xã Đông Anh,00454,k114,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01),former thị trấn Đông Anh split k113/k114/k115; historic ring relation/17627914 cannot be assembled; whole commune not used
+Xã Thư Lâm,00475,k113,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01),holds part of former thị trấn Đông Anh
+Xã Phúc Thịnh,00466,k115,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01),holds the remainder of former thị trấn Đông Anh (and the OSM town node)

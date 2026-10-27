@@ -1,0 +1,39 @@
+# Survey S1 public deployment overlay - PREPARED, NOT DEPLOYED.
+#
+# Runs on a SEPARATE survey server with its OWN database volume: research data
+# never shares a database with development / TEST data.
+#   docker compose -f docker-compose.yml -f infra/survey/docker-compose.survey.yml \
+#     --env-file infra/survey/survey.env up -d postgres redis backend survey-proxy
+#
+# Release switches (SURVEY_DATASET=RESEARCH, SURVEY_S1_RELEASED=true) are set in
+# survey.env ONLY after the owner approves the questionnaire and the release.
+services:
+  backend:
+    environment:
+      SURVEY_DATASET: ${SURVEY_DATASET:-TEST}
+      SURVEY_S1_RELEASED: ${SURVEY_S1_RELEASED:-false}
+    # Trust X-Forwarded-For only from the proxy container (rate limiting by client).
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",
+              "--proxy-headers", "--forwarded-allow-ips", "*"]
+    ports: !override
+      - "127.0.0.1:8000:8000"   # admins: SSH tunnel only
+
+  survey-proxy:
+    image: caddy:2.8.4
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      SURVEY_DOMAIN: ${SURVEY_DOMAIN:?set SURVEY_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/survey/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks: [backend]
+
+volumes:
+  caddy_data:

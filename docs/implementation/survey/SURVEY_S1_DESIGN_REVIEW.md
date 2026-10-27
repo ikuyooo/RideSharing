@@ -1,6 +1,7 @@
 # SURVEY_S1_DESIGN_REVIEW — Khảo sát S1 (bản trình duyệt)
 
-- **Trạng thái:** `DRAFT — EXPERIMENT_VALUES_PENDING_APPROVAL`. **Chưa phát hành.** Không có link thu thập công khai nào. Bản nháp biểu mẫu/API chạy trên môi trường development (mục 11).
+- **Trạng thái:** `DRAFT 2 — EXPERIMENT_VALUES_PARTLY_PENDING_APPROVAL`. **Chưa phát hành — không phải `SURVEY_S1_RELEASED`.** Không có link thu thập công khai nào. Bản nháp biểu mẫu/API chạy trên môi trường development.
+- **Cập nhật 2026-10-27 (quyết định "PHASE 1 FINAL CLOSURE"):** giá trị hiện hành nằm ở `questionnaire.draft.yaml` draft 2 và [bảng kịch bản đầy đủ](SURVEY_S1_SCENARIO_TABLE.md) (mục 12). Các bảng giá trị ở mục 2 bên dưới là bản draft 1, giữ để truy vết.
 - **Căn cứ:** Revision 9 Mục 65 (thiết kế), 65.1 (phân tầng), 65.3 (phân tích), 59.2 (ẩn danh), 16.1 / 10.4 / 20.1 / 20.2 / 25.2 / 28.2 (số liệu thẻ lựa chọn); quyết định P1-D5 (biểu mẫu web độc lập, không phụ thuộc Frontend Next.js).
 - **File máy đọc được:** [`survey/s1/questionnaire.draft.yaml`](../../../survey/s1/questionnaire.draft.yaml) (mỗi giá trị có trường `source`), [`survey/s1/export_schema.md`](../../../survey/s1/export_schema.md).
 - **Quy ước nguồn:** `R9:<mục>` = có trong Revision 9 / Baseline · `DERIVED:B` = tính theo phương pháp B ở mục 3 (phương pháp chờ duyệt) · `TBD` = chưa có nguồn, cần Chủ dự án cung cấp.
@@ -157,3 +158,24 @@ Câu trả lời bị gắn cờ vẫn được lưu; việc loại khỏi phân
 6. Các khoảng lựa chọn cho D2–D4.
 7. Ngưỡng QC2 và việc có dùng câu kiểm tra chú ý (QC5).
 8. Cỡ mẫu mục tiêu, kênh phát hành, nơi triển khai công khai.
+
+---
+
+## 12. Quyết định "PHASE 1 FINAL CLOSURE" (2026-10-27) — hiện thực (draft 2)
+
+Bảng kịch bản đầy đủ (44 dòng, trường `scenario_id, attributes, options, displayed_values, source, derivation, experimental_status, approval_status`): [`SURVEY_S1_SCENARIO_TABLE.md`](SURVEY_S1_SCENARIO_TABLE.md) / `survey/s1/scenario_table.csv`, sinh tự động từ chính tệp bộ câu hỏi API dùng. Không tham số nghiên cứu nào được ghi vào `pricing_configs` (có test).
+
+| # | Quyết định | Hiện thực | Cơ sở đủ / chưa đủ |
+|---|---|---|---|
+| 1 | Ngữ cảnh 6 km: giá theo công thức khóa + ETA có nguồn | Giá: Baseline (`bike_urban`, `car_urban`, Quote / Unmatched / `Fare_matched_est`) → xe máy **41.000 đ**, bao xe **95.000 đ**, ghép dự kiến **71.000 đ**, tối đa nếu không ghép **85.000 đ**. ETA: OSRM v5.27.1 trên 150 node nội đô (seed 1): trung vị 6 km ô tô 8,80 phút / xe máy 9,57 phút; vì OSRM là dòng tự do (14 km: 18,32 / 20,63 phút so với 40 / 35 phút của Mục 10.4), ETA được **hiệu chỉnh theo tỷ lệ của ví dụ 14 km** → ô tô **19 phút**, xe máy **16 phút** (giá trị OSRM thô 9 / 10 phút ghi làm phương án thay thế). Đi vòng tối đa 6 km = 0,30 × 19,21 = **6 phút** (cùng quy tắc cho 12 phút ở 14 km) | Giá: **đủ** (công thức khóa). ETA: **có nguồn nhưng phương pháp hiệu chỉnh chờ duyệt** (`PENDING_OWNER_APPROVAL`) — SF-P1-18 |
+| 2 | 143.000 đ chỉ cho kịch bản A Mục 16.1 | Thẻ chung 14 km hiển thị **145.000 đ** (`Fare_matched_est`, Mục 20.2); 143.000 đ không xuất hiện trên thẻ | **Đủ** (OWNER_DECIDED) |
+| 3 | Ma trận biến thiên giá + khả thi; mức chưa chứng minh không dùng làm giá thật | Miền khả thi theo Baseline: `Fare_matched ∈ [0,40P; 0,80P]`, trần không ghép `0,90P` (14 km: 77.600–155.200 đ; 6 km: 38.000–76.000 đ). Đề xuất: d = 0,20 (155k / 76k), d = 0,25 (đang dùng), d = 0,35 (126k / 61k); xe máy / bao xe ±10% không suy ra được từ công thức | d = 0,25: đủ. **Các mức khác `EXPERIMENT_REVIEW_REQUIRED`, `NOT_ACTIVE_PROPOSAL` — không hiển thị** |
+| 4 | Đi bộ 200 m là thuộc tính riêng, không tự giảm giá | Giữ nguyên giá; thuộc tính `walk_m` 0 / 200 m xoay vòng | **Đủ** |
+| 5 | "Khả năng đủ khách" liên tỉnh là giá trị kịch bản giả định | HIGH: "Đã có 2/3 hành khách tối thiểu đặt chỗ…", LOW: "Chưa có hành khách nào trong 3 hành khách tối thiểu…" (mẫu số 3 = `default_min_seats_to_run` Baseline); thẻ ghi "(giả định)"; ghép 2 giá ghế × 2 mức cân bằng qua 6 khối | `HYPOTHETICAL_SCENARIO`; **câu chữ chờ duyệt** |
+| 6 | D2–D4 khoảng rõ ràng, không chồng lấn | D2: 0 / 1–2 / 3–5 / 6–10 / ≥11 lần/tuần; D3: <3 / [3,7) / [7,15) / [15,30) / ≥30 km; D4: 0 / 1 / 2–3 / 4–7 / ≥8 lần/tháng; API chỉ nhận mã định sẵn | **Chờ duyệt khoảng cụ thể** |
+| 7 | Không tự loại bài làm nhanh; được gắn cờ với quy tắc công bố trước | `QC2_FAST_COMPLETION` khi thời lượng < 120 s (½ của 4 phút); thời lượng tính từ start token ký HMAC nên CSDL chỉ lưu `duration_s` + mốc thời gian theo phút (migration `0004`); QC3/QC4 gắn cờ; QC5 không dùng | Cơ chế: đủ; **ngưỡng 120 s chờ duyệt** |
+| 8 | Mục tiêu 150 hợp lệ (75/75), mỗi nhóm 40–60% | Câu D1 hỏi **trước** khi bắt đầu phiên; nhóm đủ `floor(0,60 × 150) = 90` câu trả lời hợp lệ thì phiên mới của nhóm bị từ chối (409 `QUOTA_FULL_FOR_GROUP`); quota admin hiển thị trần và nhóm đã đóng | **Đủ** (OWNER_DECIDED) |
+
+Hạ tầng phát hành: [`SURVEY_S1_DEPLOYMENT_PLAN.md`](SURVEY_S1_DEPLOYMENT_PLAN.md) — `PREPARED — NOT DEPLOYED` (thiếu domain, máy chủ, phê duyệt bộ câu hỏi cuối). Thông báo quyền riêng tư nháp: `survey/s1/PRIVACY_NOTICE.draft.md`.
+
+Kiểm thử khảo sát (`backend/tests/test_survey_s1.py`): thiết kế tất định, xoay khối + ghép 1B, ràng buộc schema / không PII, start token giả mạo bị từ chối, QC2 theo thời lượng ký số, quota đóng nhóm, rate limit + khóa không chứa địa chỉ, xóa theo yêu cầu (ADMIN), tách TEST / RESEARCH, toàn vẹn export, tham số nghiên cứu không vào `pricing_configs`. DB chính: **0** câu trả lời khảo sát.

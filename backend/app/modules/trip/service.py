@@ -1,7 +1,9 @@
 """trip service - the only code that reads or writes `trip_requests` and
 `service_areas`.
 
-Classification uses one service_areas version (settings.service_area_version).
+Classification uses one service_areas version (settings.service_area_version)
+and its two tiers (owner decision GEO-03): the polygon layers, then a per-point
+serviceability check against the road network.
 Only APPROVED geometry is used unless ALLOW_CANDIDATE_SERVICE_AREA is set for
 development; results computed on CANDIDATE geometry are not acceptance
 evidence (owner decisions P1-D1 / P1-D3).
@@ -9,8 +11,9 @@ evidence (owner decisions P1-D1 / P1-D3).
 
 import uuid
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
+from typing import Any
 
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import func, select
@@ -19,51 +22,143 @@ from sqlalchemy.orm import Session
 from app.core.config_baseline import get_config_baseline
 from app.core.errors import ApiError
 from app.core.settings import Settings
-from app.modules.routing.service import OsrmCarDistance, RouteNotFound, RoutingUnavailable
+from app.modules.routing.service import OsrmCarDistance, Reachability, RouteNotFound, RoutingUnavailable
 from app.modules.trip import rules
 from app.modules.trip.models import ServiceArea, TripRequest
 from app.modules.trip.schemas import TripRequestIn, TripRequestOut
 
 Lonlat = tuple[float, float]
 DistanceFn = Callable[[Lonlat, Lonlat], float]
+ReachFn = Callable[[Lonlat, Lonlat, Lonlat], Reachability]
+
+
+@dataclass(frozen=True)
+class Serviceability:
+    """Tier-2 parameters stored with a version (GEO-03): anchor of the 150 km
+    road limit, the limit itself, and the maximum snap distance to the car road
+    network (implementation parameter, pending owner confirmation)."""
+
+    anchor: Lonlat
+    max_road_km: float
+    max_snap_m: float
 
 
 @dataclass(frozen=True)
 class ActiveAreas:
     version: str
     status: str
+    serviceability: Serviceability | None
 
 
-def active_service_areas(session: Session, settings: Settings) -> ActiveAreas:
+def active_service_areas(session: Session, settings: Settings, require_serviceability: bool = True) -> ActiveAreas:
     version = settings.service_area_version
     if not version:
         raise ApiError(503, "SERVICE_AREA_NOT_CONFIGURED", "No service-area version is configured")
-    statuses = dict(session.execute(
-        select(ServiceArea.area_type, ServiceArea.status).where(ServiceArea.service_area_version == version)
-    ).tuples().all())
-    if set(statuses) != {"URBAN", "TOTAL"}:
+    rows = {t: (st, src) for t, st, src in session.execute(
+        select(ServiceArea.area_type, ServiceArea.status, ServiceArea.source_json)
+        .where(ServiceArea.service_area_version == version)
+    ).tuples().all()}
+    if not {"URBAN", "TOTAL"} <= set(rows):
         raise ApiError(503, "SERVICE_AREA_NOT_CONFIGURED", f"Service-area version {version} is incomplete or missing")
-    if any(s == "RETIRED" for s in statuses.values()):
+    statuses = [st for st, _ in rows.values()]
+    if any(s == "RETIRED" for s in statuses):
         raise ApiError(503, "SERVICE_AREA_NOT_CONFIGURED", f"Service-area version {version} is retired")
-    if any(s != "APPROVED" for s in statuses.values()) and not settings.allow_candidate_service_area:
+    if any(s != "APPROVED" for s in statuses) and not settings.allow_candidate_service_area:
         raise ApiError(503, "SERVICE_AREA_NOT_APPROVED",
                        f"Service-area version {version} is not approved by the project owner")
-    status = "APPROVED" if all(s == "APPROVED" for s in statuses.values()) else "CANDIDATE"
-    return ActiveAreas(version=version, status=status)
+    raw = (rows["TOTAL"][1] or {}).get("serviceability")
+    serviceability = None if raw is None else Serviceability(
+        anchor=(float(raw["anchor"]["lon"]), float(raw["anchor"]["lat"])),
+        max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]))
+    if serviceability is None and require_serviceability:
+        raise ApiError(503, "SERVICE_AREA_NOT_CONFIGURED",
+                       f"Service-area version {version} has no per-point serviceability layer (GEO-03)")
+    status = "APPROVED" if all(s == "APPROVED" for s in statuses) else "CANDIDATE"
+    return ActiveAreas(version=version, status=status, serviceability=serviceability)
 
 
 def point_membership(session: Session, version: str, point: Lonlat) -> dict[str, bool]:
+    """Polygon membership per layer; EXCLUDED is False when the version has none."""
     geom = func.ST_SetSRID(func.ST_MakePoint(point[0], point[1]), 4326)
     rows = session.execute(
         select(ServiceArea.area_type, func.ST_Intersects(ServiceArea.geom, geom))
         .where(ServiceArea.service_area_version == version)
     ).tuples().all()
-    return dict(rows)
+    return {"EXCLUDED": False} | dict(rows)
+
+
+@dataclass(frozen=True)
+class PointAssessment:
+    in_urban: bool
+    reason: str | None  # None = served; else rules.POLYGON_REASONS / rules.POINT_REASONS
+    layer: str | None   # POLYGON (tier 1) | SERVICEABILITY (tier 2)
+    anchor_road_km: float | None = None
+    snap_m: float | None = None
+
+    def as_json(self) -> dict[str, Any]:
+        return {"reason": self.reason, "layer": self.layer,
+                "anchor_road_km": None if self.anchor_road_km is None else round(self.anchor_road_km, 3),
+                "snap_m": None if self.snap_m is None else round(self.snap_m, 1)}
+
+
+@dataclass(frozen=True)
+class Assessment:
+    classification: rules.Classification
+    pickup: PointAssessment
+    dropoff: PointAssessment
+    tier2_applied: bool
+
+
+def assess(session: Session, areas: ActiveAreas, pickup: Lonlat, dropoff: Lonlat, distance_fn: DistanceFn,
+           reach_fn: ReachFn, buffer_km: float) -> Assessment:
+    """Section 2.3 classification on a two-tier service area (GEO-03).
+
+    Tier 1 (polygon) needs no routing. Tier 2 runs one OSRM /table request only when
+    both points pass tier 1. Raises RouteNotFound when both points are served but no
+    route joins them, RoutingUnavailable when OSRM cannot answer (no fallback)."""
+    mp, md = point_membership(session, areas.version, pickup), point_membership(session, areas.version, dropoff)
+    p_reason = rules.polygon_reason(mp["TOTAL"], mp["EXCLUDED"])
+    d_reason = rules.polygon_reason(md["TOTAL"], md["EXCLUDED"])
+    p = PointAssessment(mp["URBAN"], p_reason, "POLYGON" if p_reason else None)
+    d = PointAssessment(md["URBAN"], d_reason, "POLYGON" if d_reason else None)
+    s = areas.serviceability
+    tier2 = s is not None and p.reason is None and d.reason is None
+    if tier2:
+        assert s is not None
+        try:
+            reach = reach_fn(s.anchor, pickup, dropoff)
+        except RouteNotFound:  # OSRM could not snap a point to any road segment
+            p = replace(p, reason="NO_ROAD_ACCESS", layer="SERVICEABILITY")
+            d = replace(d, reason="NO_ROAD_ACCESS", layer="SERVICEABILITY")
+        else:
+            def tier2_point(pa: PointAssessment, snap_m: float, anchor_km: float | None) -> PointAssessment:
+                reason = rules.point_reason(snap_m, anchor_km, s.max_snap_m, s.max_road_km)
+                return replace(pa, reason=reason, layer="SERVICEABILITY" if reason else None,
+                               anchor_road_km=anchor_km, snap_m=snap_m)
+
+            p = tier2_point(p, reach.pickup.snap_m, reach.pickup.anchor_road_km)
+            d = tier2_point(d, reach.dropoff.snap_m, reach.dropoff.anchor_road_km)
+            if p.reason is None and d.reason is None and reach.pickup_to_dropoff_km is None:
+                raise RouteNotFound("NoRoute")
+    result = rules.classify(
+        pickup_in_total=p.reason is None,
+        dropoff_in_total=d.reason is None,
+        pickup_in_urban=p.in_urban,
+        dropoff_in_urban=d.in_urban,
+        road_distance_km=lambda: distance_fn(pickup, dropoff),
+        urban_boundary_buffer_km=buffer_km,
+    )
+    return Assessment(classification=result, pickup=p, dropoff=d, tier2_applied=tier2)
 
 
 def osrm_distance_fn(settings: Settings) -> DistanceFn:
     client = OsrmCarDistance(settings.osrm_car_url, settings.routing_timeout_s)
     return lambda a, b: client.road_distance(a, b).km
+
+
+def osrm_reach_fn(settings: Settings) -> ReachFn:
+    client = OsrmCarDistance(settings.osrm_car_url, settings.routing_timeout_s)
+    return client.reachability
 
 
 def create_trip_request(
@@ -72,6 +167,7 @@ def create_trip_request(
     body: TripRequestIn,
     settings: Settings,
     distance_fn: DistanceFn,
+    reach_fn: ReachFn,
     now: datetime | None = None,
 ) -> TripRequestOut:
     now = now or datetime.now(UTC)
@@ -86,25 +182,22 @@ def create_trip_request(
 
     pickup: Lonlat = (body.pickup.lon, body.pickup.lat)
     dropoff: Lonlat = (body.dropoff.lon, body.dropoff.lat)
-    p_in = point_membership(session, areas.version, pickup)
-    d_in = point_membership(session, areas.version, dropoff)
     try:
-        result = rules.classify(
-            pickup_in_total=p_in["TOTAL"],
-            dropoff_in_total=d_in["TOTAL"],
-            pickup_in_urban=p_in["URBAN"],
-            dropoff_in_urban=d_in["URBAN"],
-            road_distance_km=lambda: distance_fn(pickup, dropoff),
-            urban_boundary_buffer_km=float(baseline["spatial_and_service_areas"]["urban_boundary_buffer_km"]),
-        )
+        assessed = assess(session, areas, pickup, dropoff, distance_fn, reach_fn,
+                          float(baseline["spatial_and_service_areas"]["urban_boundary_buffer_km"]))
     except RouteNotFound as exc:
         raise ApiError(422, "ROUTE_NOT_FOUND", "No road route between pickup and dropoff", {"osrm_code": str(exc)}) from exc
     except RoutingUnavailable as exc:
         raise ApiError(503, "ROUTING_UNAVAILABLE", "Routing service is unavailable") from exc
+    result = assessed.classification
     if result.mode is None:
-        message = ("Pickup or dropoff is outside the service area" if result.error_code == "OUT_OF_SERVICE_AREA"
-                   else "Only intercity routes with one end in the Hà Nội urban area are supported")
-        raise ApiError(422, str(result.error_code), message, {"service_area_version": areas.version})
+        if result.error_code == "OUT_OF_SERVICE_AREA":
+            raise ApiError(422, "OUT_OF_SERVICE_AREA", "Pickup or dropoff is outside the service area",
+                           {"service_area_version": areas.version, "pickup": assessed.pickup.as_json(),
+                            "dropoff": assessed.dropoff.as_json()})
+        raise ApiError(422, str(result.error_code),
+                       "Only intercity routes with one end in the Hà Nội urban area are supported",
+                       {"service_area_version": areas.version})
 
     allowed, rejections = rules.allowed_services(
         mode=result.mode,
