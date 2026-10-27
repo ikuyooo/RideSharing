@@ -29,7 +29,8 @@ OUTSIDE_URBAN = {"lat": 20.5, "lon": 105.5}
 OUTSIDE_URBAN_2 = {"lat": 20.6, "lon": 105.4}
 OUTSIDE_TOTAL = {"lat": 22.0, "lon": 107.0}
 # SYNTHETIC tier-2 parameters (GEO-03) stored with the TOTAL row, as the build does.
-SERVICEABILITY = '{"anchor": {"lon": 105.85, "lat": 21.03}, "max_road_km": 150.0, "max_snap_m": 300.0}'
+SERVICEABILITY = ('{"anchor": {"lon": 105.85, "lat": 21.03}, "max_road_km": 150.0, "max_snap_m": 300.0, '
+                  '"exclude": ["ferry"]}')
 # SYNTHETIC EXCLUDED square (an "island" without road) inside TOTAL, outside URBAN.
 EXCLUDED_WKT = "MULTIPOLYGON(((105.2 20.2,105.3 20.2,105.3 20.3,105.2 20.3,105.2 20.2)))"
 IN_EXCLUDED = {"lat": 20.25, "lon": 105.25}
@@ -40,9 +41,11 @@ class FakeDistance:
         self.km: float = 10.0
         self.error: Exception | None = None
         self.calls = 0
+        self.excludes: list[tuple[str, ...]] = []
 
-    def __call__(self, a: tuple[float, float], b: tuple[float, float]) -> float:
+    def __call__(self, a: tuple[float, float], b: tuple[float, float], exclude: tuple[str, ...] = ()) -> float:
         self.calls += 1
+        self.excludes.append(exclude)
         if self.error:
             raise self.error
         return self.km
@@ -58,9 +61,10 @@ class FakeReach:
         self.error: Exception | None = None
         self.calls = 0
 
-    def __call__(self, anchor: tuple[float, float], a: tuple[float, float], b: tuple[float, float]) -> Reachability:
+    def __call__(self, anchor: tuple[float, float], a: tuple[float, float], b: tuple[float, float],
+                 exclude: tuple[str, ...] = ()) -> Reachability:
         self.calls += 1
-        assert anchor == (105.85, 21.03)
+        assert anchor == (105.85, 21.03) and exclude == ("ferry",)  # GEO-E policy reaches OSRM
         if self.error:
             raise self.error
         return Reachability(self.pickup, self.dropoff, self.pickup_to_dropoff_km)
@@ -241,7 +245,7 @@ def _error(resp: object) -> dict:
     return resp.json()["error"]  # type: ignore[attr-defined]
 
 
-@pytest.mark.parametrize("km,ok", [(150.0, True), (150.001, False)])
+@pytest.mark.parametrize("km,ok", [(149.98, True), (150.0, True), (150.001, False), (150.02, False)])
 def test_tier2_road_limit_exactly_150_accepted_beyond_rejected(client: TestClient, fake_distance: FakeDistance,
                                                                km: float, ok: bool) -> None:
     _, headers = new_user(client)
@@ -254,7 +258,7 @@ def test_tier2_road_limit_exactly_150_accepted_beyond_rejected(client: TestClien
         err = _error(resp)
         assert err["code"] == "OUT_OF_SERVICE_AREA"
         assert err["details"]["dropoff"] == {"reason": "BEYOND_MAX_ROAD_DISTANCE", "layer": "SERVICEABILITY",
-                                             "anchor_road_km": 150.001, "snap_m": 5.0}
+                                             "anchor_road_km": km, "snap_m": 5.0}
         assert err["details"]["pickup"]["reason"] is None
         assert fake_distance.calls == 0  # rejected in step 1, no pickup-dropoff routing
 
@@ -317,3 +321,20 @@ def test_version_without_serviceability_layer_is_refused(client: TestClient, fak
     db_session.commit()
     resp = post(client, headers)
     assert resp.status_code == 503 and resp.json()["error"]["code"] == "SERVICE_AREA_NOT_CONFIGURED"
+
+
+def test_point_exactly_on_polygon_edge_passes_tier1(client: TestClient, fake_distance: FakeDistance) -> None:
+    """GEO-C: ST_Intersects includes the boundary - an edge point is decided by the road check."""
+    _, headers = new_user(client)
+    fake_distance.km = 60.0
+    on_edge = {"lat": 20.5, "lon": 105.0}  # west edge of the synthetic TOTAL square
+    assert post(client, headers, dropoff=on_edge).status_code == 201
+    fake_distance.reach.dropoff = PointReach(snap_m=5.0, anchor_road_km=151.0)  # type: ignore[attr-defined]
+    err = _error(post(client, headers, dropoff=on_edge))
+    assert err["details"]["dropoff"]["layer"] == "SERVICEABILITY"  # never rejected by the polygon itself
+
+
+def test_pickup_dropoff_distance_uses_the_version_exclusions(client: TestClient, fake_distance: FakeDistance) -> None:
+    _, headers = new_user(client)
+    assert post(client, headers, dropoff=OUTSIDE_URBAN).status_code == 201
+    assert fake_distance.excludes == [("ferry",)]

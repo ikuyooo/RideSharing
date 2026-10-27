@@ -1,0 +1,32 @@
+{
+  "relation": "relation/17627914",
+  "service_area_version": "sa-cand-9bd44393e699",
+  "osm": {
+    "member_ways": 9,
+    "length_km": 31.084,
+    "closed": false,
+    "open_ring_gap_m": 1885.0
+  },
+  "gadm": {
+    "dataset": "GADM 4.1 gadm41_VNM_3.json (level 3, pre-2025 units)",
+    "sha256": "fe29b396acefba3b49172ff46c2734658ee97c6a96635d506d1fd4070993b23d",
+    "gid": "VNM.27.9.5_1",
+    "area_km2": 4.544,
+    "vertices": 54,
+    "perimeter_km": 24.183,
+    "contains_osm_town_node": true,
+    "split_over_current_units_km2": {
+      "Xã Thư Lâm": 2.37,
+      "Xã Phúc Thịnh": 1.566,
+      "Xã Đông Anh": 0.609
+    },
+    "overlap_with_current_urban_km2": 0.0
+  },
+  "deviation_osm_to_gadm_boundary_m": {
+    "samples_every_25m": 1240,
+    "median": 23.7,
+    "p95": 184.2,
+    "max": 434.9
+  },
+  "gadm_boundary_farther_than_100m_from_osm_km": 0.355
+}

@@ -1,0 +1,189 @@
+# =============================================================================
+# CANDIDATE service-area rules v4 (owner decision "P1 FINAL HARDENING & APPROVAL GATES").
+# STATUS: PENDING_OWNER_APPROVAL - geometry built from these rules is CANDIDATE.
+# Changes vs v3 (sa-cand-7da7fbe2e01b, kept unchanged with v1 / v2):
+#   GEO-B  Sơn Tây (k50) and Chương Mỹ (k49) outside URBAN in the MVP - owner decision
+#   GEO-C  tier 1 = geodesic lower bound (no point rejected by sampling misses)
+#   GEO-E  no ferry: every OSRM call excludes the "ferry" class
+#   GEO-D  max_snap_m = 300 approved as a temporary MVP technical threshold
+#
+# Official sources (GEO-06) - read directly from the signed PDFs on the
+# government portal (scanned images, read page by page):
+#   QD19   = Quyết định 19/2025/QĐ-TTg (30/06/2025), Annex II, Hà Nội = 126 units
+#            (51 phường + 75 xã): https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/7/19ttg.signed.pdf
+#            (MD5 13C91AB4E9381A0D449FF4397A74796C)
+#   NQ1656 = Nghị quyết 1656/NQ-UBTVQH15 (16/06/2025), Điều 1:
+#            https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/6/1656-nq.signed.pdf
+#            (MD5 E256FF94146F3050A20CDF32CDCF5B6B)
+# Transcribed table: official/hanoi_units_qd19_nq1656.csv (every include_units
+# entry is checked against it by the pipeline).
+# =============================================================================
+rules_id: sa_rules_candidate_v4
+status: PENDING_OWNER_APPROVAL
+official_units_csv: official/hanoi_units_qd19_nq1656.csv
+
+city:
+  iso3166_2: VN-HN
+
+urban:
+  # GEO-02: controlled list instead of "every ward of Hà Nội". Basis: Revision 9
+  # Section 2.3 "các quận nội thành và các khu đô thị vệ tinh liền kề như Hà Đông,
+  # Yên Nghĩa, Dương Nội, An Khánh, Mỹ Đình, Gia Lâm, Đông Anh". Included: the 48
+  # wards formed (NQ1656 k1-k48) from wards of the former urban districts (quận),
+  # some with parts of adjacent communes as the clause states.
+  include_units:
+    - {name: "Phường Hoàn Kiếm", qd19_code: "00070", nq1656: k1, basis: "phường of former quận Hoàn Kiếm"}
+    - {name: "Phường Cửa Nam", qd19_code: "00082", nq1656: k2, basis: "phường of former quận Hoàn Kiếm"}
+    - {name: "Phường Ba Đình", qd19_code: "00004", nq1656: k3, basis: "phường of former quận Ba Đình / Hoàn Kiếm"}
+    - {name: "Phường Ngọc Hà", qd19_code: "00008", nq1656: k4, basis: "phường of former quận Ba Đình"}
+    - {name: "Phường Giảng Võ", qd19_code: "00025", nq1656: k5, basis: "phường of former quận Ba Đình / Đống Đa"}
+    - {name: "Phường Hai Bà Trưng", qd19_code: "00256", nq1656: k6, basis: "phường of former quận Hai Bà Trưng"}
+    - {name: "Phường Vĩnh Tuy", qd19_code: "00283", nq1656: k7, basis: "phường of former quận Hai Bà Trưng / Hoàng Mai"}
+    - {name: "Phường Bạch Mai", qd19_code: "00292", nq1656: k8, basis: "phường of former quận Hai Bà Trưng / Đống Đa"}
+    - {name: "Phường Đống Đa", qd19_code: "00235", nq1656: k9, basis: "phường of former quận Đống Đa"}
+    - {name: "Phường Kim Liên", qd19_code: "00229", nq1656: k10, basis: "phường of former quận Đống Đa"}
+    - {name: "Phường Văn Miếu - Quốc Tử Giám", qd19_code: "00226", nq1656: k11, basis: "phường of former quận Đống Đa / Ba Đình / Hoàn Kiếm / Hai Bà Trưng"}
+    - {name: "Phường Láng", qd19_code: "00199", nq1656: k12, basis: "phường of former quận Đống Đa / Ba Đình"}
+    - {name: "Phường Ô Chợ Dừa", qd19_code: "00190", nq1656: k13, basis: "phường of former quận Đống Đa / Ba Đình"}
+    - {name: "Phường Hồng Hà", qd19_code: "00097", nq1656: k14, basis: "phường of former quận Hoàn Kiếm / Ba Đình / Tây Hồ / Long Biên / Hai Bà Trưng"}
+    - {name: "Phường Lĩnh Nam", qd19_code: "00328", nq1656: k15, basis: "phường of former quận Hoàng Mai / Hai Bà Trưng"}
+    - {name: "Phường Hoàng Mai", qd19_code: "00331", nq1656: k16, basis: "phường of former quận Hoàng Mai"}
+    - {name: "Phường Vĩnh Hưng", qd19_code: "00301", nq1656: k17, basis: "phường of former quận Hoàng Mai / Hai Bà Trưng"}
+    - {name: "Phường Tương Mai", qd19_code: "00322", nq1656: k18, basis: "phường of former quận Hoàng Mai / Hai Bà Trưng / Thanh Xuân"}
+    - {name: "Phường Định Công", qd19_code: "00316", nq1656: k19, basis: "phường of former quận Hoàng Mai + parts of xã Tân Triều, Thanh Liệt (huyện Thanh Trì)"}
+    - {name: "Phường Hoàng Liệt", qd19_code: "00337", nq1656: k20, basis: "phường Hoàng Liệt, Đại Kim (part) + thị trấn Văn Điển, xã Tam Hiệp, Thanh Liệt (parts, huyện Thanh Trì)"}
+    - {name: "Phường Yên Sở", qd19_code: "00340", nq1656: k21, basis: "phường of former quận Hoàng Mai + part of xã Tứ Hiệp (huyện Thanh Trì)"}
+    - {name: "Phường Thanh Xuân", qd19_code: "00367", nq1656: k22, basis: "phường of former quận Thanh Xuân / Cầu Giấy / Nam Từ Liêm"}
+    - {name: "Phường Khương Đình", qd19_code: "00364", nq1656: k23, basis: "phường of former quận Thanh Xuân / Hoàng Mai + part of xã Tân Triều"}
+    - {name: "Phường Phương Liệt", qd19_code: "00352", nq1656: k24, basis: "phường of former quận Thanh Xuân / Hoàng Mai"}
+    - {name: "Phường Cầu Giấy", qd19_code: "00166", nq1656: k25, basis: "phường of former quận Cầu Giấy + part of phường Mỹ Đình 1, Mỹ Đình 2 (quận Nam Từ Liêm)"}
+    - {name: "Phường Nghĩa Đô", qd19_code: "00160", nq1656: k26, basis: "phường of former quận Cầu Giấy / Bắc Từ Liêm"}
+    - {name: "Phường Yên Hòa", qd19_code: "00175", nq1656: k27, basis: "phường of former quận Cầu Giấy / Nam Từ Liêm / Thanh Xuân"}
+    - {name: "Phường Tây Hồ", qd19_code: "00103", nq1656: k28, basis: "phường of former quận Tây Hồ / Cầu Giấy"}
+    - {name: "Phường Phú Thượng", qd19_code: "00091", nq1656: k29, basis: "phường of former quận Tây Hồ / Bắc Từ Liêm"}
+    - {name: "Phường Tây Tựu", qd19_code: "00613", nq1656: k30, basis: "phường of former quận Bắc Từ Liêm + part of xã Kim Chung (huyện Hoài Đức)"}
+    - {name: "Phường Phú Diễn", qd19_code: "00619", nq1656: k31, basis: "phường of former quận Bắc Từ Liêm / Cầu Giấy"}
+    - {name: "Phường Xuân Đỉnh", qd19_code: "00611", nq1656: k32, basis: "phường of former quận Bắc Từ Liêm / Tây Hồ"}
+    - {name: "Phường Đông Ngạc", qd19_code: "00602", nq1656: k33, basis: "phường of former quận Bắc Từ Liêm"}
+    - {name: "Phường Thượng Cát", qd19_code: "00598", nq1656: k34, basis: "phường of former quận Bắc Từ Liêm"}
+    - {name: "Phường Từ Liêm", qd19_code: "00592", nq1656: k35, basis: "phường of former quận Nam Từ Liêm / Cầu Giấy incl. remainder of Mỹ Đình 1, Mỹ Đình 2"}
+    - {name: "Phường Xuân Phương", qd19_code: "00622", nq1656: k36, basis: "phường of former quận Nam / Bắc Từ Liêm + part of xã Vân Canh (huyện Hoài Đức)"}
+    - {name: "Phường Tây Mỗ", qd19_code: "00634", nq1656: k37, basis: "phường of former quận Nam Từ Liêm / Hà Đông + part of xã An Khánh (huyện Hoài Đức)"}
+    - {name: "Phường Đại Mỗ", qd19_code: "00637", nq1656: k38, basis: "phường of former quận Nam Từ Liêm / Hà Đông / Thanh Xuân / Cầu Giấy"}
+    - {name: "Phường Long Biên", qd19_code: "00145", nq1656: k39, basis: "phường of former quận Long Biên + part of xã Bát Tràng (huyện Gia Lâm)"}
+    - {name: "Phường Bồ Đề", qd19_code: "00118", nq1656: k40, basis: "phường of former quận Long Biên"}
+    - {name: "Phường Việt Hưng", qd19_code: "00127", nq1656: k41, basis: "phường of former quận Long Biên"}
+    - {name: "Phường Phúc Lợi", qd19_code: "00136", nq1656: k42, basis: "phường of former quận Long Biên + part of xã Cổ Bi (huyện Gia Lâm)"}
+    - {name: "Phường Hà Đông", qd19_code: "09556", nq1656: k43, basis: "phường of former quận Hà Đông / Nam Từ Liêm + part of xã Tân Triều"}
+    - {name: "Phường Dương Nội", qd19_code: "09886", nq1656: k44, basis: "phường of former quận Hà Đông + part of xã La Phù (huyện Hoài Đức)"}
+    - {name: "Phường Yên Nghĩa", qd19_code: "09562", nq1656: k45, basis: "phường of former quận Hà Đông (part of Đồng Mai, remainder of Yên Nghĩa)"}
+    - {name: "Phường Phú Lương", qd19_code: "09568", nq1656: k46, basis: "phường of former quận Hà Đông + parts of xã Cự Khê, Hữu Hòa (huyện Thanh Oai / Thanh Trì)"}
+    - {name: "Phường Kiến Hưng", qd19_code: "09552", nq1656: k47, basis: "phường of former quận Hà Đông"}
+    - {name: "Phường Thanh Liệt", qd19_code: "00643", nq1656: k48, basis: "phường of former quận Hoàng Mai / Thanh Xuân / Hà Đông + parts of xã Tả Thanh Oai, Thanh Liệt, Tân Triều"}
+    - {name: "Xã Gia Lâm", qd19_code: "00565", nq1656: k109, basis: "R9 'Gia Lâm'; whole population of former thị trấn Trâu Quỳ (A3)"}
+  # U3 (A2 / GEO-05): named OSM urban-development polygons of An Khánh, not the
+  # whole new Xã An Khánh (which also holds the remainder of La Phù, NQ1656 k105).
+  include_osm_areas:
+    - {osm: relation/21054720, label: "Khu đô thị Nam An Khánh"}
+    - {osm: way/1484064385, label: "Vista Lago Nam An Khánh"}
+    - {osm: way/1298606975, label: "The Golden An Khánh"}
+    - {osm: way/1565334267, label: "An Khánh Ecomony"}
+    - {osm: way/1565297217, label: "Splendora Villas", note: "Splendora = Bắc An Khánh by name (owner GEO-05); investor address Km10+600 Đại lộ Thăng Long, Sơn Đồng"}
+    - {osm: way/1565297218, label: "Splendora Terrace Mailand", note: "Splendora = Bắc An Khánh by name (owner GEO-05)"}
+    - {osm: way/1565297219, label: "Splendora Lakeside Villas", note: "Splendora = Bắc An Khánh by name (owner GEO-05)"}
+  # Units of the city deliberately NOT in the urban list (documentation, reported in the bundle).
+  excluded_review:
+    - {name: "Phường Tùng Thiện", qd19_code: "09604", nq1656: k51, status: "EXCLUDED - OWNER_DECISION_GEO-02",
+       reason: "former thị xã Sơn Tây; stays in the TOTAL area"}
+    - {name: "Phường Sơn Tây", qd19_code: "09574", nq1656: k50, status: "EXCLUDED - OWNER_DECISION_GEO-B (MVP)",
+       reason: "former thị xã Sơn Tây; outside URBAN in the MVP; stays in TOTAL for intercity service"}
+    - {name: "Phường Chương Mỹ", qd19_code: "10015", nq1656: k49, status: "EXCLUDED - OWNER_DECISION_GEO-B (MVP)",
+       reason: "mainly former huyện Chương Mỹ; outside URBAN in the MVP; stays in TOTAL for intercity service"}
+    - {name: "Xã Đông Anh", qd19_code: "00454", nq1656: k114, status: "EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-A)",
+       reason: "former thị trấn Đông Anh split k113/k114/k115; OSM historic ring relation/17627914 open in every version; GADM 4.1 polygon is non-authoritative - owner decision required"}
+    - {name: "Xã Thư Lâm", qd19_code: "00475", nq1656: k113, status: "EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01)",
+       reason: "holds part of former thị trấn Đông Anh"}
+    - {name: "Xã Phúc Thịnh", qd19_code: "00466", nq1656: k115, status: "EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01)",
+       reason: "holds the remainder of former thị trấn Đông Anh (and the OSM town node)"}
+
+total:
+  province_scope: all_within_range   # A5
+  neighbours:   # Section 1 names -> current provinces (documentation of A1)
+    - {name: Hưng Yên, by: province_iso, iso3166_2: VN-66}
+    - {name: Bắc Ninh, by: province_iso, iso3166_2: VN-56}
+    - {name: Hải Dương, by: contains_node, osm_node: 369487115}
+    - {name: Hà Nam, by: contains_node, osm_node: 369487036}
+    - {name: Vĩnh Phúc, by: contains_node, osm_node: 369486946}
+    - {name: Hòa Bình, by: contains_node, osm_node: 13967896564}
+  anchor:
+    osm_node: 74132064   # A4 / GEO-03: technical anchor (admin_centre of r1903516)
+  unit_admin_level: 6
+  # GEO-C tier 1: a unit enters the TOTAL polygon when its NEAREST point lies within
+  # the limit in a straight line (geodesic, spheroid). A road distance is never
+  # shorter than the straight line, so the polygon never rejects a point the road
+  # check would accept; the per-point road check (tier 2) is mandatory.
+  tier1_rule: geodesic_lower_bound
+  sensitivity_band_km: 30
+  sensitivity_points_per_unit: 16
+  # GEO-04: TOTAL components probed at PointOnSurface + N seeded points; no road
+  # inside / no route from the anchor -> EXCLUDED layer (raw polygon kept).
+  component_probe_points: 4
+
+# Tier 2 (per pickup / dropoff point; one OSRM car /table request, elements
+# anchor->pickup, anchor->dropoff, pickup->dropoff). max_road_km = Baseline
+# max_total_service_radius_km (accept distance_m <= 150000). max_snap_m: owner GEO-D,
+# temporary MVP technical threshold - NOT a Baseline parameter; re-evaluate before P2.
+# exclude: owner GEO-E - journeys that need a ferry are not supported in the MVP.
+serviceability:
+  max_snap_m: 300
+  exclude: [ferry]
+
+# Pre-2025 boundaries (OSM boundary=historic, admin_level 8) used as evidence only.
+historic_evidence:
+  - {relation: 17627914, label: "Thị trấn Đông Anh (pre-2025)", purpose: "GEO-01"}
+  - {relation: 11367508, label: "Xã An Khánh (pre-2025)", purpose: "A2 / GEO-05"}
+  - {relation: 11367506, label: "Xã La Phù (pre-2025)", purpose: "A2 / Section 72.2"}
+  - {relation: 13825102, label: "Thị trấn Trâu Quỳ (pre-2025)", purpose: "A3 Gia Lâm"}
+  - {relation: 11367522, label: "Phường Mỹ Đình 1 (pre-2025)", purpose: "A3 Mỹ Đình"}
+  - {relation: 11367523, label: "Phường Mỹ Đình 2 (pre-2025)", purpose: "A3 Mỹ Đình"}
+
+admin_mapping:
+  - {r9_name: "Hoàn Kiếm (quận nội thành)", unit: "Phường Hoàn Kiếm", qd19_code: "00070", nq1656: "k1", confidence: HIGH}
+  - {r9_name: "Hà Đông", unit: "Phường Hà Đông", qd19_code: "09556", nq1656: "k43", confidence: HIGH,
+     note: "former quận Hà Đông wards form k43-k47 (all in the controlled list)"}
+  - {r9_name: "Yên Nghĩa", unit: "Phường Yên Nghĩa", qd19_code: "09562", nq1656: "k45", confidence: HIGH}
+  - {r9_name: "Dương Nội", unit: "Phường Dương Nội", qd19_code: "09886", nq1656: "k44", confidence: HIGH,
+     note: "k44 also takes part of xã La Phù"}
+  - {r9_name: "Mỹ Đình", unit: "Phường Cầu Giấy + Phường Từ Liêm", qd19_code: "00166 / 00592", nq1656: "k25, k35",
+     confidence: HIGH, note: "Mỹ Đình 1 / 2 split between k25 and k35 (signed NQ1656); historic polygons reported"}
+  - {r9_name: "An Khánh", unit: "Phường Tây Mỗ (part) + Xã Sơn Đồng (part) + Xã An Khánh (remainder)",
+     qd19_code: "00634 / 09871 / 09877", nq1656: "k37, k104, k105", confidence: MEDIUM,
+     note: "urban = U3 OSM polygons only; historic An Khánh ring cannot be assembled"}
+  - {r9_name: "La Phù", unit: "Phường Dương Nội (part) + Xã An Khánh (remainder)", qd19_code: "09886 / 09877",
+     nq1656: "k44, k105", confidence: MEDIUM, note: "historic La Phù polygon (relation/11367506) reported as evidence"}
+  - {r9_name: "Gia Lâm", unit: "Xã Gia Lâm", qd19_code: "00565", nq1656: "k109", confidence: MEDIUM,
+     note: "k109: whole population and part of the area of former Trâu Quỳ town; remainder -> Xã Bát Tràng (00577, k111)"}
+  - {r9_name: "Đông Anh", unit: "Xã Đông Anh (part) / Xã Thư Lâm (part) / Xã Phúc Thịnh (remainder)",
+     qd19_code: "00454 / 00475 / 00466", nq1656: "k113, k114, k115", confidence: PENDING,
+     note: "GEO-A: PENDING_GEOMETRY_EVIDENCE - not in the urban area"}
+  - {r9_name: "TP Hưng Yên", unit: "Phường Phố Hiến (candidate representative only)", qd19_code: null,
+     nq1656: null, confidence: LOW, note: "A8: representative point only, not an official mapping"}
+
+test_locations:
+  - {label: "Hoàn Kiếm", osm: node/13709921432, expected_urban: true, source: "Section 2.3"}
+  - {label: "Hà Đông", osm: node/13709983624, expected_urban: true, source: "Section 2.3"}
+  - {label: "Yên Nghĩa", osm: node/13710038878, expected_urban: true, source: "Section 2.3"}
+  - {label: "Dương Nội", osm: node/13710014146, expected_urban: true, source: "Section 2.3"}
+  - {label: "An Khánh (Khu đô thị Nam An Khánh)", osm: relation/21054720, expected_urban: true, source: "Section 2.3"}
+  - {label: "An Khánh (Splendora / Bắc An Khánh)", osm: way/1565297218, expected_urban: true, source: "Section 2.3; GEO-05"}
+  - {label: "Mỹ Đình (Sân vận động Quốc gia)", osm: way/533838254, expected_urban: true, source: "Section 2.3"}
+  - {label: "Mỹ Đình (Bến xe Mỹ Đình)", osm: relation/21430094, expected_urban: true, source: "Section 2.3"}
+  - {label: "Gia Lâm (Khu tái định cư Trâu Quỳ)", osm: way/1431973724, expected_urban: true, source: "Section 2.3; NQ1656 k109"}
+  - {label: "Đông Anh (town place node)", osm: node/13799910539, expected_urban: true, source: "Section 2.3",
+     note: "EXPECTED BY R9 BUT PENDING_GEOMETRY_EVIDENCE (GEO-A) - blocker, not hidden"}
+  - {label: "La Phù", osm: node/12147486706, expected_urban: false, source: "Section 72.2"}
+  - {label: "Đại học Phenikaa", osm: way/973433275, expected_urban: true, source: "Sections 16.1, 72.2"}
+  - {label: "Tùng Thiện (Xuân Khanh)", osm: node/12629466848, expected_urban: false, expected_total: true, source: "GEO-02"}
+  - {label: "Sơn Tây (city node)", osm: node/13341355937, expected_urban: false, expected_total: true, source: "GEO-02 controlled list"}
+  - {label: "Phố Hiến (TP Hưng Yên representative)", osm: node/13155709564, expected_urban: false, expected_total: true,
+     source: "Section 72.2", note: "A8 candidate representative"}

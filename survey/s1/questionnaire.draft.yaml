@@ -1,6 +1,6 @@
 # =============================================================================
-# Survey S1 - questionnaire DRAFT 2 (Revision 9 Section 65; owner decisions P1-D5
-# and "PHASE 1 FINAL CLOSURE" survey items 1-8)
+# Survey S1 - questionnaire DRAFT 3 (Revision 9 Section 65; owner decisions P1-D5,
+# "PHASE 1 FINAL CLOSURE" survey items 1-8 and "P1 FINAL HARDENING" SURVEY-01..07)
 # STATUS: DRAFT - not released. Rows with approval_status PENDING_OWNER_APPROVAL or
 # experimental_status EXPERIMENT_REVIEW_REQUIRED are not approved.
 #
@@ -10,11 +10,12 @@
 #   experimental_status  SOURCED_R9 | DERIVED_LOCKED_FORMULA | DERIVED_SOURCED_ETA |
 #                        HYPOTHETICAL_SCENARIO | DESIGN_PARAMETER | EXPERIMENT_REVIEW_REQUIRED
 #   approval_status      OWNER_DECIDED (<decision>) | PENDING_OWNER_APPROVAL | NOT_ACTIVE_PROPOSAL
-# Research parameters live ONLY here - never in pricing_configs.
+# Research parameters live ONLY here - never in pricing_configs, OSRM or the Baseline:
+# the 6 km times are survey-scenario values, not production routing parameters.
 # Scenario table: python -I scripts/survey/scenario_table.py
 # =============================================================================
 survey_id: s1
-draft_version: 2
+draft_version: 3
 language: vi
 estimated_minutes: "4-5"            # R9:65.2
 
@@ -58,6 +59,9 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
         expected_price_vnd: {value: 145000, source: "R9:20.2 Fare_matched_est",
                              derivation: "floor(0.75 x 194000) (d_matched_typical 0.25); 143000 is only R9:16.1 matched scenario A",
                              experimental_status: SOURCED_R9, approval_status: "OWNER_DECIDED (survey item 2)"}
+        quote_cap_vnd: {value: 155000, source: "R9:18.3 (Quote_A = 155.000 đ) / R9:5 card shows Quote_i",
+                        derivation: "floor(194000 x (1 - d_min 0.20) / 1000) x 1000", experimental_status: SOURCED_R9,
+                        approval_status: "OWNER_DECIDED (SURVEY-01)"}
         max_price_if_unmatched_vnd: {value: 174000, source: "R9:10.4 / 18.4", derivation: "", experimental_status: SOURCED_R9,
                                      approval_status: "OWNER_DECIDED (P1-D5)"}
         max_detour_min: {value: 12, source: "R9:10.4 (+12 phút)", derivation: "= 0.30 x 40 (R9:6 default detour ratio)",
@@ -69,28 +73,34 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
                     approval_status: "OWNER_DECIDED (survey item 1: locked formula)"}
         travel_min: {value: 16, source: "OSRM motorbike 6 km median 9.57 min; R9:10.4 14 km 35 min; OSRM 14 km median 20.63 min",
                      derivation: "9.57 x 35 / 20.63 = 16.24 -> 16 (OSRM calibrated to the R9 14 km example); raw OSRM alternative 10",
-                     experimental_status: DERIVED_SOURCED_ETA, approval_status: PENDING_OWNER_APPROVAL}
+                     experimental_status: DERIVED_SOURCED_ETA,
+                     approval_status: "OWNER_DECIDED (SURVEY-02: peak-hour survey assumption, not a routing parameter)"}
       CAR_URBAN_PRIVATE:
         price_vnd: {value: 95000, source: "Baseline car_urban (20000 + 11000/km + 500/min, floor 1000)",
                     derivation: "floor((20000 + 11000 x 6 + 500 x 19) / 1000) x 1000", experimental_status: DERIVED_LOCKED_FORMULA,
                     approval_status: "OWNER_DECIDED (survey item 1: locked formula)"}
         travel_min: {value: 19, source: "OSRM car 6 km median 8.80 min; R9:10.4 14 km 40 min; OSRM 14 km median 18.32 min",
                      derivation: "8.80 x 40 / 18.32 = 19.21 -> 19 (OSRM calibrated to the R9 14 km example); raw OSRM alternative 9",
-                     experimental_status: DERIVED_SOURCED_ETA, approval_status: PENDING_OWNER_APPROVAL}
+                     experimental_status: DERIVED_SOURCED_ETA,
+                     approval_status: "OWNER_DECIDED (SURVEY-02: peak-hour survey assumption, not a routing parameter)"}
       CAR_URBAN_POOL:
         expected_price_vnd: {value: 71000, source: "R9:20.2 Fare_matched_est; Baseline d_matched_typical 0.25",
                              derivation: "floor(0.75 x 95000)", experimental_status: DERIVED_LOCKED_FORMULA,
                              approval_status: "OWNER_DECIDED (survey item 1: locked formula)"}
+        quote_cap_vnd: {value: 76000, source: "R9:18.3 Quote_i; Baseline d_min 0.20",
+                        derivation: "floor(95000 x 0.80 / 1000) x 1000", experimental_status: DERIVED_LOCKED_FORMULA,
+                        approval_status: "OWNER_DECIDED (SURVEY-01)"}
         max_price_if_unmatched_vnd: {value: 85000, source: "R9:18.4 Unmatched; Baseline d_min 0.20, alpha 0.50",
                                      derivation: "Quote = 0.80 x 95000 = 76000; floor(76000 + 0.5 x (95000 - 76000))",
                                      experimental_status: DERIVED_LOCKED_FORMULA,
                                      approval_status: "OWNER_DECIDED (survey item 1: locked formula)"}
         max_detour_min: {value: 6, source: "R9:6 default max_passenger_detour_ratio 0.30 (same rule gives 12 at 14 km)",
-                         derivation: "0.30 x 19.21 = 5.76 -> 6", experimental_status: DERIVED_LOCKED_FORMULA,
-                         approval_status: PENDING_OWNER_APPROVAL}
+                         derivation: "0.30 x 19.21 = 5.76 -> 6; shown as extra MINUTES to pick up / drop off another passenger, never as a distance limit",
+                         experimental_status: DERIVED_LOCKED_FORMULA, approval_status: "OWNER_DECIDED (SURVEY-02)"}
   rotated_attributes:
-    match_likelihood: {levels: [Cao, Trung bình, Thấp], source: "R9:65.2", derivation: "block rotation (survey_design.py)",
-                       experimental_status: SOURCED_R9, approval_status: "OWNER_DECIDED (P1-D5)"}
+    match_likelihood: {levels: [Cao, Trung bình, Thấp], source: "R9:65.2; SURVEY-03",
+                       derivation: "hypothetical survey levels shown as words only - no percentages, not an AI forecast; block rotation (survey_design.py)",
+                       experimental_status: HYPOTHETICAL_SCENARIO, approval_status: "OWNER_DECIDED (SURVEY-03)"}
     walk_m: {levels: [0, 200], source: "R9:65.2",
              derivation: "separate attribute; price NOT adjusted (C9 / R9:23.3 mu acts on allocation weights)",
              experimental_status: SOURCED_R9, approval_status: "OWNER_DECIDED (survey item 4)"}
@@ -117,6 +127,14 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
                           source: "R9 preamble: tariffs may be calibrated to market prices - no level given",
                           derivation: "not derivable from the locked formulas", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
                           approval_status: NOT_ACTIVE_PROPOSAL}
+
+      TIME_MODE_PM20: {applies_to: "travel_min of car (private, pool detour) and motorbike, varied independently per mode",
+                       rule: "x0.80 / x1.00 / x1.20 per mode, rotated independently of distance (design D)",
+                       example_14km_vnd: "times: car 32 / 40 / 48 min; motorbike 28 / 35 / 42 min",
+                       example_6km_vnd: "times: car 15 / 19 / 23 min; motorbike 13 / 16 / 19 min",
+                       source: "SURVEY-06 identifiability check (scripts/survey/identifiability_check.py)",
+                       derivation: "with POOL_D0xx + PRIVATE_BIKE_PM10: rank 9/9, max VIF 5.3; current design: rank 7/9 (not identified)",
+                       experimental_status: EXPERIMENT_REVIEW_REQUIRED, approval_status: NOT_ACTIVE_PROPOSAL}
 
 part_1b:                            # R9:65.2 - intercity, 2 tasks
   tasks_per_respondent: 2
@@ -171,46 +189,68 @@ part_3_demographics:                # R9:65.2 - minimal, anonymous; survey item 
     derivation: "asked first: the group quota is applied at session start"
     experimental_status: SOURCED_R9
     approval_status: "OWNER_DECIDED (survey item 8)"
+  # SURVEY-04: optional - a respondent may skip D2-D4 (stored as null).
   ride_hailing_trips_per_week:
-    question: "Mỗi tuần bạn đặt xe công nghệ (xe máy / ô tô) bao nhiêu lần?"
-    options: [{code: "0", text: "0 lần"}, {code: "1-2", text: "1–2 lần"}, {code: "3-5", text: "3–5 lần"},
-              {code: "6-10", text: "6–10 lần"}, {code: "11+", text: "Từ 11 lần trở lên"}]
-    source: "R9:65.2 (question); bins: survey item 6"
-    derivation: "integer counts, disjoint and exhaustive"
-    experimental_status: DESIGN_PARAMETER
-    approval_status: PENDING_OWNER_APPROVAL
-  usual_trip_distance:
-    question: "Quãng đường một chuyến đi thường ngày của bạn?"
-    options: [{code: LT3, text: "Dưới 3 km"}, {code: 3-LT7, text: "Từ 3 đến dưới 7 km"}, {code: 7-LT15, text: "Từ 7 đến dưới 15 km"},
-              {code: 15-LT30, text: "Từ 15 đến dưới 30 km"}, {code: "30+", text: "Từ 30 km trở lên"}]
-    source: "R9:65.2 (question); bins: survey item 6"
-    derivation: "half-open intervals [a, b): no overlap; 6 km and 14 km contexts fall in different bins"
-    experimental_status: DESIGN_PARAMETER
-    approval_status: PENDING_OWNER_APPROVAL
-  intercity_trips_per_month:
-    question: "Mỗi tháng bạn đi liên tỉnh (xe khách, xe ghép, ô tô…) bao nhiêu lần?"
+    question: "Mỗi tuần bạn sử dụng dịch vụ đặt xe bao nhiêu lần?"
+    required: false
     options: [{code: "0", text: "0 lần"}, {code: "1", text: "1 lần"}, {code: "2-3", text: "2–3 lần"},
-              {code: "4-7", text: "4–7 lần"}, {code: "8+", text: "Từ 8 lần trở lên"}]
-    source: "R9:65.2 (question); bins: survey item 6"
+              {code: "4-6", text: "4–6 lần"}, {code: "7+", text: "Từ 7 lần trở lên"}]
+    source: "R9:65.2 (question); bins: owner SURVEY-04"
     derivation: "integer counts, disjoint and exhaustive"
     experimental_status: DESIGN_PARAMETER
-    approval_status: PENDING_OWNER_APPROVAL
+    approval_status: "OWNER_DECIDED (SURVEY-04)"
+  usual_trip_distance:
+    question: "Quãng đường di chuyển phổ biến của bạn?"
+    required: false
+    options: [{code: LT3, text: "Dưới 3 km"}, {code: 3-LT6, text: "Từ 3 đến dưới 6 km"}, {code: 6-LT10, text: "Từ 6 đến dưới 10 km"},
+              {code: 10-LT20, text: "Từ 10 đến dưới 20 km"}, {code: "20+", text: "Từ 20 km trở lên"}]
+    source: "R9:65.2 (question); bins: owner SURVEY-04"
+    derivation: "half-open intervals [a, b): no overlap"
+    experimental_status: DESIGN_PARAMETER
+    approval_status: "OWNER_DECIDED (SURVEY-04)"
+  intercity_trips_per_month:
+    question: "Mỗi tháng bạn đi liên tỉnh bao nhiêu chuyến?"
+    required: false
+    options: [{code: "0", text: "0 chuyến"}, {code: "1", text: "1 chuyến"}, {code: "2-3", text: "2–3 chuyến"},
+              {code: "4+", text: "Từ 4 chuyến trở lên"}]
+    source: "R9:65.2 (question); bins: owner SURVEY-04"
+    derivation: "integer counts, disjoint and exhaustive"
+    experimental_status: DESIGN_PARAMETER
+    approval_status: "OWNER_DECIDED (SURVEY-04)"
 
 quality_rules:                      # survey item 7: flags only, published before collection
-  QC1: {rule: "all 10 choice tasks, 3 ratings, preferred method, D1-D4 answered", action: REQUIRED_BY_API,
+  QC1: {rule: "all 10 choice tasks, 3 ratings, preferred method and D1 answered (D2-D4 optional)", action: REQUIRED_BY_API,
         source: "SURVEY_S1_DESIGN_REVIEW §7", derivation: "", experimental_status: DESIGN_PARAMETER,
         approval_status: "OWNER_DECIDED (P1-D5)"}
   QC2: {rule: "completion time < 120 s (half of the 4-minute lower bound of R9:65.2)", action: FLAG_ONLY,
-        flag_below_seconds: 120, source: "R9:65.2 (~4-5 min); survey item 7",
-        derivation: "0.5 x 240 s; duration from an HMAC-signed start token", experimental_status: DESIGN_PARAMETER,
-        approval_status: PENDING_OWNER_APPROVAL}
+        flag: FAST_RESPONSE_REVIEW, flag_below_seconds: 120, source: "R9:65.2 (~4-5 min); owner SURVEY-05",
+        derivation: "0.5 x 240 s; duration from an HMAC-signed start token; never an automatic exclusion",
+        experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (SURVEY-05)"}
   QC3: {rule: "same card position in all 8 Part-1A tasks", action: FLAG_ONLY, source: "SURVEY_S1_DESIGN_REVIEW §7",
         derivation: "", experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (survey item 7)"}
   QC4: {rule: "same Likert score for all three H4 methods", action: FLAG_ONLY, source: "SURVEY_S1_DESIGN_REVIEW §7",
         derivation: "", experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (survey item 7)"}
-  QC5: {rule: "attention-check task", action: NOT_USED, source: "SURVEY_S1_DESIGN_REVIEW §7",
-        derivation: "would lengthen the survey; not approved", experimental_status: DESIGN_PARAMETER,
-        approval_status: NOT_ACTIVE_PROPOSAL}
+  QC5: {rule: "attention-check task", action: NOT_USED, source: "SURVEY_S1_DESIGN_REVIEW §7; owner SURVEY-05",
+        derivation: "would lengthen the survey; no concrete proposal", experimental_status: DESIGN_PARAMETER,
+        approval_status: "OWNER_DECIDED (SURVEY-05: not used)"}
+
+# SURVEY-05: data rules fixed BEFORE collection (published with the release).
+analysis_rules:
+  R1_incomplete: {rule: "sessions without a submission are not exported (no partial answers exist: the API accepts only complete submissions)",
+                  action: EXCLUDE_BY_CONSTRUCTION, source: "survey_service.submit / export_table", derivation: "",
+                  experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+  R2_duplicate: {rule: "one submission per session (409 ALREADY_SUBMITTED); repeated sessions by one person cannot be linked (anonymous) - limited by rate limits; no identity matching is attempted",
+                 action: PREVENTED_AT_COLLECTION, source: "survey_service / survey_guard", derivation: "",
+                 experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+  R3_invalid: {rule: "answers outside the shown options, unknown fields or a forged start token are rejected by the API (422) and never stored",
+               action: REJECTED_AT_COLLECTION, source: "survey_schemas (extra=forbid)", derivation: "",
+               experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+  R4_flags: {rule: "primary analysis keeps every stored response; a sensitivity analysis drops FAST_RESPONSE_REVIEW, QC3 and QC4 flagged responses; both are reported",
+             action: REPORT_BOTH, source: "owner SURVEY-05", derivation: "", experimental_status: DESIGN_PARAMETER,
+             approval_status: PENDING_OWNER_APPROVAL}
+  R5_test_data: {rule: "only dataset RESEARCH from the release server is analysed; TEST rows are never merged",
+                 action: SEPARATED, source: "SURVEY_DATASET / SURVEY_S1_RELEASED", derivation: "",
+                 experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (SURVEY-07)"}
 
 quotas:                             # R9:65.1; survey item 8
   target_valid_respondents: 150

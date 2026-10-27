@@ -72,15 +72,37 @@ def haversine_km(a: Lonlat, b: Lonlat) -> float:
     return 2 * 6371.0088 * math.asin(math.sqrt(h))
 
 
-def road_km_from(osrm_url: str, origin: Lonlat, points: list[Lonlat]) -> list[float | None]:
+def table_params(exclude: tuple[str, ...]) -> dict[str, str]:
+    params = {"sources": "0", "annotations": "distance"}
+    if exclude:
+        params["exclude"] = ",".join(exclude)
+    return params
+
+
+def road_km_from(osrm_url: str, origin: Lonlat, points: list[Lonlat], exclude: tuple[str, ...] = ()) -> list[float | None]:
     out: list[float | None] = []
     for i in range(0, len(points), 150):
         batch = points[i:i + 150]
         coords = ";".join(f"{x:.6f},{y:.6f}" for x, y in [origin, *batch])
-        body = httpx.get(f"{osrm_url}/table/v1/driving/{coords}", params={"sources": "0", "annotations": "distance"},
+        body = httpx.get(f"{osrm_url}/table/v1/driving/{coords}", params=table_params(exclude),
                          headers={"Connection": "close"}, timeout=60).json()
         out.extend(None if d is None else d / 1000 for d in body["distances"][0][1:])
     return out
+
+
+def ferry_use(osrm_url: str, a: Lonlat, b: Lonlat, exclude: tuple[str, ...]) -> dict[str, Any]:
+    """GEO-E: route a -> b with steps; report the code, length and ferry length."""
+    params = {"overview": "false", "steps": "true"}
+    if exclude:
+        params["exclude"] = ",".join(exclude)
+    body = httpx.get(f"{osrm_url}/route/v1/driving/{a[0]:.6f},{a[1]:.6f};{b[0]:.6f},{b[1]:.6f}", params=params,
+                     headers={"Connection": "close"}, timeout=60).json()
+    if body.get("code") != "Ok":
+        return {"code": body.get("code"), "km": None, "ferry_steps": 0, "ferry_km": 0.0}
+    steps = [st for leg in body["routes"][0]["legs"] for st in leg["steps"]]
+    ferry = [st for st in steps if st.get("mode") == "ferry"]
+    return {"code": "Ok", "km": round(body["routes"][0]["distance"] / 1000, 3), "ferry_steps": len(ferry),
+            "ferry_km": round(sum(st["distance"] for st in ferry) / 1000, 3)}
 
 
 def main() -> None:
@@ -112,8 +134,10 @@ def main() -> None:
                                    "WHERE service_area_version = :v AND area_type = 'TOTAL'"), {"v": args.version}).scalar_one()
         serviceability = None if raw is None else Serviceability(
             anchor=(float(raw["anchor"]["lon"]), float(raw["anchor"]["lat"])),
-            max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]))
+            max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]),
+            exclude=tuple(raw.get("exclude", ())))
         areas = ActiveAreas(version=args.version, status=geometry_status, serviceability=serviceability)
+        ex = serviceability.exclude if serviceability else ()
 
         def point(ref: str) -> Lonlat:
             row = session.execute(text("SELECT ST_X(p), ST_Y(p) FROM (SELECT ST_PointOnSurface(ST_MakeValid("
@@ -134,7 +158,7 @@ def main() -> None:
                                    "pickup_total": pa["TOTAL"], "dropoff_total": pb["TOTAL"], "note": note} | extra
             try:
                 # Production code path: polygon tier, then (when the version has it) tier 2.
-                res = assess(session, areas, a, b, lambda x, y: client.road_distance(x, y).km,
+                res = assess(session, areas, a, b, lambda x, y, ex=(): client.road_distance(x, y, ex).km,
                              client.reachability, buffer_km)
                 c = res.classification
                 row |= {"actual": c.mode or c.error_code, "branch": c.step, "direct_distance_km": c.direct_distance_km,
@@ -155,7 +179,7 @@ def main() -> None:
         near = [(ref, p) for ref, p in places.items()
                 if ref.startswith("node/") and p["place"] in CANDIDATE_PLACES and ref != PHO_HIEN
                 and 1.5 <= haversine_km(hy, tuple(p["geometry"]["coordinates"])) <= 4.0]
-        dists = road_km_from(settings.osrm_car_url, hy, [tuple(p["geometry"]["coordinates"]) for _, p in near])
+        dists = road_km_from(settings.osrm_car_url, hy, [tuple(p["geometry"]["coordinates"]) for _, p in near], ex)
         pick = min(((abs(d - 3.0), ref, d) for (ref, _), d in zip(near, dists, strict=True) if d is not None), default=None)
         if pick:
             classify("~3 km inside TP Hưng Yên", "72.2", "UNSUPPORTED_INTER_PROVINCE_ROUTE", PHO_HIEN, pick[1], hy,
@@ -167,7 +191,7 @@ def main() -> None:
                 if ref.startswith("node/") and p["place"] in CANDIDATE_PLACES
                 and 8 <= haversine_km(phenikaa, tuple(p["geometry"]["coordinates"])) <= 25]
         cand = [(ref, xy) for ref, xy in cand if not member(xy)["URBAN"] and member(xy)["TOTAL"]]
-        dists = road_km_from(settings.osrm_car_url, phenikaa, [xy for _, xy in cand])
+        dists = road_km_from(settings.osrm_car_url, phenikaa, [xy for _, xy in cand], ex)
         pairs = [(d, ref, xy) for (ref, xy), d in zip(cand, dists, strict=True) if d is not None]
         for label, sel, expected in (("<= 15 km", max((p for p in pairs if p[0] <= buffer_km), default=None), "URBAN"),
                                      ("> 15 km", min((p for p in pairs if p[0] > buffer_km), default=None), "INTERCITY")):
@@ -183,7 +207,7 @@ def main() -> None:
                 if ref.startswith("node/") and p["place"] in CANDIDATE_PLACES
                 and bbox[0] <= p["geometry"]["coordinates"][0] <= bbox[2] and bbox[1] <= p["geometry"]["coordinates"][1] <= bbox[3]
                 and 100 <= haversine_km(anchor, tuple(p["geometry"]["coordinates"])) <= 160]
-        dists = road_km_from(settings.osrm_car_url, anchor, [xy for _, xy in cand])
+        dists = road_km_from(settings.osrm_car_url, anchor, [xy for _, xy in cand], ex)
         pairs = [(d, ref, xy) for (ref, xy), d in zip(cand, dists, strict=True) if d is not None]
         for label, sel, expected in (("<= 150 km", max((p for p in pairs if p[0] <= max_km), default=None), "INTERCITY"),
                                      ("> 150 km", min((p for p in pairs if p[0] > max_km), default=None), "OUT_OF_SERVICE_AREA")):
@@ -210,8 +234,7 @@ def main() -> None:
             for i in range(0, len(pts), 150):
                 batch = [(float(x), float(y)) for x, y in pts[i:i + 150]]
                 coords = ";".join(f"{x:.6f},{y:.6f}" for x, y in [serviceability.anchor, *batch])
-                body = httpx.get(f"{settings.osrm_car_url}/table/v1/driving/{coords}",
-                                 params={"sources": "0", "annotations": "distance"},
+                body = httpx.get(f"{settings.osrm_car_url}/table/v1/driving/{coords}", params=table_params(ex),
                                  headers={"Connection": "close"}, timeout=60).json()
                 for j, (x, y) in enumerate(batch):
                     d = body["distances"][0][j + 1]
@@ -239,6 +262,40 @@ def main() -> None:
                 classify("point in largest EXCLUDED component (tier 1)", "GEO-04", "OUT_OF_SERVICE_AREA", HOAN_KIEM,
                          "EXCLUDED component", hk, (float(excl[0]), float(excl[1])),
                          note=f"component {round(excl[2], 4)} km²", expected_reason="UNSERVICEABLE_COMPONENT")
+            # A point exactly on the TOTAL boundary (a vertex of the main body's outer ring): the
+            # polygon tier must not reject it (ST_Intersects includes the boundary).
+            edge = session.execute(text("""SELECT ST_X(v), ST_Y(v) FROM (SELECT ST_PointN(ST_ExteriorRing(d.geom), 1) AS v
+                    FROM (SELECT (ST_Dump(geom)).geom FROM service_areas WHERE service_area_version = :v
+                          AND area_type = 'TOTAL') d ORDER BY ST_Area(d.geom) DESC LIMIT 1) s"""),
+                {"v": args.version}).first()
+            if edge:
+                classify("point exactly on the TOTAL polygon boundary", "GEO-C", "INFO", HOAN_KIEM, "boundary vertex", hk,
+                         (float(edge[0]), float(edge[1])), note="polygon tier must pass; tier 2 decides",
+                         expected_layer_not="POLYGON")
+            # GEO-E: ferry policy. Every separated TOTAL component kept serviceable, Cát Bà town
+            # and the sampled points: default route vs route with the version's exclusions.
+            probes = [(f"component {int(i)}", (float(x), float(y))) for i, x, y in session.execute(text("""
+                SELECT row_number() OVER (ORDER BY ST_Area(d.geom) DESC), ST_X(ST_PointOnSurface(d.geom)),
+                       ST_Y(ST_PointOnSurface(d.geom))
+                FROM (SELECT (ST_Dump(geom)).geom FROM service_areas WHERE service_area_version = :v
+                      AND area_type = 'TOTAL') d
+                WHERE NOT EXISTS (SELECT 1 FROM service_areas e WHERE e.service_area_version = :v
+                      AND e.area_type = 'EXCLUDED' AND ST_Intersects(e.geom, ST_PointOnSurface(d.geom)))"""),
+                {"v": args.version}).all()][1:]
+            probes.append(("Cát Bà town (107.0496, 20.7262)", (107.0496, 20.7262)))
+            ferry_rows = []
+            for label, xy in probes + [(f"sample {k}", (x, y)) for k, (x, y) in enumerate(pts)]:
+                default, policy = ferry_use(settings.osrm_car_url, serviceability.anchor, xy, ()), \
+                    ferry_use(settings.osrm_car_url, serviceability.anchor, xy, ex)
+                if label.startswith("sample") and default["ferry_steps"] == 0:
+                    continue
+                ferry_rows.append({"destination": label, "default": default, "with_policy": policy,
+                                   "ok": policy["ferry_steps"] == 0})
+            tier2_stats["ferry_check"] = {
+                "exclude": list(ex), "destinations_checked": len(probes) + len(pts),
+                "routes_using_ferry_by_default": sum(r["default"]["ferry_steps"] > 0 for r in ferry_rows),
+                "ferry_steps_with_policy": sum(r["with_policy"]["ferry_steps"] for r in ferry_rows),
+                "rows": ferry_rows}
 
         # A8 context: Hà Đông -> Phố Hiến vs the 65 km example of Section 25.2.
         try:
@@ -253,6 +310,8 @@ def main() -> None:
         ok = c["actual"] == c["expected"] or c["expected"] == "INFO"
         if ok and c.get("expected_reason"):
             ok = c.get("dropoff_tier", {}).get("reason") == c["expected_reason"]
+        if ok and c.get("expected_layer_not"):
+            ok = c.get("dropoff_tier", {}).get("layer") != c["expected_layer_not"]
         if ok and c.get("expected_branch") and c["branch"] != c["expected_branch"]:
             c["result_on_candidate"] = f"PASS (mode) / branch {c['branch']} ≠ expected {c['expected_branch']}"
         else:
@@ -265,9 +324,8 @@ def main() -> None:
     json_path = out_dir / f"{args.report_name.lower()}.json"
     md_path = out_dir / f"{args.report_name}.md"
     for path in (json_path, md_path):
-        if path.exists() and args.report_name == "TRIP_CLASSIFICATION_EVAL" and (out_dir / "REVIEW.md").exists() \
-                and "sa_rules_candidate_v1" in (out_dir / "REVIEW.md").read_text(encoding="utf-8"):
-            raise SystemExit(f"refusing to overwrite original evidence {path}; pass --report-name")
+        if path.exists():  # evidence is written once; a re-evaluation uses another --report-name
+            raise SystemExit(f"refusing to overwrite evidence {path}; pass --report-name")
     json_path.write_text(
         json.dumps({"cases": cases, "context_checks": [context], "tier2_sample": tier2_stats},
                    ensure_ascii=False, indent=2), encoding="utf-8")
@@ -288,8 +346,15 @@ def main() -> None:
             f"{c['case']}: pickup {c.get('pickup_tier', {}).get('reason')}, dropoff {c.get('dropoff_tier', {}).get('reason')}"
             f" (anchor km {c.get('dropoff_tier', {}).get('anchor_road_km')}, snap {c.get('dropoff_tier', {}).get('snap_m')} m)"
             for c in cases if c.get("tier2_applied") or c.get("expected_reason")), "",
-           "Seeded sample of the accept-able polygon:", "", "```json", json.dumps(tier2_stats, ensure_ascii=False, indent=2),
-           "```", ""] if tier2_stats else []),
+           "Seeded sample of the accept-able polygon:", "", "```json",
+           json.dumps({k: v for k, v in tier2_stats.items() if k != "ferry_check"}, ensure_ascii=False, indent=2), "```", "",
+           "Ferry policy (GEO-E) — default route vs route with the version's OSRM exclusions:", "",
+           "| Destination | Default: km / ferry steps / ferry km | With policy: code / km / ferry steps | OK |",
+           "|---|---|---|---|",
+           *[f"| {r['destination']} | {r['default']['km']} / {r['default']['ferry_steps']} / {r['default']['ferry_km']} | "
+             f"{r['with_policy']['code']} / {r['with_policy']['km']} / {r['with_policy']['ferry_steps']} | "
+             f"{'PASS' if r['ok'] else 'FAIL'} |" for r in tier2_stats.get("ferry_check", {}).get("rows", [])],
+           ""] if tier2_stats else []),
         "Context check (A8):",
         "",
         "```json",

@@ -46,10 +46,11 @@ let session = null;
 function cardHtml(task, c) {
   const rows = [];
   if (c.price_vnd !== undefined) rows.push(`Giá${c.alternative === "CAR_URBAN_POOL" ? " dự kiến khi ghép" : ""}: ${fmt(c.price_vnd)}`);
+  if (c.quote_cap_vnd !== undefined) rows.push(`Trần cam kết nếu ghép được: ${fmt(c.quote_cap_vnd)}`);
   if (c.max_price_if_unmatched_vnd !== undefined) rows.push(`Giá tối đa nếu không ai ghép: ${fmt(c.max_price_if_unmatched_vnd)}`);
   if (c.travel_min !== undefined) rows.push(`Thời gian đi: ${fmt(c.travel_min)} phút`);
-  if (c.max_detour_min !== undefined) rows.push(`Đi vòng tối đa: +${fmt(c.max_detour_min)} phút`);
-  if (c.match_likelihood) rows.push(`Khả năng ghép: ${LIKE[c.match_likelihood]}`);
+  if (c.max_detour_min !== undefined) rows.push(`Thời gian đi vòng thêm tối đa (đón/trả khách khác): +${fmt(c.max_detour_min)} phút`);
+  if (c.match_likelihood) rows.push(`Khả năng ghép (tình huống giả định): ${LIKE[c.match_likelihood]}`);
   if (c.walk_m !== undefined) rows.push(`Đi bộ ra điểm đón: ${c.walk_m} m`);
   if (c.lead_days) rows.push(`Đặt trước: ${c.lead_days} ngày`);
   if (c.fill_likelihood_text !== undefined) rows.push(`Khả năng đủ khách (giả định): ${c.fill_likelihood_text}`);
@@ -60,7 +61,9 @@ function cardHtml(task, c) {
 function render(d) {
   const t1a = d.tasks.filter(t => t.part === "1A"), t1b = d.tasks.filter(t => t.part === "1B");
   const sc = d.scenario;
-  let h = `<form id="f">`;
+  let h = `<form id="f"><p class="ctx">Giá và thời gian trong các tình huống là giá trị giả định cho khảo sát
+    (thời gian theo giờ cao điểm), không phải giá chính thức của ứng dụng. "Khả năng ghép" là tình huống giả định,
+    không phải dự báo của hệ thống.</p>`;
   t1a.forEach((t, i) => {
     h += `<div class="q"><div class="ctx">Tình huống ${i + 1}/${t1a.length}: đi <b>${t.context.distance_km} km</b> trong nội đô Hà Nội ·
       ${t.context.weather} · ${t.context.urgency}</div><div class="cards">${t.cards.map(c => cardHtml(t, c)).join("")}</div></div>`;
@@ -79,7 +82,8 @@ function render(d) {
   h += `<p><b>Bạn sẵn sàng sử dụng cách nào nhất?</b> ${d.fairness.map(f =>
       `<label><input type="radio" name="preferred" value="${f.display_label}" required> ${f.display_label}</label>`).join(" ")}</p></div>
     <div class="q">${Object.entries(session.demographics_options).map(([k, q]) => `<p><b>${q.question}</b><br>${q.options.map(o =>
-      `<label><input type="radio" name="${k}" value="${o.code}" required> ${o.text}</label>`).join(" ")}</p>`).join("")}</div>
+      `<label><input type="radio" name="${k}" value="${o.code}"> ${o.text}</label>`).join(" ")}
+      <span class="ctx">(không bắt buộc)</span></p>`).join("")}</div>
     <button type="submit">Gửi câu trả lời</button> <span id="msg"></span></form>`;
   document.getElementById("app").innerHTML = h;
   document.getElementById("f").addEventListener("submit", submit);
@@ -102,7 +106,7 @@ async function submit(ev) {
   const fd = new FormData(ev.target), d = session.design;
   const payload = {
     start_token: session.start_token,
-    demographics: Object.fromEntries(Object.keys(session.demographics_options).map(k => [k, fd.get(k)])),
+    demographics: Object.fromEntries(Object.keys(session.demographics_options).map(k => [k, fd.get(k) || null])),
     choices: d.tasks.map(t => ({task_id: t.task_id, chosen: fd.get(t.task_id)})),
     fairness: d.fairness.map(f => ({display_label: f.display_label, likert: Number(fd.get("likert_" + f.display_label))})),
     preferred_label: fd.get("preferred"),

@@ -27,12 +27,12 @@ class FairnessIn(_Strict):
 
 
 class DemographicsIn(_Strict):
-    """D2-D4 with non-overlapping bins (survey decision 6; codes defined in
-    survey/s1/questionnaire.draft.yaml part_3_demographics)."""
+    """D2-D4: non-overlapping bins of owner decision SURVEY-04 (codes in
+    survey/s1/questionnaire.draft.yaml part_3_demographics); each may be skipped."""
 
-    ride_hailing_trips_per_week: Literal["0", "1-2", "3-5", "6-10", "11+"]
-    usual_trip_distance: Literal["LT3", "3-LT7", "7-LT15", "15-LT30", "30+"]
-    intercity_trips_per_month: Literal["0", "1", "2-3", "4-7", "8+"]
+    ride_hailing_trips_per_week: Literal["0", "1", "2-3", "4-6", "7+"] | None = None
+    usual_trip_distance: Literal["LT3", "3-LT6", "6-LT10", "10-LT20", "20+"] | None = None
+    intercity_trips_per_month: Literal["0", "1", "2-3", "4+"] | None = None
 
 
 class SubmitIn(_Strict):
@@ -40,4 +40,4 @@ class SubmitIn(_Strict):
     choices: list[ChoiceIn] = Field(max_length=20)
     fairness: list[FairnessIn] = Field(max_length=3)
     preferred_label: Literal["X", "Y", "Z"]
-    demographics: DemographicsIn
+    demographics: DemographicsIn = DemographicsIn()

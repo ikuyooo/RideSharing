@@ -1,0 +1,7 @@
+relation,label,purpose,assembled,evidence_status,member_ways,merged_chains,closed_chains,open_chain_ends,max_endpoint_gap_m,min_endpoint_gap_m,member_length_km,note,km2,share_in_urban,share_in_total_polygon,u3_overlap_km2,current_units
+relation/17627914,Thị trấn Đông Anh (pre-2025),GEO-01,False,PENDING_GEOMETRY_EVIDENCE,9,1,0,2,1885.6,1885.6,31.094,osmium could not assemble the ring; the pipeline does not close or redraw it,,,,,
+relation/11367508,Xã An Khánh (pre-2025),A2 / GEO-05,False,PENDING_GEOMETRY_EVIDENCE,7,1,0,2,1200.6,1200.6,14.99,osmium could not assemble the ring; the pipeline does not close or redraw it,,,,,
+relation/11367506,Xã La Phù (pre-2025),A2 / Section 72.2,True,GEOMETRY_AVAILABLE,,,,,,,,,3.5103,0.0777,1.0,0.0,Xã An Khánh 3.237 km²; Phường Dương Nội 0.273 km²
+relation/13825102,Thị trấn Trâu Quỳ (pre-2025),A3 Gia Lâm,True,GEOMETRY_AVAILABLE,,,,,,,,,7.1961,0.9561,1.0,0.0,Xã Gia Lâm 6.880 km²; Xã Bát Tràng 0.316 km²
+relation/11367522,Phường Mỹ Đình 1 (pre-2025),A3 Mỹ Đình,True,GEOMETRY_AVAILABLE,,,,,,,,,2.2375,1.0,1.0,0.0,Phường Từ Liêm 2.105 km²; Phường Cầu Giấy 0.132 km²
+relation/11367523,Phường Mỹ Đình 2 (pre-2025),A3 Mỹ Đình,True,GEOMETRY_AVAILABLE,,,,,,,,,2.0669,1.0,1.0,0.0,Phường Từ Liêm 1.623 km²; Phường Cầu Giấy 0.444 km²

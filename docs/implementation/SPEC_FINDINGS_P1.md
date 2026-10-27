@@ -64,3 +64,22 @@ Bảng gốc ở trên được giữ nguyên. Phiên bản ứng viên mới: *
 | SF-P1-18 | Thời gian OSRM là dòng tự do: 14 km car 18,3 phút / xe máy 20,6 phút so với 40 / 35 phút ở Mục 10.4 (×2,18 / ×1,70); xe máy chậm hơn ô tô (SF-05, V-03) | `docs/implementation/survey/evidence/s1_6km_eta_osrm.json` | Phương pháp ETA 6 km (hiệu chỉnh theo ví dụ 14 km) | P1 (S1) |
 | SF-P1-19 | Splendora: chủ đầu tư công bố 81,2 ha tại Sơn Đồng; polygon OSM 32,0 ha; báo chí 245 ha (km 8+400–10+700, 4 xã cũ) | `GEOMETRY_REVIEW_P1_FINAL_CLOSURE.md` §6 | Chấp nhận phạm vi polygon OSM hiện có | P1 |
 | SF-P1-20 | Danh sách nội đô có kiểm soát loại Phường Sơn Tây (k50) và Phường Chương Mỹ (k49, phần lớn từ huyện Chương Mỹ nhưng có phường Biên Giang/Đồng Mai của quận Hà Đông cũ) | REVIEW.md §12 | Xác nhận | P1 |
+
+## Trạng thái sau "P1 FINAL HARDENING & APPROVAL GATES" (2026-10-28) — ứng viên `sa-cand-9bd44393e699`
+
+| Mã | Xử lý | Trạng thái |
+|---|---|---|
+| SF-P1-14 Đông Anh | Đối chiếu OSM (snapshot + lịch sử v1–v9: chưa từng khép), GADM 4.1 (polygon đầy đủ nhưng không có thẩm quyền, giản lược), HDX COD-AB (chỉ cấp tỉnh sau cải cách). Không nối, không thay thế | **OPEN — blocker** (chờ nguồn có thẩm quyền hoặc quyết định về GADM) |
+| SF-P1-15 sót mép 150 km | Lớp 1 = cận dưới trắc địa; 4 đơn vị đã vào; lớp 2 quyết định từng điểm | **Đã xử lý** |
+| SF-P1-16 snap 300 m | Chủ dự án chấp nhận tạm thời (GEO-D); điểm đón thực tế: 1,3% bị từ chối do xa đường | Đã xử lý cho MVP; đánh giá lại trước P2 |
+| SF-P1-17 phà | `exclude=ferry` trên graph hiện có; 0 chặng phà khi áp chính sách; 7 thành phần chỉ tới được bằng phà vào EXCLUDED | **Đã xử lý** |
+| SF-P1-18 ETA 6 km | Chủ dự án chấp nhận 19 / 16 phút làm giả định giờ cao điểm của khảo sát (SURVEY-02) | **Đã xử lý** |
+| SF-P1-20 Sơn Tây / Chương Mỹ | Ngoài URBAN trong MVP (GEO-B) | **Đã xử lý** |
+
+### Phát hiện mới
+
+| Mã | Phát hiện | Bằng chứng | Cần quyết định | Ảnh hưởng |
+|---|---|---|---|---|
+| SF-P1-21 | Thiết kế thí nghiệm S1 đang chạy **không nhận dạng được**: hạng 7/9 (giá, thời gian chỉ đổi theo quãng đường) | `survey/SURVEY_S1_PRICE_VARIATION_DESIGN.md`, `survey/evidence/s1_identifiability.json` | Duyệt ma trận D (hạng 9/9, VIF ≤ 5,3, khả thi 48/48) hoặc phương án khác | **Blocker phát hành S1** |
+| SF-P1-22 | Snapshot OSM còn 6 quan hệ cấp tỉnh cũ chồng lên tỉnh mới: `Tỉnh Hòa Bình`, `Tỉnh Yên Bái`, `Tỉnh Quảng Bình`, `Tỉnh An Giang cũ`, `Tỉnh Lào Cai cũ`, `Tỉnh Quảng Trị cũ` | `admin_boundaries.geojsonseq` (39 quan hệ admin_level 4) | Không (đã xử lý trong thống kê; hình học vùng không phụ thuộc) | Thống kê theo tỉnh |
+| SF-P1-23 | TOTAL thô v4 là vùng bao ứng viên 68.374 km², lớn hơn nhiều vùng thực sự phục vụ được | `GEOMETRY_REVIEW_P1_HARDENING.md` §3 | Không công bố polygon này như vùng phục vụ | Truyền thông / hiển thị |

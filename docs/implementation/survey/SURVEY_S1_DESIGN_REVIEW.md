@@ -179,3 +179,19 @@ Bảng kịch bản đầy đủ (44 dòng, trường `scenario_id, attributes, 
 Hạ tầng phát hành: [`SURVEY_S1_DEPLOYMENT_PLAN.md`](SURVEY_S1_DEPLOYMENT_PLAN.md) — `PREPARED — NOT DEPLOYED` (thiếu domain, máy chủ, phê duyệt bộ câu hỏi cuối). Thông báo quyền riêng tư nháp: `survey/s1/PRIVACY_NOTICE.draft.md`.
 
 Kiểm thử khảo sát (`backend/tests/test_survey_s1.py`): thiết kế tất định, xoay khối + ghép 1B, ràng buộc schema / không PII, start token giả mạo bị từ chối, QC2 theo thời lượng ký số, quota đóng nhóm, rate limit + khóa không chứa địa chỉ, xóa theo yêu cầu (ADMIN), tách TEST / RESEARCH, toàn vẹn export, tham số nghiên cứu không vào `pricing_configs`. DB chính: **0** câu trả lời khảo sát.
+
+---
+
+## 13. Quyết định "P1 FINAL HARDENING & APPROVAL GATES" (2026-10-28) — draft 3
+
+| Mã | Quyết định | Hiện thực | Trạng thái |
+|---|---|---|---|
+| SURVEY-01 | Giữ giá 6 km theo Baseline; 145k (Mục 20.2, ước tính khi chưa có khách thứ hai) ≠ 143k (Mục 16.1, booking A ghép cụ thể với B); mọi thẻ ghép thể hiện giá dự kiến, **trần cam kết**, giá tối đa nếu không ghép | Thẻ taxi ghép thêm "Trần cam kết nếu ghép được" = `Quote_i` (Mục 18.3): **155.000 đ** (14 km), **76.000 đ** (6 km); 143.000 đ không xuất hiện ở thẻ nào; export thêm cột `quote_cap_vnd` | Đã làm |
+| SURVEY-02 | 19 phút ô tô / 16 phút xe máy (6 km) là giả định giờ cao điểm của thí nghiệm; 6 phút đi vòng | Ghi `OWNER_DECIDED`; câu chữ "Thời gian đi vòng thêm tối đa (đón/trả khách khác): +6 phút" — diễn đạt bằng **phút**, không phải giới hạn quãng đường (giới hạn detour 30% theo quãng đường của Mục 6 không hiển thị); dòng giới thiệu: "giá trị giả định cho khảo sát (thời gian theo giờ cao điểm), không phải giá chính thức của ứng dụng". Không ghi vào OSRM / Baseline / thuật toán giá | Đã làm |
+| SURVEY-03 | Khả năng ghép 3 mức giả định, không quy đổi phần trăm | Thẻ: "Khả năng ghép (tình huống giả định): Cao / Trung bình / Thấp"; dòng giới thiệu nói rõ không phải dự báo của hệ thống | Đã làm |
+| SURVEY-04 | D2: 0; 1; 2–3; 4–6; ≥7 · D3: <3; 3–<6; 6–<10; 10–<20; ≥20 km · D4: 0; 1; 2–3; ≥4 — không bắt buộc | Schema chỉ nhận đúng các mã này hoặc bỏ trống (lưu `null`); biểu mẫu ghi "(không bắt buộc)" | Đã làm + test |
+| SURVEY-05 | 120 s chỉ gắn cờ `FAST_RESPONSE_REVIEW`; không câu kiểm tra chú ý; quy tắc dữ liệu thiếu / trùng / không hợp lệ xác định trước | Cờ đổi tên `FAST_RESPONSE_REVIEW`; QC5 không dùng; `analysis_rules` R1–R5 trong bộ câu hỏi (thiếu: không có bài nộp dở; trùng: 1 bài/phiên + rate limit, không ghép danh tính; không hợp lệ: API từ chối; cờ: phân tích chính giữ tất cả + phân tích độ nhạy bỏ bài gắn cờ; TEST không trộn) | Cơ chế xong; **R1–R4 chờ duyệt** |
+| SURVEY-06 | Không kích hoạt mức chưa duyệt; kiểm tra tính nhận dạng; ma trận biến thiên riêng | [`SURVEY_S1_PRICE_VARIATION_DESIGN.md`](SURVEY_S1_PRICE_VARIATION_DESIGN.md): thiết kế đang chạy **không nhận dạng được** (hạng 7/9 — giá và thời gian chỉ đổi theo quãng đường); đề xuất D (d ghép, giá ±10%, thời gian ±20% riêng từng phương tiện) đạt hạng 9/9, VIF lớn nhất 5,3, khả thi 48/48 | **Blocker phát hành — chờ duyệt ma trận D** |
+| SURVEY-07 | 150 hợp lệ (75/75), 40–60%; một link HTTPS + QR; không triển khai khi thiếu domain / máy chủ | Quota trần 90/nhóm (đã có); phương án HTTPS [`SURVEY_S1_DEPLOYMENT_PLAN.md`](SURVEY_S1_DEPLOYMENT_PLAN.md) | `PREPARED — NOT DEPLOYED` |
+
+Bảng kịch bản (draft 3): 52 dòng — xem [`SURVEY_S1_SCENARIO_TABLE.md`](SURVEY_S1_SCENARIO_TABLE.md).

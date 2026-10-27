@@ -19,7 +19,12 @@ version ids therefore stay reproducible):
   total.tier1_rule        any_sample_within: a unit enters the TOTAL polygon when its
                           representative point OR any sampled point is within the
                           road limit; tier 2 then rejects the points beyond it (GEO-03)
-  serviceability          tier-2 parameters stored with the TOTAL row (GEO-03)
+  total.tier1_rule        geodesic_lower_bound (rules v4, GEO-C): a unit enters the TOTAL
+                          polygon when its NEAREST point is within the limit in straight
+                          line; a road distance is never shorter, so the polygon cannot
+                          reject a point the road check would accept
+  serviceability          tier-2 parameters stored with the TOTAL row (GEO-03); its
+                          `exclude` (GEO-E: ferry) is applied to every OSRM call here too
   total.component_probe_points  TOTAL components without a routable road inside, or
                           without a car route from the anchor, form the EXCLUDED
                           layer; the raw TOTAL polygon is kept unchanged (GEO-04)
@@ -67,6 +72,10 @@ class Build:
     historic_members: dict[int, list[int]] = field(default_factory=dict)
     log: list[str] = field(default_factory=list)
     conflicts: list[str] = field(default_factory=list)
+
+    @property
+    def exclude(self) -> tuple[str, ...]:
+        return tuple(self.rules.get("serviceability", {}).get("exclude", ()))
 
     def note(self, msg: str) -> None:
         print(f"[service-area-build] {msg}")
@@ -322,14 +331,16 @@ def map_neighbours(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]
     return list(unique.values())
 
 
-def road_distances(osrm_url: str, anchor: tuple[float, float], points: list[tuple[float, float]]) -> list[tuple[float | None, float]]:
+def road_distances(osrm_url: str, anchor: tuple[float, float], points: list[tuple[float, float]],
+                   exclude: tuple[str, ...] = ()) -> list[tuple[float | None, float]]:
     """(road km from the anchor or None if unroutable, snap distance m) per point."""
     out: list[tuple[float | None, float]] = []
+    params = {"sources": "0", "annotations": "distance"} | ({"exclude": ",".join(exclude)} if exclude else {})
     for i in range(0, len(points), OSRM_BATCH):
         batch = points[i:i + OSRM_BATCH]
         coords = ";".join(f"{lon:.6f},{lat:.6f}" for lon, lat in [anchor, *batch])
         resp = httpx.get(f"{osrm_url}/table/v1/driving/{coords}",
-                         params={"sources": "0", "annotations": "distance"},
+                         params=params,
                          headers={"Connection": "close"}, timeout=60)
         body = resp.json()
         if resp.status_code != 200 or body.get("code") != "Ok":
@@ -363,11 +374,33 @@ def select_total(conn: Connection, provinces: list[dict[str, Any]], osrm_url: st
         elif u.province_id in selected_ids:
             outside_extract.append({"osm_id": u.osm_id, "name": u.name, "province": u.province,
                                     "reason": "representative point outside the routing extract bbox (A9)"})
-    dists = road_distances(osrm_url, (lon, lat), [(u.lon, u.lat) for u in routed])
+    dists = road_distances(osrm_url, (lon, lat), [(u.lon, u.lat) for u in routed], b.exclude)
     info: dict[int, dict[str, Any]] = {}
     chosen, unroutable, outside_scope = [], [], {}
+    geodesic = b.rules["total"].get("tier1_rule") == "geodesic_lower_bound"
+    if geodesic:
+        # GEO-C: provable envelope. Nearest-point geodesic distance (spheroid) of every unit.
+        near_km = dict(conn.execute(text(f"""SELECT u.osm_id, ST_Distance(u.geom::geography,
+                ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography) / 1000
+            FROM {SCHEMA}.units u WHERE u.admin_level = 6 AND ST_DWithin(u.geom::geography,
+                ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography, :m)"""),
+            {"x": lon, "y": lat, "m": b.max_km * 1000}).tuples().all())
+        routed_ids = {u.osm_id for u in routed}
+        outside_extract = [o for o in outside_extract if o["osm_id"] not in near_km]
+        for u in units_in_provinces(conn, all_provinces):
+            if u.osm_id in near_km and u.osm_id not in routed_ids and u.province_id in selected_ids:
+                chosen.append({"osm_id": u.osm_id, "name": u.name, "province": u.province, "road_km": None,
+                               "snap_m": None, "geodesic_min_km": round(near_km[u.osm_id], 3),
+                               "rule": f"T1 nearest point within {b.max_km} km straight line (representative point outside bbox)"})
     for u, (km, snap_m) in zip(routed, dists, strict=True):
         info[u.osm_id] = {"name": u.name, "province": u.province, "road_km": km, "snap_m": snap_m}
+        if geodesic:
+            if u.osm_id in near_km and u.province_id in selected_ids:
+                chosen.append({"osm_id": u.osm_id, "name": u.name, "province": u.province,
+                               "road_km": None if km is None else round(km, 3), "snap_m": round(snap_m, 1),
+                               "geodesic_min_km": round(near_km[u.osm_id], 3),
+                               "rule": f"T1 nearest point within {b.max_km} km straight line (road check decides per point)"})
+            continue
         if km is None:
             if u.province_id in selected_ids:
                 unroutable.append({"osm_id": u.osm_id, "name": u.name, "province": u.province,
@@ -412,7 +445,7 @@ def sensitivity_150(conn: Connection, info: dict[int, dict[str, Any]], chosen_id
             FROM {SCHEMA}.units WHERE osm_id = :id) s"""), {"n": n, "id": uid}).all()
         samples.extend((uid, x, y) for x, y in pts)
     lon, lat, _ = anchor_point(conn, b)
-    dists = road_distances(osrm_url, (lon, lat), [(x, y) for _, x, y in samples])
+    dists = road_distances(osrm_url, (lon, lat), [(x, y) for _, x, y in samples], b.exclude)
     per_unit: dict[int, list[float | None]] = {}
     sample_rows = []
     for (uid, x, y), (km, snap) in zip(samples, dists, strict=True):
@@ -496,6 +529,7 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
         SELECT row_number() OVER (ORDER BY ST_Area(d.geom) DESC) AS idx, d.geom AS g
         FROM (SELECT (ST_Dump(geom)).geom FROM public.service_areas
               WHERE area_type = :a AND service_area_version = :v) d"""), {"a": area_type, "v": version})
+    conn.execute(text(f"CREATE INDEX ON {SCHEMA}.comps USING gist (g)"))
     rows = conn.execute(text(f"""SELECT c.idx, ST_Area(c.g::geography) / 1e6 AS km2,
             ST_NumInteriorRings(c.g) AS holes,
             ST_X(ST_PointOnSurface(c.g)) AS lon, ST_Y(ST_PointOnSurface(c.g)) AS lat,
@@ -503,11 +537,14 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
                 AND ST_Area(ST_Intersection(u.geom, c.g)) >= 0.999 * ST_Area(u.geom)) AS whole_units,
             (SELECT string_agg(DISTINCT u.name, ', ') FROM {SCHEMA}.units u
                 WHERE u.osm_id = ANY(:ids) AND ST_Intersects(u.geom, ST_PointOnSurface(c.g))) AS unit_names,
-            COALESCE((SELECT min(ST_Distance(c.g::geography, o.g::geography)) FROM {SCHEMA}.comps o
-                WHERE o.idx <> c.idx AND ST_DWithin(c.g, o.g, 0.5)), 1e9) AS gap_m,
+            -- the gap only serves the sliver test, so it is measured for sliver-sized parts only
+            CASE WHEN ST_Area(c.g::geography) / 1e6 < :sliver THEN
+                COALESCE((SELECT min(ST_Distance(c.g::geography, o.g::geography)) FROM {SCHEMA}.comps o
+                    WHERE o.idx <> c.idx AND ST_DWithin(c.g, o.g, 0.001)), 1e9) ELSE 1e9 END AS gap_m,
             EXISTS (SELECT 1 FROM {SCHEMA}.places p WHERE p.osm_type || '/' || p.osm_id = ANY(:areas)
                 AND ST_Intersects(p.geom_full, ST_PointOnSurface(c.g))) AS is_osm_area
-        FROM {SCHEMA}.comps c ORDER BY c.idx"""), {"ids": unit_ids, "areas": osm_areas or []}).mappings().all()
+        FROM {SCHEMA}.comps c ORDER BY c.idx"""),
+        {"ids": unit_ids, "areas": osm_areas or [], "sliver": SLIVER_MAX_KM2}).mappings().all()
     main_holes = conn.execute(text(f"""SELECT count(*) AS n,
             count(*) FILTER (WHERE ST_Area(r.geom::geography) / 1e6 < :sliver) AS tiny
         FROM (SELECT (ST_DumpRings(g)).* FROM {SCHEMA}.comps WHERE idx = 1) r WHERE r.path[1] > 0"""),
@@ -528,6 +565,7 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
         road_inside = False
         for x, y in pts:
             snapped = httpx.get(f"{b_osrm(osrm_url)}/nearest/v1/driving/{x:.6f},{y:.6f}",
+                                params={"exclude": ",".join(b.exclude)} if b.exclude else None,
                                 headers={"Connection": "close"}, timeout=10).json()
             loc = snapped["waypoints"][0]["location"] if snapped.get("code") == "Ok" else None
             if loc and conn.execute(text(
@@ -554,7 +592,7 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
                     "road_inside": road_inside, "probes": len(pts), "category": category})
     if probes and anchor is not None:
         idxs = sorted(inside_locs)
-        kms = road_distances(osrm_url, anchor, [inside_locs[i] for i in idxs]) if idxs else []
+        kms = road_distances(osrm_url, anchor, [inside_locs[i] for i in idxs], b.exclude) if idxs else []
         routable = {i: km is not None for i, (km, _) in zip(idxs, kms, strict=True)}
         anchor_km = {i: km for i, (km, _) in zip(idxs, kms, strict=True)}
         for c in out:
@@ -959,9 +997,14 @@ def render_v3_sections(r: dict[str, Any]) -> list[str]:
                   "Implementation decision of the owner (GEO-03), **not** a Revision 9 formula.", "",
                   f"- Tier 1 — polygon: TOTAL minus EXCLUDED. Raw TOTAL {c.get('total_km2')} km² / {c.get('total_parts')} parts; "
                   f"EXCLUDED {c.get('excluded_km2')} km² / {c.get('excluded_parts')} parts; effective {c.get('effective_total_km2')} km².",
-                  f"- Units added by the sampled-point rule: {len(r.get('tier1_added_units') or [])} (`tier1_added_units.csv`).",
+                  (f"- Tier-1 rule `{r['rules']['total'].get('tier1_rule')}`"
+                   + (": units whose nearest point is within the limit in straight line (road distance is never shorter)."
+                      if r["rules"]["total"].get("tier1_rule") == "geodesic_lower_bound" else
+                      f"; units added by the sampled-point rule: {len(r.get('tier1_added_units') or [])} (`tier1_added_units.csv`).")),
                   f"- Tier 2 — per point, one OSRM car `/table` request: snap distance ≤ {sv['max_snap_m']} m "
-                  "(implementation parameter, pending owner confirmation); route from anchor "
+                  + ("(owner GEO-D: temporary MVP technical threshold, not a Baseline parameter)" if sv.get("exclude") is not None
+                     else "(implementation parameter, pending owner confirmation)")
+                  + f"; OSRM exclusions {sv.get('exclude', [])}; route from anchor "
                   f"node/{sv['anchor']['osm_node']} exists; road distance ≤ {sv['max_road_km']} km (exactly the limit is accepted); "
                   "pickup → dropoff routable.",
                   f"- A4 sample points inside included units: {t2.get('sample_points_in_included_units')}; "
@@ -1024,6 +1067,7 @@ def main() -> None:
             total_source["serviceability"] = {
                 "anchor": {"osm_node": total_stats["anchor"]["osm_node"], "lon": anchor[0], "lat": anchor[1]},
                 "max_road_km": b.max_km, "max_snap_m": float(rules["serviceability"]["max_snap_m"]),
+                "exclude": list(b.exclude),
                 "basis": "owner decision GEO-03 (implementation decision, not a Revision 9 formula)"}
         persist_result = {
             "URBAN": persist(conn, version, "URBAN", geometry_sql("urban"),

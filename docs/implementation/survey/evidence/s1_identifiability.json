@@ -1,0 +1,146 @@
+[
+  {
+    "design": "A",
+    "rows": 96,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200"
+    ],
+    "rank": 7,
+    "full_rank": 9,
+    "identified": false,
+    "corr_price_time": 0.892,
+    "corr_price_detour": 0.536,
+    "corr_price_unmatched_gap": 0.526,
+    "vif": {
+      "price_k": null,
+      "time_min": null,
+      "detour_min": null,
+      "unmatched_gap_k": null,
+      "like_medium": null,
+      "like_low": null,
+      "walk_200": null
+    },
+    "max_vif": null,
+    "feasibility": {
+      "levels_checked": 48,
+      "all_within_baseline_bounds": true,
+      "violations": []
+    }
+  },
+  {
+    "design": "B",
+    "rows": 96,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200"
+    ],
+    "rank": 9,
+    "full_rank": 9,
+    "identified": false,
+    "corr_price_time": 0.833,
+    "corr_price_detour": 0.482,
+    "corr_price_unmatched_gap": 0.319,
+    "vif": {
+      "price_k": 14.7,
+      "time_min": 40.1,
+      "detour_min": 10.0,
+      "unmatched_gap_k": 7.7,
+      "like_medium": 1.6,
+      "like_low": 1.6,
+      "walk_200": 1.5
+    },
+    "max_vif": 40.1,
+    "feasibility": {
+      "levels_checked": 48,
+      "all_within_baseline_bounds": true,
+      "violations": []
+    }
+  },
+  {
+    "design": "C",
+    "rows": 96,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200"
+    ],
+    "rank": 9,
+    "full_rank": 9,
+    "identified": false,
+    "corr_price_time": 0.826,
+    "corr_price_detour": 0.472,
+    "corr_price_unmatched_gap": 0.319,
+    "vif": {
+      "price_k": 6.7,
+      "time_min": 14.7,
+      "detour_min": 6.1,
+      "unmatched_gap_k": 5.7,
+      "like_medium": 1.5,
+      "like_low": 1.6,
+      "walk_200": 1.4
+    },
+    "max_vif": 14.7,
+    "feasibility": {
+      "levels_checked": 48,
+      "all_within_baseline_bounds": true,
+      "violations": []
+    }
+  },
+  {
+    "design": "D",
+    "rows": 96,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200"
+    ],
+    "rank": 9,
+    "full_rank": 9,
+    "identified": true,
+    "corr_price_time": 0.497,
+    "corr_price_detour": 0.472,
+    "corr_price_unmatched_gap": 0.319,
+    "vif": {
+      "price_k": 1.8,
+      "time_min": 1.4,
+      "detour_min": 5.3,
+      "unmatched_gap_k": 4.5,
+      "like_medium": 1.5,
+      "like_low": 1.6,
+      "walk_200": 1.4
+    },
+    "max_vif": 5.3,
+    "feasibility": {
+      "levels_checked": 48,
+      "all_within_baseline_bounds": true,
+      "violations": []
+    }
+  }
+]

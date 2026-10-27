@@ -1,0 +1,7 @@
+name,qd19_code,nq1656,status,reason
+Phường Tùng Thiện,09604,k51,EXCLUDED - OWNER_DECISION_GEO-02,former thị xã Sơn Tây; stays in the TOTAL area
+Phường Sơn Tây,09574,k50,EXCLUDED - OWNER_DECISION_GEO-B (MVP),former thị xã Sơn Tây; outside URBAN in the MVP; stays in TOTAL for intercity service
+Phường Chương Mỹ,10015,k49,EXCLUDED - OWNER_DECISION_GEO-B (MVP),mainly former huyện Chương Mỹ; outside URBAN in the MVP; stays in TOTAL for intercity service
+Xã Đông Anh,00454,k114,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-A),former thị trấn Đông Anh split k113/k114/k115; OSM historic ring relation/17627914 open in every version; GADM 4.1 polygon is non-authoritative - owner decision required
+Xã Thư Lâm,00475,k113,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01),holds part of former thị trấn Đông Anh
+Xã Phúc Thịnh,00466,k115,EXCLUDED - PENDING_GEOMETRY_EVIDENCE (GEO-01),holds the remainder of former thị trấn Đông Anh (and the OSM town node)

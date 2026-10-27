@@ -28,8 +28,9 @@ from app.modules.trip.models import ServiceArea, TripRequest
 from app.modules.trip.schemas import TripRequestIn, TripRequestOut
 
 Lonlat = tuple[float, float]
-DistanceFn = Callable[[Lonlat, Lonlat], float]
-ReachFn = Callable[[Lonlat, Lonlat, Lonlat], Reachability]
+Exclude = tuple[str, ...]
+DistanceFn = Callable[[Lonlat, Lonlat, Exclude], float]
+ReachFn = Callable[[Lonlat, Lonlat, Lonlat, Exclude], Reachability]
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class Serviceability:
     anchor: Lonlat
     max_road_km: float
     max_snap_m: float
+    exclude: Exclude = ()  # OSRM classes never used (GEO-E: ferry)
 
 
 @dataclass(frozen=True)
@@ -69,7 +71,8 @@ def active_service_areas(session: Session, settings: Settings, require_serviceab
     raw = (rows["TOTAL"][1] or {}).get("serviceability")
     serviceability = None if raw is None else Serviceability(
         anchor=(float(raw["anchor"]["lon"]), float(raw["anchor"]["lat"])),
-        max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]))
+        max_road_km=float(raw["max_road_km"]), max_snap_m=float(raw["max_snap_m"]),
+        exclude=tuple(raw.get("exclude", ())))
     if serviceability is None and require_serviceability:
         raise ApiError(503, "SERVICE_AREA_NOT_CONFIGURED",
                        f"Service-area version {version} has no per-point serviceability layer (GEO-03)")
@@ -126,7 +129,7 @@ def assess(session: Session, areas: ActiveAreas, pickup: Lonlat, dropoff: Lonlat
     if tier2:
         assert s is not None
         try:
-            reach = reach_fn(s.anchor, pickup, dropoff)
+            reach = reach_fn(s.anchor, pickup, dropoff, s.exclude)
         except RouteNotFound:  # OSRM could not snap a point to any road segment
             p = replace(p, reason="NO_ROAD_ACCESS", layer="SERVICEABILITY")
             d = replace(d, reason="NO_ROAD_ACCESS", layer="SERVICEABILITY")
@@ -140,12 +143,13 @@ def assess(session: Session, areas: ActiveAreas, pickup: Lonlat, dropoff: Lonlat
             d = tier2_point(d, reach.dropoff.snap_m, reach.dropoff.anchor_road_km)
             if p.reason is None and d.reason is None and reach.pickup_to_dropoff_km is None:
                 raise RouteNotFound("NoRoute")
+    exclude = s.exclude if s is not None else ()
     result = rules.classify(
         pickup_in_total=p.reason is None,
         dropoff_in_total=d.reason is None,
         pickup_in_urban=p.in_urban,
         dropoff_in_urban=d.in_urban,
-        road_distance_km=lambda: distance_fn(pickup, dropoff),
+        road_distance_km=lambda: distance_fn(pickup, dropoff, exclude),
         urban_boundary_buffer_km=buffer_km,
     )
     return Assessment(classification=result, pickup=p, dropoff=d, tier2_applied=tier2)
@@ -153,7 +157,7 @@ def assess(session: Session, areas: ActiveAreas, pickup: Lonlat, dropoff: Lonlat
 
 def osrm_distance_fn(settings: Settings) -> DistanceFn:
     client = OsrmCarDistance(settings.osrm_car_url, settings.routing_timeout_s)
-    return lambda a, b: client.road_distance(a, b).km
+    return lambda a, b, exclude=(): client.road_distance(a, b, exclude).km
 
 
 def osrm_reach_fn(settings: Settings) -> ReachFn:

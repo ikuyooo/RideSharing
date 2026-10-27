@@ -74,9 +74,9 @@ def test_reachability_parses_one_table_request(monkeypatch: pytest.MonkeyPatch) 
         return httpx.Response(200, content=json.dumps(body).encode())
 
     monkeypatch.setattr(httpx, "get", fake_get)
-    r = OsrmCarDistance("http://osrm", 1).reachability((105.85, 21.03), (105.0, 21.0), (105.1, 21.1))
+    r = OsrmCarDistance("http://osrm", 1).reachability((105.85, 21.03), (105.0, 21.0), (105.1, 21.1), ("ferry",))
     assert "/table/v1/driving/105.850000,21.030000;105.000000,21.000000;105.100000,21.100000" in seen["url"]
-    assert seen["params"] == {"sources": "0;1", "destinations": "1;2", "annotations": "distance"}
+    assert seen["params"] == {"sources": "0;1", "destinations": "1;2", "annotations": "distance", "exclude": "ferry"}
     assert r.pickup.anchor_road_km == 150.0 and r.pickup.snap_m == 2.5
     assert r.dropoff.anchor_road_km is None and r.dropoff.snap_m == 301.0
     assert r.pickup_to_dropoff_km == pytest.approx(12.345)
@@ -92,4 +92,28 @@ def test_real_osrm_reachability_matches_route() -> None:
     r = client.reachability(anchor, a, b)
     assert r.pickup_to_dropoff_km == pytest.approx(client.road_distance(a, b).km, rel=1e-3)
     assert r.pickup.anchor_road_km == pytest.approx(client.road_distance(anchor, a).km, rel=1e-3)
+    # anchor -> dropoff is the DIRECT road distance, not anchor -> pickup -> dropoff
+    direct = client.road_distance(anchor, b).km
+    assert r.dropoff.anchor_road_km == pytest.approx(direct, rel=1e-3)
+    assert r.dropoff.anchor_road_km < r.pickup.anchor_road_km + r.pickup_to_dropoff_km - 1
     assert 0 <= r.pickup.snap_m < 300 and 0 <= r.dropoff.snap_m < 300
+
+
+@pytest.mark.osrm
+def test_real_osrm_ferry_exclusion_to_cat_ba() -> None:
+    """GEO-E on the existing CH graph: Hà Nội -> Cát Bà needs a ferry; with exclude=ferry
+    there is no route (no fallback, no ferry step)."""
+    url = _osrm_car_url()
+    if not _reachable(url):
+        pytest.skip(f"OSRM car not reachable at {url}")
+    anchor, cat_ba = (105.854041, 21.0283334), (107.0496, 20.7262)
+    raw = httpx.get(f"{url}/route/v1/driving/{anchor[0]},{anchor[1]};{cat_ba[0]},{cat_ba[1]}",
+                    params={"steps": "true", "overview": "false"}, headers={"Connection": "close"}).json()
+    modes = {st["mode"] for leg in raw["routes"][0]["legs"] for st in leg["steps"]}
+    assert "ferry" in modes  # the default car profile does use a ferry here
+    client = OsrmCarDistance(url, timeout_s=5)
+    with pytest.raises(RouteNotFound):
+        client.road_distance(anchor, cat_ba, ("ferry",))
+    r = client.reachability(anchor, (105.7477, 20.9426), cat_ba, ("ferry",))
+    assert r.dropoff.anchor_road_km is None and r.pickup_to_dropoff_km is None
+    assert r.pickup.anchor_road_km is not None  # the mainland point stays reachable

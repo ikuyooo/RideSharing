@@ -81,6 +81,9 @@ def rows(q: dict) -> list[dict]:
     for name, spec in q["quality_rules"].items():
         out.append(meta(spec, scenario_id=f"QC-{name}", attributes=spec["rule"], options=spec["action"],
                         displayed_values="not shown to respondents (published rule)"))
+    for name, spec in q.get("analysis_rules", {}).items():
+        out.append(meta(spec, scenario_id=f"DATA-{name}", attributes=spec["rule"], options=spec["action"],
+                        displayed_values="not shown to respondents (pre-registered data rule)"))
     qq = q["quotas"]
     out.append(meta(qq, scenario_id="QUOTA", attributes="valid respondents per group",
                     options=f"target {qq['target_valid_respondents']}, nominal {qq['nominal_per_group']}/group, "

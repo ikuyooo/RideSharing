@@ -134,20 +134,21 @@ def submit(session: Session, settings: Settings, respondent_id: uuid.UUID, body:
     respondent.completed_at = _minute(datetime.fromtimestamp(now_ms / 1000, UTC))
     respondent.duration_s = duration_s
     q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    qc2 = q["quality_rules"]["QC2"]
     respondent.quality_flags = quality_flags(design, choices, ratings, duration_s,
-                                             int(q["quality_rules"]["QC2"]["flag_below_seconds"]))
+                                             int(qc2["flag_below_seconds"]), str(qc2["flag"]))
     session.commit()
     return respondent
 
 
 def quality_flags(design: dict[str, Any], choices: dict[str, str], ratings: dict[str, int],
-                  duration_s: int, qc2_below_s: int) -> list[str]:
+                  duration_s: int, qc2_below_s: int, qc2_flag: str = "FAST_RESPONSE_REVIEW") -> list[str]:
     """QC2 / QC3 / QC4 of SURVEY_S1_DESIGN_REVIEW - flags only, nothing is discarded
     (survey decision 7: a short completion time is flagged, never auto-excluded;
     the rule is published in the questionnaire before collection)."""
     flags = []
     if duration_s < qc2_below_s:
-        flags.append("QC2_FAST_COMPLETION")
+        flags.append(qc2_flag)
     positions = [next(c["position"] for c in t["cards"] if c["alternative"] == choices[t["task_id"]])
                  for t in design["tasks"] if t["part"] == "1A"]
     if len(set(positions)) == 1:
@@ -173,7 +174,7 @@ RESPONDENT_COLUMNS = ["respondent_id", "questionnaire_version", "design_block", 
                       "ride_hailing_trips_per_week", "usual_trip_distance", "intercity_trips_per_month",
                       "started_at_utc", "completed_at_utc", "duration_s", "quality_flags"]
 CHOICE_COLUMNS = ["respondent_id", "part", "task_index", "task_id", "distance_km", "weather", "urgency",
-                  "alternative", "position", "price_vnd", "max_price_if_unmatched_vnd", "travel_min",
+                  "alternative", "position", "price_vnd", "quote_cap_vnd", "max_price_if_unmatched_vnd", "travel_min",
                   "max_detour_min", "match_likelihood", "fill_likelihood", "walk_m", "chosen"]
 FAIRNESS_COLUMNS = ["respondent_id", "method", "display_label", "display_position", "likert_fairness", "preferred"]
 

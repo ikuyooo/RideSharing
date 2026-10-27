@@ -47,6 +47,7 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
              "price_vnd": _value(levels["BIKE_URBAN"]["price_vnd"]), "travel_min": _value(levels["BIKE_URBAN"]["travel_min"])},
             {"alternative": "CAR_URBAN_POOL", "label": p1a["alternatives"]["CAR_URBAN_POOL"]["label"],
              "price_vnd": _value(levels["CAR_URBAN_POOL"]["expected_price_vnd"]),
+             "quote_cap_vnd": _value(levels["CAR_URBAN_POOL"]["quote_cap_vnd"]),
              "max_price_if_unmatched_vnd": _value(levels["CAR_URBAN_POOL"]["max_price_if_unmatched_vnd"]),
              "max_detour_min": _value(levels["CAR_URBAN_POOL"]["max_detour_min"]),
              "match_likelihood": LIKELIHOOD_CODES[likelihood], "walk_m": walk},

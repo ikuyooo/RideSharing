@@ -124,7 +124,7 @@ docker compose --profile osrm-prep run --rm --no-deps --entrypoint sh osm-fetch 
   /scripts/export_historic_boundaries.sh           # ranh giới trước 2025 (bằng chứng, rules v3)
 docker compose build backend                       # service-area-build dùng chung ảnh ridesharing-backend:local
 docker compose --profile service-area run --rm service-area-build \
-  python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v3.yaml
+  python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v4.yaml
 docker compose --profile service-area run --rm service-area-build \
   python -m app.modules.trip.boundary_eval --version <service_area_version>
 docker compose --profile service-area run --rm service-area-build \
@@ -133,14 +133,17 @@ docker compose --profile service-area run --rm service-area-build \
 # Bundle đã tồn tại không bị ghi đè; chạy lại một phiên bản: thêm --out /tmp/<dir>
 ```
 
-Vùng phục vụ hai lớp (GEO-03/04): đa giác TOTAL trừ lớp `EXCLUDED`, rồi kiểm tra từng điểm đón/trả bằng một
-request OSRM `/table` (snap ≤ `max_snap_m`, có tuyến từ điểm gốc, ≤ 150 km). Phiên bản không có lớp 2 (`v1`, `v2`)
-bị Trip API từ chối (503).
+Vùng phục vụ hai lớp (GEO-03/04, GEO-C/E): lớp 1 là vùng bao ứng viên (v4: đơn vị có điểm gần nhất ≤ 150 km
+đường thẳng) trừ lớp `EXCLUDED`; lớp 2 kiểm tra từng điểm đón/trả bằng một request OSRM `/table` (snap ≤ `max_snap_m`,
+có tuyến từ điểm gốc, ≤ 150 km, không đi phà). Vùng bao **không** phải lời hứa phục vụ. Phiên bản không có lớp 2
+(`v1`, `v2`) bị Trip API từ chối (503). Công cụ báo cáo: `app.modules.trip.pickup_survey` (tỷ lệ từ chối trên điểm
+đón thực tế, cần `scripts/osm/export_pickup_candidates.sh`), `app.modules.trip.historic_sources` (đối chiếu ranh giới
+Đông Anh cũ). Sau khi dừng một container build, kết thúc cả truy vấn PostgreSQL của nó (`pg_terminate_backend`).
 
 Khảo sát S1 (bản nháp, chỉ môi trường development, dữ liệu `TEST`): mở `http://127.0.0.1:8000/survey/s1`;
 admin export `GET /api/admin/survey/s1/export/{respondents|choices|fairness_h4}?dataset=TEST`. Tập `RESEARCH`
 bị từ chối cho đến khi Chủ dự án phát hành (`SURVEY_S1_RELEASED`). Bảng kịch bản:
-`python -I scripts/survey/scenario_table.py`. Diễn tập backup/restore (CSDL tạm):
+`python -I scripts/survey/scenario_table.py`; kiểm tra nhận dạng thí nghiệm: `python -I scripts/survey/identifiability_check.py`. Diễn tập backup/restore (CSDL tạm):
 `MSYS_NO_PATHCONV=1 sh scripts/survey/backup_restore_drill.sh`. Phương án HTTPS công khai (chưa triển khai):
 [docs/implementation/survey/SURVEY_S1_DEPLOYMENT_PLAN.md](docs/implementation/survey/SURVEY_S1_DEPLOYMENT_PLAN.md).
 

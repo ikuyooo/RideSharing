@@ -48,3 +48,17 @@ def test_name_normalisation_only_unifies_tone_mark_placement() -> None:
     assert norm_name("Phường Yên Hoà") == norm_name("Phường Yên Hòa")
     assert norm_name("Xã Thuỵ Lâm") == norm_name("Xã Thụy Lâm")
     assert norm_name("Phường Tây Hồ") != norm_name("Phường Tây Mỗ")
+
+
+def test_rules_v4_hardening() -> None:
+    """GEO-B/C/D/E: v4 keeps the v3 controlled urban list and adds the provable tier-1
+    envelope, the ferry exclusion and the owner-approved 300 m snap threshold."""
+    v3 = yaml.safe_load(RULES_V3.read_text(encoding="utf-8"))
+    v4 = yaml.safe_load((CONFIG / "service_area_rules.candidate.v4.yaml").read_text(encoding="utf-8"))
+    assert v4["urban"]["include_units"] == v3["urban"]["include_units"]
+    assert v4["urban"]["include_osm_areas"] == v3["urban"]["include_osm_areas"]
+    assert v4["total"]["tier1_rule"] == "geodesic_lower_bound"
+    assert v4["serviceability"] == {"max_snap_m": 300, "exclude": ["ferry"]}
+    review = {x["name"]: x["status"] for x in v4["urban"]["excluded_review"]}
+    assert review["Phường Sơn Tây"].endswith("GEO-B (MVP)") and review["Phường Chương Mỹ"].endswith("GEO-B (MVP)")
+    assert "PENDING_GEOMETRY_EVIDENCE" in review["Xã Đông Anh"]

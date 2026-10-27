@@ -1,0 +1,164 @@
+{
+  "service_area_version": "sa-cand-9bd44393e699",
+  "max_snap_m": 300.0,
+  "exclude": [
+    "ferry"
+  ],
+  "candidates_in_area": 14027,
+  "sampled": 3296,
+  "per_province_cap": 300,
+  "seed": 1,
+  "overall": {
+    "SERVED": 2443,
+    "NO_ROAD_ACCESS": 42,
+    "BEYOND_MAX_ROAD_DISTANCE": 811
+  },
+  "snap_m_percentiles": {
+    "50": 16.1,
+    "90": 52.4,
+    "95": 85.7,
+    "99": 397.4
+  },
+  "by_province": {
+    "Thành phố Bắc Ninh": {
+      "SERVED": 297,
+      "NO_ROAD_ACCESS": 3
+    },
+    "Thành phố Hà Nội": {
+      "SERVED": 300
+    },
+    "Thành phố Hải Phòng": {
+      "SERVED": 299,
+      "NO_ROAD_ACCESS": 1
+    },
+    "Thành phố Quảng Ninh": {
+      "SERVED": 187,
+      "BEYOND_MAX_ROAD_DISTANCE": 111,
+      "NO_ROAD_ACCESS": 2
+    },
+    "Tỉnh Hưng Yên": {
+      "SERVED": 299,
+      "NO_ROAD_ACCESS": 1
+    },
+    "Tỉnh Lào Cai": {
+      "BEYOND_MAX_ROAD_DISTANCE": 77,
+      "SERVED": 2,
+      "NO_ROAD_ACCESS": 3
+    },
+    "Tỉnh Lạng Sơn": {
+      "BEYOND_MAX_ROAD_DISTANCE": 226,
+      "SERVED": 68,
+      "NO_ROAD_ACCESS": 6
+    },
+    "Tỉnh Nghệ An": {
+      "BEYOND_MAX_ROAD_DISTANCE": 2,
+      "NO_ROAD_ACCESS": 1
+    },
+    "Tỉnh Ninh Bình": {
+      "SERVED": 300
+    },
+    "Tỉnh Phú Thọ": {
+      "SERVED": 289,
+      "BEYOND_MAX_ROAD_DISTANCE": 6,
+      "NO_ROAD_ACCESS": 5
+    },
+    "Tỉnh Sơn La": {
+      "BEYOND_MAX_ROAD_DISTANCE": 59,
+      "SERVED": 1
+    },
+    "Tỉnh Thanh Hóa": {
+      "BEYOND_MAX_ROAD_DISTANCE": 198,
+      "NO_ROAD_ACCESS": 13,
+      "SERVED": 89
+    },
+    "Tỉnh Thái Nguyên": {
+      "SERVED": 251,
+      "BEYOND_MAX_ROAD_DISTANCE": 48,
+      "NO_ROAD_ACCESS": 1
+    },
+    "Tỉnh Tuyên Quang": {
+      "BEYOND_MAX_ROAD_DISTANCE": 84,
+      "SERVED": 61,
+      "NO_ROAD_ACCESS": 6
+    }
+  },
+  "by_category": {
+    "amenity=bank": {
+      "SERVED": 72,
+      "NO_ROAD_ACCESS": 1,
+      "BEYOND_MAX_ROAD_DISTANCE": 13
+    },
+    "amenity=clinic": {
+      "SERVED": 13,
+      "BEYOND_MAX_ROAD_DISTANCE": 1
+    },
+    "amenity=college": {
+      "SERVED": 7
+    },
+    "amenity=fuel": {
+      "SERVED": 330,
+      "BEYOND_MAX_ROAD_DISTANCE": 152
+    },
+    "amenity=hospital": {
+      "SERVED": 13,
+      "BEYOND_MAX_ROAD_DISTANCE": 3
+    },
+    "amenity=marketplace": {
+      "SERVED": 34,
+      "BEYOND_MAX_ROAD_DISTANCE": 12
+    },
+    "amenity=post_office": {
+      "SERVED": 26,
+      "BEYOND_MAX_ROAD_DISTANCE": 4
+    },
+    "amenity=school": {
+      "SERVED": 188,
+      "BEYOND_MAX_ROAD_DISTANCE": 16,
+      "NO_ROAD_ACCESS": 2
+    },
+    "amenity=townhall": {
+      "SERVED": 15
+    },
+    "amenity=university": {
+      "SERVED": 2
+    },
+    "bus_stop": {
+      "SERVED": 677,
+      "BEYOND_MAX_ROAD_DISTANCE": 31
+    },
+    "place=city": {
+      "SERVED": 15,
+      "BEYOND_MAX_ROAD_DISTANCE": 12
+    },
+    "place=hamlet": {
+      "SERVED": 126,
+      "NO_ROAD_ACCESS": 8,
+      "BEYOND_MAX_ROAD_DISTANCE": 108
+    },
+    "place=neighbourhood": {
+      "SERVED": 48,
+      "BEYOND_MAX_ROAD_DISTANCE": 16,
+      "NO_ROAD_ACCESS": 1
+    },
+    "place=quarter": {
+      "SERVED": 232,
+      "NO_ROAD_ACCESS": 1,
+      "BEYOND_MAX_ROAD_DISTANCE": 42
+    },
+    "place=suburb": {
+      "SERVED": 161,
+      "NO_ROAD_ACCESS": 2,
+      "BEYOND_MAX_ROAD_DISTANCE": 50
+    },
+    "place=town": {
+      "SERVED": 190,
+      "BEYOND_MAX_ROAD_DISTANCE": 124,
+      "NO_ROAD_ACCESS": 5
+    },
+    "place=village": {
+      "SERVED": 294,
+      "NO_ROAD_ACCESS": 22,
+      "BEYOND_MAX_ROAD_DISTANCE": 227
+    }
+  }
+}

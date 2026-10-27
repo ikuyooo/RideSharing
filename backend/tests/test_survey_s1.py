@@ -19,7 +19,7 @@ from tests.conftest import QUESTIONNAIRE
 
 pytestmark = pytest.mark.db
 
-DEMOGRAPHICS = {"ride_hailing_trips_per_week": "3-5", "usual_trip_distance": "3-LT7", "intercity_trips_per_month": "1"}
+DEMOGRAPHICS = {"ride_hailing_trips_per_week": "2-3", "usual_trip_distance": "3-LT6", "intercity_trips_per_month": "1"}
 
 
 class FakeLimiter:
@@ -88,6 +88,15 @@ def test_design_follows_section_65_and_is_deterministic(client: TestClient) -> N
     # Survey decision 2: the generic 14 km card shows Fare_matched_est (R9 Section 20.2);
     # 143.000 đ belongs only to the matched scenario A of Section 16.1.
     assert prices == {"BIKE_URBAN": 81000, "CAR_URBAN_POOL": 145000, "CAR_URBAN_PRIVATE": 194000}
+    # SURVEY-01: every pool card shows expected price, committed cap and unmatched maximum.
+    pools = {t["context"]["distance_km"]: next(c for c in t["cards"] if c["alternative"] == "CAR_URBAN_POOL")
+             for t in t1a}
+    assert {k: (c["price_vnd"], c["quote_cap_vnd"], c["max_price_if_unmatched_vnd"]) for k, c in pools.items()} == \
+        {14: (145000, 155000, 174000), 6: (71000, 76000, 85000)}
+    six = next(t for t in t1a if t["context"]["distance_km"] == 6)
+    assert {c["alternative"]: c.get("travel_min") for c in six["cards"]} == \
+        {"BIKE_URBAN": 16, "CAR_URBAN_POOL": None, "CAR_URBAN_PRIVATE": 19}
+    assert pools[6]["max_detour_min"] == 6 and pools[14]["max_detour_min"] == 12
     fills = [next(c for c in t["cards"] if c["alternative"] == "CAR_INTERCITY_POOL") for t in t1b]
     assert {c["fill_likelihood"] for c in fills} == {"HIGH", "LOW"}  # hypothetical levels, one per seat price
     assert all(c["fill_likelihood_text"] for c in fills)
@@ -128,7 +137,7 @@ def test_submit_validation_and_single_submission(client: TestClient) -> None:
     wrong = full | {"choices": [dict(full["choices"][0], chosen="CAR_INTERCITY_PRIVATE")] + full["choices"][1:]}
     assert client.post(url, json=wrong).status_code == 422
     assert client.post(url, json=full | {"email": "someone@example.com"}).status_code == 422  # no PII fields
-    assert client.post(url, json=full | {"demographics": DEMOGRAPHICS | {"usual_trip_distance": "3-7"}}).status_code == 422
+    assert client.post(url, json=full | {"demographics": DEMOGRAPHICS | {"usual_trip_distance": "3-LT7"}}).status_code == 422
     assert client.post(url, json=full | {"group": "WORKER"}).status_code == 422  # group is fixed at start
     tampered = full | {"start_token": "1." + full["start_token"].split(".")[1]}
     assert client.post(url, json=tampered).json()["error"]["code"] == "INVALID_START_TOKEN"
@@ -149,7 +158,7 @@ def test_quality_flags(client: TestClient) -> None:
     }
     flags = client.post(f"/api/survey/s1/sessions/{s['respondent_id']}/submit", json=same_position).json()["quality_flags"]
     # Submitted within seconds of the start -> QC2 flag (decision 7: flagged, never excluded).
-    assert flags == ["QC2_FAST_COMPLETION", "QC3_SAME_POSITION_ALL_1A", "QC4_SAME_LIKERT_ALL_METHODS"]
+    assert flags == ["FAST_RESPONSE_REVIEW", "QC3_SAME_POSITION_ALL_1A", "QC4_SAME_LIKERT_ALL_METHODS"]
 
 
 def test_qc2_uses_signed_duration_and_publishes_threshold(client: TestClient, db_session: Session,
@@ -161,12 +170,24 @@ def test_qc2_uses_signed_duration_and_publishes_threshold(client: TestClient, db
     s = _start(client)
     monkeypatch.setattr(survey_service, "_now_ms", lambda: t0 + 200_500)  # 200.5 s later
     resp = client.post(f"/api/survey/s1/sessions/{s['respondent_id']}/submit", json=_answer(s, likert={"X": 5, "Y": 2}))
-    assert resp.status_code == 201 and "QC2_FAST_COMPLETION" not in resp.json()["quality_flags"]
+    assert resp.status_code == 201 and "FAST_RESPONSE_REVIEW" not in resp.json()["quality_flags"]
     stored = db_session.execute(text("SELECT duration_s, extract(second FROM completed_at) FROM survey_respondents "
                                      "WHERE respondent_id = :r"), {"r": s["respondent_id"]}).one()
     assert stored[0] == 200 and stored[1] == 0  # whole seconds of duration; timestamps stay per minute
     q = survey_service.load_questionnaire(Path(QUESTIONNAIRE))
     assert q["quality_rules"]["QC2"]["flag_below_seconds"] == 120 and q["quality_rules"]["QC2"]["action"] == "FLAG_ONLY"
+    assert q["quality_rules"]["QC2"]["flag"] == "FAST_RESPONSE_REVIEW"
+
+
+def test_demographics_are_optional(client: TestClient, db_session: Session) -> None:
+    """SURVEY-04: D2-D4 may be skipped; skipped answers are stored as null."""
+    s = _start(client)
+    body = _answer(s)
+    del body["demographics"]
+    assert client.post(f"/api/survey/s1/sessions/{s['respondent_id']}/submit", json=body).status_code == 201
+    stored = db_session.execute(text("SELECT demographics_json FROM survey_respondents WHERE respondent_id = :r"),
+                                {"r": s["respondent_id"]}).scalar_one()
+    assert stored == {"ride_hailing_trips_per_week": None, "usual_trip_distance": None, "intercity_trips_per_month": None}
 
 
 def test_group_quota_closes_a_full_group_at_session_start(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -260,7 +281,8 @@ def test_export_formats_groupkfold_and_h4(client: TestClient, db_session: Sessio
     ids = {r["respondent_id"] for r in respondents}
     assert len(ids) == 3
     assert all(r["group"] == "STUDENT" for r in respondents)
-    assert all(r["usual_trip_distance"] == "3-LT7" and r["duration_s"] != "" for r in respondents)
+    assert all(r["usual_trip_distance"] == "3-LT6" and r["duration_s"] != "" for r in respondents)
+    assert {r["quote_cap_vnd"] for r in choices if r["alternative"] == "CAR_URBAN_POOL"} == {"155000", "76000"}
     # Long format: 10 tasks x 3 alternatives per respondent, exactly one chosen per task.
     assert len(choices) == 3 * 10 * 3
     per_task: dict[tuple[str, str], int] = {}
@@ -313,7 +335,7 @@ def test_research_parameters_stay_out_of_pricing_configs() -> None:
     from app.modules.pricing import seed
 
     q = yaml.safe_load(Path(QUESTIONNAIRE).read_text(encoding="utf-8"))
-    assert q["draft_version"] == 2
+    assert q["draft_version"] == 3
     source = Path(seed.__file__).read_text(encoding="utf-8")
     for marker in ("questionnaire", "price_variation", "survey"):
         assert marker not in source

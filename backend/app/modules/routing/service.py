@@ -70,11 +70,19 @@ class OsrmCarDistance:
             raise RoutingUnavailable(f"OSRM answered HTTP {resp.status_code} code={code}")
         return body
 
-    def reachability(self, anchor: Lonlat, pickup: Lonlat, dropoff: Lonlat) -> Reachability:
-        """One /table request: anchor->pickup, anchor->dropoff, pickup->dropoff road
-        distances (metres -> km) and the snap distance of both points."""
-        body = self._get("table", [anchor, pickup, dropoff],
-                         {"sources": "0;1", "destinations": "1;2", "annotations": "distance"})
+    def reachability(self, anchor: Lonlat, pickup: Lonlat, dropoff: Lonlat,
+                     exclude: tuple[str, ...] = ()) -> Reachability:
+        """One /table request over coordinates [anchor, pickup, dropoff] with
+        sources [anchor, pickup] and destinations [pickup, dropoff]; the matrix is
+          distances[0][0] = anchor -> pickup    distances[0][1] = anchor -> dropoff
+          distances[1][0] = pickup -> pickup    distances[1][1] = pickup -> dropoff
+        i.e. three DIRECT road distances (never the chained anchor -> pickup -> dropoff),
+        in metres -> km, plus the snap distance of both points. `exclude` lists OSRM
+        excludable classes (GEO-E: "ferry")."""
+        params = {"sources": "0;1", "destinations": "1;2", "annotations": "distance"}
+        if exclude:
+            params["exclude"] = ",".join(exclude)
+        body = self._get("table", [anchor, pickup, dropoff], params)
         dist = body["distances"]
         km = [[None if d is None else d / 1000.0 for d in row] for row in dist]
         snaps = [w["distance"] for w in body["destinations"]]
@@ -84,10 +92,12 @@ class OsrmCarDistance:
             pickup_to_dropoff_km=km[1][1],
         )
 
-    def road_distance(self, pickup: Lonlat, dropoff: Lonlat) -> RoadDistance:
+    def road_distance(self, pickup: Lonlat, dropoff: Lonlat, exclude: tuple[str, ...] = ()) -> RoadDistance:
         """pickup/dropoff are (lon, lat). Distance is metres from OSRM, never duration."""
-        body = self._get("route", [pickup, dropoff],
-                         {"overview": "false", "alternatives": "false", "steps": "false"})
+        params = {"overview": "false", "alternatives": "false", "steps": "false"}
+        if exclude:
+            params["exclude"] = ",".join(exclude)
+        body = self._get("route", [pickup, dropoff], params)
         route = body["routes"][0]
         return RoadDistance(
             km=route["distance"] / 1000.0,

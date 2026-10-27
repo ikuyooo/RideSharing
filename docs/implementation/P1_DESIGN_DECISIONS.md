@@ -90,3 +90,15 @@ Revision 9, Baseline v1 hay Decision Register.
 | Ảnh Docker dùng chung | `backend` và `service-area-build` cùng tag `ridesharing-backend:local` (trước đây `service-area-build` có ảnh riêng, dễ chạy mã cũ) |
 | Chống ghi đè bằng chứng | `ensure_new_bundle`: không ghi vào bundle đã tồn tại; chạy lại dùng `--out` khác |
 | Khảo sát | Nhóm chọn trước khi bắt đầu phiên (quota trần 90/nhóm); `duration_s` (migration `0004`) tính từ start token ký HMAC; QC2 chỉ gắn cờ; rate limit Redis khóa băm; xóa theo mã phiên (ADMIN) |
+
+## 5. Quyết định "P1 FINAL HARDENING & APPROVAL GATES" (2026-10-28) — cách hiện thực
+
+| Mã | Quyết định của Chủ dự án | Hiện thực | Còn chờ |
+|---|---|---|---|
+| GEO-A | Đông Anh giữ `PENDING_GEOMETRY_EVIDENCE`; không nối đoạn hở; không thay bằng 3 xã hoặc Global Gate; tìm nguồn lịch sử đáng tin cậy | Đối chiếu 4 nguồn (lịch sử chỉnh sửa OSM `relation/17627914` v1–v9, GADM 4.1 cấp 3, OCHA HDX COD-AB (GSO), snapshot OSM). Chỉ GADM có polygon đầy đủ — nguồn tổng hợp không có thẩm quyền, giản lược (54 đỉnh), giấy phép hạn chế phân phối lại → **không dùng**; phân loại không bị sửa | Nguồn có thẩm quyền hoặc quyết định chấp nhận GADM |
+| GEO-B | Sơn Tây, Chương Mỹ ngoài URBAN trong MVP, vẫn trong vùng tổng | `excluded_review` status `OWNER_DECISION_GEO-B (MVP)`; cả hai đơn vị thuộc TOTAL | — |
+| GEO-C | Lớp polygon không được từ chối điểm chỉ vì điểm mẫu không chạm; kiểm tra định tuyến cuối bắt buộc | `tier1_rule: geodesic_lower_bound` — đơn vị vào TOTAL khi điểm gần nhất cách anchor ≤ 150 km theo đường thẳng (trắc địa, ellipsoid); vì quãng đường bộ ≥ đường thẳng, polygon không bao giờ từ chối một điểm mà lớp 2 sẽ nhận. Lớp 2 bắt buộc (phiên bản không có `serviceability` → 503). Ma trận `/table`: `[0][0]` anchor→pickup, `[0][1]` anchor→dropoff, `[1][1]` pickup→dropoff (ba khoảng cách trực tiếp; có test so với `/route`). Nhận `≤ 150000 m` | — |
+| GEO-D | `max_snap_m = 300` là ngưỡng kỹ thuật tạm thời của MVP, không phải tham số Baseline | Giữ 300; khảo sát tỷ lệ từ chối trên điểm đón thực tế (`pickup_survey`) | Đánh giá lại trước P2 |
+| GEO-E | Không hỗ trợ hành trình bắt buộc đi phà | `serviceability.exclude: [ferry]`, áp dụng cho mọi request OSRM (lớp 2, khoảng cách pickup→dropoff, pipeline). Graph CH hiện có hỗ trợ `exclude=ferry` (đã kiểm: Hà Nội → Cát Bà có phà 2,015 km khi không loại; `NoRoute` khi loại) → **không build lại OSRM** | — |
+| GEO-F | Bảo toàn v1/v2/v3; candidate mới; không gán GEOMETRY_APPROVED khi còn blocker | Rules v4 → candidate mới (mục báo cáo); v1/v2/v3 không đổi | Phê duyệt hình học |
+| SURVEY-01…07 | Xem `survey/SURVEY_S1_DESIGN_REVIEW.md` §13 | Draft 3 | Ma trận biến thiên (SURVEY-06), quy tắc dữ liệu R1–R4, mức "đủ khách" 1B |
