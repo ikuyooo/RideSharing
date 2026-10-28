@@ -1,0 +1,469 @@
+[
+  {
+    "variation_design_active": false,
+    "choice_sets": 48,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200",
+      "rain_x_bike",
+      "urgent_x_time"
+    ],
+    "rank_of_difference_matrix": 9,
+    "parameters": 11,
+    "max_vif": null,
+    "vif": {
+      "price_k": null,
+      "time_min": null,
+      "detour_min": null,
+      "unmatched_gap_k": null,
+      "like_medium": null,
+      "like_low": null,
+      "walk_200": null,
+      "rain_x_bike": null,
+      "urgent_x_time": null
+    },
+    "condition_number_info_zero_priors": null,
+    "condition_number_info_priors": null,
+    "d0_error": null,
+    "dp_error": null,
+    "priors_assumption": {
+      "asc_bike": 0.5,
+      "asc_pool": -0.2,
+      "price_k": -0.03,
+      "time_min": -0.025,
+      "detour_min": -0.03,
+      "unmatched_gap_k": -0.01,
+      "like_medium": -0.3,
+      "like_low": -0.8,
+      "walk_200": -0.2,
+      "rain_x_bike": -0.8,
+      "urgent_x_time": -0.02
+    },
+    "correlations_alternative_level": {
+      "price_vs_time": 0.807,
+      "price_vs_distance": 0.7,
+      "time_vs_distance": 0.982,
+      "price_vs_is_bike": -0.606
+    },
+    "correlations_within_alternative": {
+      "BIKE_URBAN": {
+        "price_vs_distance": 1.0,
+        "time_vs_distance": 1.0,
+        "price_vs_time": 1.0
+      },
+      "CAR_URBAN_PRIVATE": {
+        "price_vs_distance": 1.0,
+        "time_vs_distance": 1.0,
+        "price_vs_time": 1.0
+      },
+      "CAR_URBAN_POOL": {
+        "price_vs_distance": 1.0,
+        "time_vs_distance": 1.0,
+        "price_vs_time": 1.0
+      }
+    },
+    "level_balance": {
+      "match_likelihood": {
+        "HIGH": 16,
+        "LOW": 16,
+        "MEDIUM": 16
+      },
+      "walk_m": {
+        "0": 24,
+        "200": 24
+      }
+    },
+    "pool_display_consistent": "48/48",
+    "dominance": {
+      "bike_cheaper_and_not_slower_than_private": 48,
+      "private_not_dearer_than_pool": 0,
+      "choice_sets_with_max_probability_above_0_9_under_priors": 24
+    },
+    "implied_speeds_kmh": [
+      18.9,
+      21.0,
+      22.5,
+      24.0
+    ]
+  },
+  {
+    "variation_design_active": true,
+    "choice_sets": 48,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200",
+      "rain_x_bike",
+      "urgent_x_time"
+    ],
+    "rank_of_difference_matrix": 11,
+    "parameters": 11,
+    "max_vif": 5.42,
+    "vif": {
+      "price_k": 1.85,
+      "time_min": 1.98,
+      "detour_min": 5.42,
+      "unmatched_gap_k": 4.52,
+      "like_medium": 1.53,
+      "like_low": 1.59,
+      "walk_200": 1.43,
+      "rain_x_bike": 1.47,
+      "urgent_x_time": 1.62
+    },
+    "condition_number_info_zero_priors": 151.43262183657237,
+    "condition_number_info_priors": 241.49713494448594,
+    "d0_error": 1.3400792126804828,
+    "dp_error": 4.675068240029525,
+    "priors_assumption": {
+      "asc_bike": 0.5,
+      "asc_pool": -0.2,
+      "price_k": -0.03,
+      "time_min": -0.025,
+      "detour_min": -0.03,
+      "unmatched_gap_k": -0.01,
+      "like_medium": -0.3,
+      "like_low": -0.8,
+      "walk_200": -0.2,
+      "rain_x_bike": -0.8,
+      "urgent_x_time": -0.02
+    },
+    "correlations_alternative_level": {
+      "price_vs_time": 0.737,
+      "price_vs_distance": 0.683,
+      "time_vs_distance": 0.882,
+      "price_vs_is_bike": -0.585
+    },
+    "correlations_within_alternative": {
+      "BIKE_URBAN": {
+        "price_vs_distance": 0.963,
+        "time_vs_distance": 0.904,
+        "price_vs_time": 0.871
+      },
+      "CAR_URBAN_PRIVATE": {
+        "price_vs_distance": 0.969,
+        "time_vs_distance": 0.897,
+        "price_vs_time": 0.896
+      },
+      "CAR_URBAN_POOL": {
+        "price_vs_distance": 0.945,
+        "time_vs_distance": 0.897,
+        "price_vs_time": 0.877
+      }
+    },
+    "level_balance": {
+      "pool_discount_d": {
+        "(14, 0.2)": 8,
+        "(14, 0.25)": 8,
+        "(14, 0.35)": 8,
+        "(6, 0.2)": 8,
+        "(6, 0.25)": 8,
+        "(6, 0.35)": 8
+      },
+      "private_price_mult": {
+        "(14, 0.9)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.1)": 8,
+        "(6, 0.9)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.1)": 8
+      },
+      "bike_price_mult": {
+        "(14, 0.9)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.1)": 8,
+        "(6, 0.9)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.1)": 8
+      },
+      "car_time_mult": {
+        "(14, 0.8)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.2)": 8,
+        "(6, 0.8)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.2)": 8
+      },
+      "bike_time_mult": {
+        "(14, 0.8)": 9,
+        "(14, 1.0)": 9,
+        "(14, 1.2)": 6,
+        "(6, 0.8)": 6,
+        "(6, 1.0)": 9,
+        "(6, 1.2)": 9
+      },
+      "match_likelihood": {
+        "HIGH": 16,
+        "LOW": 16,
+        "MEDIUM": 16
+      },
+      "walk_m": {
+        "0": 24,
+        "200": 24
+      }
+    },
+    "pool_display_consistent": "48/48",
+    "dominance": {
+      "bike_cheaper_and_not_slower_than_private": 33,
+      "private_not_dearer_than_pool": 0,
+      "choice_sets_with_max_probability_above_0_9_under_priors": 18
+    },
+    "implied_speeds_kmh": [
+      15.7,
+      17.5,
+      18.9,
+      20.0,
+      21.0,
+      22.5,
+      24.0,
+      26.2,
+      27.7,
+      30.0
+    ],
+    "design": "D (approved)",
+    "expected_abs_t_n150": {
+      "full": {
+        "asc_bike": 1.51,
+        "asc_pool": 0.43,
+        "price_k": 6.49,
+        "time_min": 1.1,
+        "detour_min": 0.48,
+        "unmatched_gap_k": 0.75,
+        "like_medium": 1.16,
+        "like_low": 2.5,
+        "walk_200": 0.82,
+        "rain_x_bike": 4.59,
+        "urgent_x_time": 0.57
+      },
+      "lean_without_urgent_x_time": {
+        "asc_bike": 1.53,
+        "asc_pool": 0.44,
+        "price_k": 6.59,
+        "time_min": 1.39,
+        "detour_min": 0.49,
+        "unmatched_gap_k": 0.77,
+        "like_medium": 1.19,
+        "like_low": 2.59,
+        "walk_200": 0.87,
+        "rain_x_bike": 4.63
+      }
+    }
+  },
+  {
+    "variation_design_active": true,
+    "choice_sets": 48,
+    "columns": [
+      "asc_bike",
+      "asc_pool",
+      "price_k",
+      "time_min",
+      "detour_min",
+      "unmatched_gap_k",
+      "like_medium",
+      "like_low",
+      "walk_200",
+      "rain_x_bike",
+      "urgent_x_time"
+    ],
+    "rank_of_difference_matrix": 11,
+    "parameters": 11,
+    "max_vif": 6.28,
+    "vif": {
+      "price_k": 1.49,
+      "time_min": 2.03,
+      "detour_min": 6.28,
+      "unmatched_gap_k": 6.27,
+      "like_medium": 1.52,
+      "like_low": 1.57,
+      "walk_200": 1.4,
+      "rain_x_bike": 1.4,
+      "urgent_x_time": 1.96
+    },
+    "condition_number_info_zero_priors": 97.55095654271672,
+    "condition_number_info_priors": 115.15097930743646,
+    "d0_error": 1.0013374267218724,
+    "dp_error": 3.468853317297622,
+    "priors_assumption": {
+      "asc_bike": 0.5,
+      "asc_pool": -0.2,
+      "price_k": -0.03,
+      "time_min": -0.025,
+      "detour_min": -0.03,
+      "unmatched_gap_k": -0.01,
+      "like_medium": -0.3,
+      "like_low": -0.8,
+      "walk_200": -0.2,
+      "rain_x_bike": -0.8,
+      "urgent_x_time": -0.02
+    },
+    "correlations_alternative_level": {
+      "price_vs_time": 0.669,
+      "price_vs_distance": 0.683,
+      "time_vs_distance": 0.795,
+      "price_vs_is_bike": -0.585
+    },
+    "correlations_within_alternative": {
+      "BIKE_URBAN": {
+        "price_vs_distance": 0.963,
+        "time_vs_distance": 0.806,
+        "price_vs_time": 0.856
+      },
+      "CAR_URBAN_PRIVATE": {
+        "price_vs_distance": 0.969,
+        "time_vs_distance": 0.805,
+        "price_vs_time": 0.815
+      },
+      "CAR_URBAN_POOL": {
+        "price_vs_distance": 0.945,
+        "time_vs_distance": 0.805,
+        "price_vs_time": 0.8
+      }
+    },
+    "level_balance": {
+      "pool_discount_d": {
+        "(14, 0.2)": 8,
+        "(14, 0.25)": 8,
+        "(14, 0.35)": 8,
+        "(6, 0.2)": 8,
+        "(6, 0.25)": 8,
+        "(6, 0.35)": 8
+      },
+      "private_price_mult": {
+        "(14, 0.9)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.1)": 8,
+        "(6, 0.9)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.1)": 8
+      },
+      "bike_price_mult": {
+        "(14, 0.9)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.1)": 8,
+        "(6, 0.9)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.1)": 8
+      },
+      "car_time_mult": {
+        "(14, 0.7)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.3)": 8,
+        "(6, 0.7)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.3)": 8
+      },
+      "bike_time_mult": {
+        "(14, 0.7)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.3)": 8,
+        "(6, 0.7)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.3)": 8
+      },
+      "detour_mult": {
+        "(14, 0.5)": 8,
+        "(14, 1.0)": 8,
+        "(14, 1.5)": 8,
+        "(6, 0.5)": 8,
+        "(6, 1.0)": 8,
+        "(6, 1.5)": 8
+      },
+      "match_likelihood": {
+        "HIGH": 16,
+        "LOW": 16,
+        "MEDIUM": 16
+      },
+      "walk_m": {
+        "0": 24,
+        "200": 24
+      }
+    },
+    "pool_display_consistent": "48/48",
+    "dominance": {
+      "bike_cheaper_and_not_slower_than_private": 16,
+      "private_not_dearer_than_pool": 0,
+      "choice_sets_with_max_probability_above_0_9_under_priors": 17
+    },
+    "implied_speeds_kmh": [
+      14.4,
+      16.2,
+      17.1,
+      18.3,
+      18.9,
+      21.0,
+      22.5,
+      24.0,
+      27.7,
+      30.0,
+      32.7,
+      35.0
+    ],
+    "design": "D2 (proposed)",
+    "expected_abs_t_n150": {
+      "full": {
+        "asc_bike": 1.68,
+        "asc_pool": 0.64,
+        "price_k": 7.47,
+        "time_min": 1.88,
+        "detour_min": 0.7,
+        "unmatched_gap_k": 0.6,
+        "like_medium": 1.15,
+        "like_low": 2.51,
+        "walk_200": 0.87,
+        "rain_x_bike": 4.65,
+        "urgent_x_time": 1.0
+      },
+      "lean_without_urgent_x_time": {
+        "asc_bike": 1.69,
+        "asc_pool": 0.64,
+        "price_k": 7.52,
+        "time_min": 2.71,
+        "detour_min": 0.69,
+        "unmatched_gap_k": 0.6,
+        "like_medium": 1.19,
+        "like_low": 2.55,
+        "walk_200": 0.88,
+        "rain_x_bike": 4.67
+      }
+    },
+    "expected_abs_t_n300": {
+      "full": {
+        "asc_bike": 2.37,
+        "asc_pool": 0.91,
+        "price_k": 10.56,
+        "time_min": 2.65,
+        "detour_min": 0.99,
+        "unmatched_gap_k": 0.85,
+        "like_medium": 1.62,
+        "like_low": 3.55,
+        "walk_200": 1.23,
+        "rain_x_bike": 6.58,
+        "urgent_x_time": 1.42
+      },
+      "lean_without_urgent_x_time": {
+        "asc_bike": 2.38,
+        "asc_pool": 0.91,
+        "price_k": 10.63,
+        "time_min": 3.84,
+        "detour_min": 0.98,
+        "unmatched_gap_k": 0.84,
+        "like_medium": 1.68,
+        "like_low": 3.6,
+        "walk_200": 1.24,
+        "rain_x_bike": 6.61
+      }
+    }
+  }
+]

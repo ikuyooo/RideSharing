@@ -49,3 +49,31 @@ Tệp đã chuẩn bị: [`infra/survey/Caddyfile`](../../../infra/survey/Caddyf
 
 - Không có domain, không có máy chủ công khai → **không triển khai**, không có link, không có QR.
 - Không đặt `SURVEY_S1_RELEASED` ở bất kỳ môi trường nào. Bản chạy trên `127.0.0.1` **không** được coi là phát hành.
+
+
+## 5. Chính sách lưu trữ đề xuất (OWNER APPROVAL §6 — chờ phê duyệt, không phải thời hạn luật định)
+
+| Bước | Nội dung |
+|---|---|
+| Thời hạn | Câu trả lời ẩn danh (`dataset = RESEARCH`) lưu **12 tháng kể từ ngày đóng khảo sát** |
+| Xóa khi hết hạn | `scripts/survey/purge_survey.sh <db> RESEARCH PURGE-RESEARCH` (giao dịch, in số dòng trước/sau để ghi vào nhật ký xóa); file export CSV trong thư mục nhóm cũng bị xóa cùng ngày |
+| Bản sao lưu | Backup hằng ngày giữ tối đa 30 ngày (xoay vòng); khi hết thời hạn lưu trữ, xóa mọi archive `s1_*.dump` còn lại trong vòng 30 ngày — sau đó không còn bản sao dữ liệu chi tiết |
+| Gia hạn | Chỉ khi Chủ dự án quyết định bằng văn bản **trước** ngày hết hạn, ghi lý do và thời hạn mới; thông báo nghiên cứu cập nhật tương ứng |
+| Xóa theo yêu cầu | Người trả lời gửi mã phiên → admin `DELETE /api/admin/survey/s1/respondents/{id}`; bản sao lưu chứa phiên đó hết hạn theo vòng 30 ngày |
+| Dữ liệu TEST | Xóa ngay khi kết thúc kiểm thử phát hành (`purge_survey.sh <db> TEST PURGE-TEST`); không bao giờ gộp vào phân tích |
+
+## 6. Kiểm thử phát hành cục bộ qua HTTPS (2026-10-28) — `scripts/survey/staging_e2e.sh`
+
+Không có domain công khai nên đã chạy toàn bộ đường đi phát hành trên máy: chính `infra/survey/Caddyfile` phục vụ `localhost`
+bằng CA nội bộ của Caddy, phía sau là một backend staging riêng trên **CSDL tạm** (`dataset = TEST`).
+
+| Kiểm tra | Kết quả |
+|---|---|
+| TLS (xác thực theo root CA nội bộ của Caddy), HSTS, CSP | PASS |
+| `/survey/s1` 200; admin / docs / openapi / health / trip / auth → 404 qua proxy | PASS |
+| 1 câu trả lời TEST qua HTTPS (bắt đầu phiên + nộp); trường lạ → 422; body 70 KB → 413 | PASS |
+| Log truy cập proxy (11 dòng) và log backend cho đường dẫn khảo sát: không có địa chỉ client | PASS |
+| CSDL staging: `TEST = 1`, không có `RESEARCH`; CSDL chính: 0 dòng khảo sát | PASS |
+| Dọn dẹp: container, network, CSDL staging đã xóa | PASS |
+
+Chưa kiểm được (cần hạ tầng thật): chứng chỉ công khai cho domain thật, truy cập từ thiết bị bên ngoài, QR.

@@ -71,3 +71,55 @@ Kết quả phân loại (cùng ca): mọi ca biên R9 giữ nguyên kết quả
 - Dừng container build (`docker stop`) **không** dừng truy vấn PostgreSQL của nó: truy vấn mồ côi giữ khóa schema `sa_build` và chặn lần build sau (đã `pg_terminate_backend`; giao dịch chưa commit nên không ghi gì). Quy tắc: sau khi dừng build phải kết thúc backend tương ứng.
 - Truy vấn phân loại thành phần chậm khi vùng bao chứa hàng nghìn đảo → chỉ tính khoảng cách cho mảnh cỡ "sliver" + chỉ mục GIST (kết quả phân loại không đổi vì ngưỡng sliver là < 10 m).
 - Khảo sát điểm đón ban đầu đếm trùng do snapshot còn quan hệ tỉnh cũ (Hòa Bình VN-14, Yên Bái VN-06, "… cũ") chồng lên tỉnh mới → mỗi điểm nay gán đúng 1 tỉnh (quan hệ lớn nhất, loại "cũ"); tệp sai đã xóa trước khi tạo lại.
+
+## 9. Cập nhật 2026-10-28 (sau báo cáo hardening) — xử lý blocker Đông Anh: ứng viên v5 `sa-cand-0d5347b4294e`
+
+**Phát hiện:** quan hệ OSM `relation/17627914` **không thực sự hở**. Điểm đầu của way 1412300270 nằm đúng trên way 1412300271 (khoảng cách 0,0 m — nút chữ T), và way 1412300271 cắt way 1286471120. Khoảng "hở 1.885 m" chỉ là do way 1412300271 **chạy quá** nút giao 2,25 km (một đường ranh xã khác được đưa nguyên vào quan hệ), khiến osmium không ghép được vòng. Ghép bằng `ST_Polygonize(ST_Node(member ways))` — chỉ dùng các đường đã có trong OSM, **không thêm, không nối, không dịch chuyển đường nào** — cho 2 mặt kề nhau.
+
+| Cách đọc | km² | IoU với GADM | Hausdorff tới GADM | Chứa node thị trấn | Phân bố Thư Lâm / Phúc Thịnh / Đông Anh (km²) |
+|---|---|---|---|---|---|
+| **Hợp 2 mặt** | **4,344** | **0,855** | **222 m** | **có** | **2,303 / 1,487 / 0,554** — cả 3 xã như NQ1656 k113–k115; GADM: 2,37 / 1,566 / 0,609 |
+| Chỉ mặt 1 | 3,042 | 0,597 | 1.787 m | không | gần như thiếu Phúc Thịnh |
+| Chỉ mặt 2 | 1,303 | 0,275 | 4.097 m | có | chỉ Phúc Thịnh |
+
+Chỉ cách đọc "hợp 2 mặt" nhất quán với cả GADM (độc lập) và văn bản chính thức NQ1656 (thị trấn chia cho 3 xã). Phần không dùng: 2.251 m đuôi thừa của way 1412300271.
+
+**Ứng viên v5** (`service_area_rules.candidate.v5.yaml` = v4 + quy tắc U4 `include_historic_areas`): nội đô thêm polygon thị trấn Đông Anh cũ 4,347 km² — **không** lấy nguyên 3 xã, **không** dùng Global Gate.
+
+| | v4 `9bd44393e699` | **v5 `0d5347b4294e`** |
+|---|---|---|
+| URBAN | 340,034 km², 6 phần | **344,381 km², 7 phần** (+4,347) |
+| TOTAL / EXCLUDED | 68.374,523 / 488,167 km² | không đổi |
+| Node `place=*` đổi trạng thái | — | 1: node/13799910539 Đông Anh vào URBAN |
+| Đông Anh → Hoàn Kiếm | INTERCITY 19,678 km — FAIL | **URBAN (2a) — PASS** |
+| Ca biên R9 + ca GEO (15 ca) | 14 PASS, 1 FAIL | **15/15 PASS** (nghiệm thu: NOT_VERIFIED vì chưa phê duyệt) |
+
+SHA-256 v5: urban `33ca5346…0307`, total `c3de995a…6353`, excluded `dcb26c8f…82cf` (TOTAL/EXCLUDED cùng hình học với v4; hash khác vì thuộc tính `service_area_version` trong GeoJSON).
+
+**Trạng thái:** bằng chứng hình học đã có (OSM + đối chiếu GADM + NQ1656), nhưng **không nguồn nào là bản đồ ranh giới có thẩm quyền** → đây là `PENDING_OWNER_APPROVAL`, không phải GEOMETRY_APPROVED. Chủ dự án chọn: phê duyệt v5 (Đông Anh nội đô theo thị trấn cũ) hoặc giữ v4 (Đông Anh chưa nội đô).
+
+## 10. Phê duyệt có điều kiện v5 — kết quả 8 cổng kiểm (OWNER APPROVAL §2, 2026-10-28)
+
+Thực hiện bằng `app.modules.trip.service_area_approve` — chỉ ghi trạng thái khi **mọi** cổng PASS; bằng chứng: `sa-cand-0d5347b4294e/APPROVAL_GATES.json` (đánh giá mới `APPROVAL_GATE_EVAL.md` / `approval_gate_eval.json`, không ghi đè bằng chứng cũ).
+
+| Cổng | Nội dung | Kết quả |
+|---|---|---|
+| G1 | 3 lớp có trong DB, đang CANDIDATE; 13 tệp trong `CHECKSUMS.sha256` băm lại khớp; hình học lưu trong DB (`ST_AsGeoJSON` 6 chữ số) = GeoJSON của bundle. SHA-256 đầy đủ: urban `33ca5346a75e065a5af883ac6e2097b6deaae3bb81b8fe8d7b5bcf77fdb80307`, total `c3de995abbcd80a6ab6935887e802462d0503a2f5f4c417bd2e5ebf446946353`, excluded `dcb26c8f860047c8ed77b11b20b3523f86892610d0c5b0b1b00f6471952782cf` | PASS |
+| G2 | Bằng chứng ứng viên: U4 `relation/17627914` ghép bằng polygonize; hợp 2 mặt IoU 0,855 với GADM, chứa node thị trấn, chia 3 xã | PASS |
+| G3 | Đánh giá chạy lại (15 ca) — tất cả PASS | PASS |
+| G4 | Đông Anh → Hoàn Kiếm = URBAN (2a) | PASS |
+| G5 | Phenikaa → La Phù = URBAN qua vùng đệm (2b), 5,977 km | PASS |
+| G6 | Điểm ngoài 150 km bị từ chối (lớp 2): 150,024 km và 256,43 km → `BEYOND_MAX_ROAD_DISTANCE` | PASS |
+| G7 | Snap 1.576,6 m → `NO_ROAD_ACCESS`; điểm trong EXCLUDED → `UNSERVICEABLE_COMPONENT`; phà: 412 đích, 0 chặng phà khi áp chính sách, Cát Bà `NoRoute` | PASS |
+| G8 | Import lại vào thư mục tạm: 3 lớp `unchanged (ST_Equals)`, SHA-256 trùng; bundle đã có bị từ chối ghi đè | PASS |
+
+**Kết quả:** `sa-cand-0d5347b4294e` — 3 lớp `status = APPROVED`, `approved_at` có giá trị, `approval_reference = "GEOMETRY_APPROVED_FOR_MVP | Owner conditional approval 2026-10-28 … academic MVP scope only - NOT a legal certification of administrative boundaries; Dong Anh former-town boundary reconstructed from OSM relation 17627914 (member ways polygonized, no line added), compared with GADM 4.1 and HDX COD-AB; no state boundary certification"`. v1–v4 giữ nguyên (CANDIDATE / RETIRED). Cấu hình chạy cục bộ: `SERVICE_AREA_VERSION = sa-cand-0d5347b4294e`, `ALLOW_CANDIDATE_SERVICE_AREA = false`.
+
+**Phạm vi:** phê duyệt cho MVP học thuật — **không** phải chứng nhận độ chính xác pháp lý của địa giới.
+
+**Rủi ro còn lại về địa giới Đông Anh**
+1. Ranh giới thị trấn cũ là **tái dựng từ dữ liệu cộng đồng** (OSM), được hai nguồn không có thẩm quyền (GADM) và một văn bản (NQ1656, chỉ mô tả bằng lời) xác nhận — chưa có bản đồ địa giới của cơ quan nhà nước.
+2. Đoạn ranh giữa 2 mặt và đuôi thừa 2,25 km thuộc way 1412300271: cách đọc "hợp 2 mặt" là suy luận (được GADM ủng hộ, IoU 0,855); sai lệch biên tới GADM tới 222 m (Hausdorff) → điểm đón trong dải vài trăm mét quanh ranh có thể bị phân loại khác thực tế.
+3. Diện tích 4,344 km² so với GADM 4,544 km² (−4,4%) — phần GADM nằm ngoài vùng OSM (≈10%) không thuộc nội đô.
+4. "Đông Anh" của Mục 2.3 được hiểu là thị trấn cũ (không phải cả huyện) — các xã khác của huyện Đông Anh cũ (Cổ Loa, Uy Nỗ, Vĩnh Ngọc, Global Gate…) vẫn ngoài nội đô; chuyến từ đó vào trung tâm > 15 km là INTERCITY.
+5. Dữ liệu OSM có thể đổi: phiên bản khóa theo snapshot 2026-10-23; cập nhật bản đồ sau này cần build + kiểm cổng lại.

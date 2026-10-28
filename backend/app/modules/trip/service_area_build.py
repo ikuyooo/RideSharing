@@ -29,6 +29,10 @@ version ids therefore stay reproducible):
                           without a car route from the anchor, form the EXCLUDED
                           layer; the raw TOTAL polygon is kept unchanged (GEO-04)
   historic_evidence       pre-2025 boundary=historic relations reported as evidence
+  urban.include_historic_areas  (rules v5) urban polygons of pre-2025 units taken from
+                          their OSM historic relation: the osmium area when it builds,
+                          otherwise ST_Polygonize over the noded MEMBER WAYS only (no
+                          line is added or moved); unused member length is reported
 
 Deterministic: identical inputs give the identical service_area_version and
 geometry; a rerun reports "unchanged" and a changed geometry under an existing
@@ -113,6 +117,8 @@ def load_inputs(conn: Connection, sources: Path, b: Build) -> None:
         osm_id bigint PRIMARY KEY, admin_level int NOT NULL, name text NOT NULL, iso text,
         input_valid boolean NOT NULL, geom geometry(MultiPolygon, 4326) NOT NULL)"""))
     conn.execute(text(f"CREATE INDEX ON {SCHEMA}.units USING gist (geom)"))
+    conn.execute(text(f"""CREATE TABLE {SCHEMA}.urban_hist (relation bigint PRIMARY KEY, label text,
+        geom geometry(MultiPolygon, 4326) NOT NULL)"""))
     conn.execute(text(f"""CREATE TABLE {SCHEMA}.places (
         osm_type text NOT NULL, osm_id bigint NOT NULL, name text, kind text,
         geom_full geometry(Geometry, 4326) NOT NULL, geom geometry(Point, 4326) NOT NULL,
@@ -286,6 +292,43 @@ def select_urban(conn: Connection, city: Any, b: Build) -> tuple[list[dict[str, 
                       "rule": "U3 OSM urban-development polygon", "note": area.get("note")})
     b.note(f"urban: {len(units)} level-6 units in city, selected {len(chosen)} units + {len(areas)} OSM areas")
     return sorted(chosen.values(), key=lambda r: r["osm_id"]), areas
+
+
+def select_urban_historic(conn: Connection, city: Any, b: Build) -> list[dict[str, Any]]:
+    """U4: pre-2025 units named in urban.include_historic_areas, clipped to the city."""
+    out = []
+    for h in b.rules["urban"].get("include_historic_areas", []):
+        rid = int(h["relation"])
+        assembled = conn.execute(text(f"SELECT count(*) FROM {SCHEMA}.historic WHERE osm_id = :r"), {"r": rid}).scalar_one()
+        if assembled:
+            method, source_sql = "osmium area", f"SELECT geom AS g FROM {SCHEMA}.historic WHERE osm_id = :r"
+        else:
+            method = "ST_Polygonize over noded member ways (no line added)"
+            source_sql = (f"SELECT (ST_Dump(ST_Polygonize(n.g))).geom AS g FROM (SELECT ST_Node(ST_Collect(geom)) AS g "
+                          f"FROM {SCHEMA}.historic_ways WHERE relation = :r) n")
+        row = conn.execute(text(f"""WITH faces AS ({source_sql}),
+                u AS (SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(g)), 3)) AS g, count(*) AS n FROM faces),
+                c AS (SELECT geom AS g FROM {SCHEMA}.units WHERE osm_id = :city)
+            SELECT u.n AS faces, ST_Area(u.g::geography) / 1e6 AS km2,
+                   ST_Area(ST_Intersection(u.g, c.g)::geography) / 1e6 AS km2_in_city,
+                   (SELECT ST_Length(ST_Difference(ST_Collect(w.geom),
+                        ST_Buffer(ST_Boundary(u.g)::geography, 0.5)::geometry)::geography)
+                    FROM {SCHEMA}.historic_ways w WHERE w.relation = :r) AS unused_member_m,
+                   ST_AsEWKB(ST_Multi(ST_CollectionExtract(ST_Intersection(u.g, c.g), 3))) AS clipped
+            FROM u, c"""), {"r": rid, "city": city.osm_id}).mappings().one_or_none()
+        if row is None or not row["km2"]:
+            b.conflicts.append(f"urban rule U4: historic relation/{rid} gives no polygon")
+            continue
+        conn.execute(text(f"INSERT INTO {SCHEMA}.urban_hist VALUES (:r, :l, ST_GeomFromEWKB(:g))"),
+                     {"r": rid, "l": h.get("label"), "g": row["clipped"]})
+        out.append({"osm": f"relation/{rid}", "label": h.get("label"), "rule": "U4 historic unit polygon",
+                    "assembly": method, "faces": row["faces"], "km2": round(row["km2"], 4),
+                    "km2_in_city": round(row["km2_in_city"], 4),
+                    "unused_member_m": None if row["unused_member_m"] is None else round(row["unused_member_m"], 1),
+                    "evidence": h.get("evidence"), "status": h.get("status")})
+    if out:
+        b.note("urban U4 historic areas: " + "; ".join(f"{a['label']} {a['km2']} km² ({a['assembly']})" for a in out))
+    return out
 
 
 def official_crosscheck(conn: Connection, city: Any, b: Build) -> dict[str, Any] | None:
@@ -541,10 +584,12 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
             CASE WHEN ST_Area(c.g::geography) / 1e6 < :sliver THEN
                 COALESCE((SELECT min(ST_Distance(c.g::geography, o.g::geography)) FROM {SCHEMA}.comps o
                     WHERE o.idx <> c.idx AND ST_DWithin(c.g, o.g, 0.001)), 1e9) ELSE 1e9 END AS gap_m,
-            EXISTS (SELECT 1 FROM {SCHEMA}.places p WHERE p.osm_type || '/' || p.osm_id = ANY(:areas)
-                AND ST_Intersects(p.geom_full, ST_PointOnSurface(c.g))) AS is_osm_area
+            (EXISTS (SELECT 1 FROM {SCHEMA}.places p WHERE p.osm_type || '/' || p.osm_id = ANY(:areas)
+                AND ST_Intersects(p.geom_full, ST_PointOnSurface(c.g)))
+             OR (:area_type = 'URBAN' AND EXISTS (SELECT 1 FROM {SCHEMA}.urban_hist h
+                WHERE ST_Intersects(h.geom, ST_PointOnSurface(c.g))))) AS is_osm_area
         FROM {SCHEMA}.comps c ORDER BY c.idx"""),
-        {"ids": unit_ids, "areas": osm_areas or [], "sliver": SLIVER_MAX_KM2}).mappings().all()
+        {"ids": unit_ids, "areas": osm_areas or [], "sliver": SLIVER_MAX_KM2, "area_type": area_type}).mappings().all()
     main_holes = conn.execute(text(f"""SELECT count(*) AS n,
             count(*) FILTER (WHERE ST_Area(r.geom::geography) / 1e6 < :sliver) AS tiny
         FROM (SELECT (ST_DumpRings(g)).* FROM {SCHEMA}.comps WHERE idx = 1) r WHERE r.path[1] > 0"""),
@@ -579,7 +624,8 @@ def classify_components(conn: Connection, version: str, area_type: str, unit_ids
         elif r["whole_units"] > 0:
             category = "SEPARATED_WHOLE_UNIT (valid administrative geometry)"
         elif r["is_osm_area"]:
-            category = "U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)"
+            category = ("U3/U4 MAPPED URBAN POLYGON (not contiguous with the main body)" if b.rules["urban"].get(
+                "include_historic_areas") else "U3_URBAN_DEVELOPMENT_POLYGON (not contiguous with the main body)")
         elif r["km2"] < SLIVER_MAX_KM2 and r["gap_m"] < SLIVER_MAX_GAP_M:
             category = "SLIVER_SUSPECTED (overlay / data artefact)"
         else:
@@ -746,7 +792,8 @@ def geometry_sql(kind: str) -> str:
     units = f"SELECT geom AS g FROM {SCHEMA}.units WHERE osm_id = ANY(:ids)"
     if kind == "urban":
         units += (f" UNION ALL SELECT ST_CollectionExtract(ST_Intersection(p.geom_full, c.geom), 3) FROM {SCHEMA}.places p, "
-                  f"{SCHEMA}.units c WHERE c.osm_id = :city AND p.osm_type || '/' || p.osm_id = ANY(:areas)")
+                  f"{SCHEMA}.units c WHERE c.osm_id = :city AND p.osm_type || '/' || p.osm_id = ANY(:areas)"
+                  f" UNION ALL SELECT geom FROM {SCHEMA}.urban_hist")
     return f"SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(g)), 3)) FROM ({units}) s"
 
 
@@ -980,6 +1027,11 @@ def render_v3_sections(r: dict[str, Any]) -> list[str]:
                   f"Official table `{r['rules'].get('official_units_csv')}` (codes read from the signed QĐ 19/2025/QĐ-TTg PDF, "
                   "clauses from the signed NQ 1656/NQ-UBTVQH15 PDF). OSM has no official code tags, so units are matched by name.",
                   "", *_table(["Check", "Value"], [[k, v] for k, v in oc.items()]), ""]
+    if r.get("urban_historic_areas"):
+        lines += ["## 11b. Historic unit polygons in the urban area (U4)", "",
+                  *_table(["Historic unit", "OSM", "Assembly", "Faces", "km²", "km² in city", "Unused member m", "Evidence", "Status"],
+                          [[a["label"], a["osm"], a["assembly"], a["faces"], a["km2"], a["km2_in_city"], a["unused_member_m"],
+                            a.get("evidence") or "", a.get("status") or ""] for a in r["urban_historic_areas"]]), ""]
     if r["rules"]["urban"].get("include_units"):
         lines += ["## 12. Controlled urban list (GEO-02)", "",
                   *_table(["Unit", "QĐ19", "NQ1656", "Basis", "OSM"],
@@ -1048,6 +1100,7 @@ def main() -> None:
         city = select_city(conn, b)
         official = official_crosscheck(conn, city, b)
         urban, urban_areas = select_urban(conn, city, b)
+        urban_hist = select_urban_historic(conn, city, b)
         provinces = map_neighbours(conn, city, b)
         total, total_stats, info = select_total(conn, provinces, settings.osrm_car_url, b)
         sensitivity, samples = sensitivity_150(conn, info, {t["osm_id"] for t in total}, settings.osrm_car_url, b)
@@ -1130,6 +1183,7 @@ def main() -> None:
         report = {
             "service_area_version": version, "status": "CANDIDATE", "approval": "PENDING_OWNER_APPROVAL",
             "official_crosscheck": official, "historic_manifest": historic_manifest, "historic_evidence": historic,
+            "urban_historic_areas": urban_hist,
             "urban_excluded_review": rules["urban"].get("excluded_review", []),
             "tier1_added_units": tier1_added if rules["total"].get("tier1_rule") else None,
             "tier2_sample_stats": tier2_sample_stats(samples, set(total_ids), b),

@@ -15,7 +15,7 @@
 # Scenario table: python -I scripts/survey/scenario_table.py
 # =============================================================================
 survey_id: s1
-draft_version: 3
+draft_version: 4
 language: vi
 estimated_minutes: "4-5"            # R9:65.2
 
@@ -112,7 +112,7 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
       POOL_D020: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.20 (= d_min, the cap)",
                   example_14km_vnd: 155000, example_6km_vnd: 76000, source: "Baseline car_urban d_min",
                   derivation: "floor(0.80 x P)", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                  approval_status: NOT_ACTIVE_PROPOSAL}
+                  approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
       POOL_D025: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.25 (d_matched_typical, current level)",
                   example_14km_vnd: 145000, example_6km_vnd: 71000, source: "Baseline d_matched_typical; R9:20.2",
                   derivation: "floor(0.75 x P)", experimental_status: SOURCED_R9,
@@ -120,13 +120,13 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
       POOL_D035: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.35 (inside [d_min, d_max]; realism unproven)",
                   example_14km_vnd: 126000, example_6km_vnd: 61000, source: "Baseline d_min / d_max bounds",
                   derivation: "floor(0.65 x P)", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                  approval_status: NOT_ACTIVE_PROPOSAL}
+                  approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
       PRIVATE_BIKE_PM10: {applies_to: "BIKE_URBAN and CAR_URBAN_PRIVATE price", rule: "x0.90 / x1.10 (market calibration)",
                           example_14km_vnd: "private 174600 / 213400; bike 72900 / 89100",
                           example_6km_vnd: "private 85500 / 104500; bike 36900 / 45100",
                           source: "R9 preamble: tariffs may be calibrated to market prices - no level given",
                           derivation: "not derivable from the locked formulas", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                          approval_status: NOT_ACTIVE_PROPOSAL}
+                          approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
 
       TIME_MODE_PM20: {applies_to: "travel_min of car (private, pool detour) and motorbike, varied independently per mode",
                        rule: "x0.80 / x1.00 / x1.20 per mode, rotated independently of distance (design D)",
@@ -134,7 +134,38 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
                        example_6km_vnd: "times: car 15 / 19 / 23 min; motorbike 13 / 16 / 19 min",
                        source: "SURVEY-06 identifiability check (scripts/survey/identifiability_check.py)",
                        derivation: "with POOL_D0xx + PRIVATE_BIKE_PM10: rank 9/9, max VIF 5.3; current design: rank 7/9 (not identified)",
-                       experimental_status: EXPERIMENT_REVIEW_REQUIRED, approval_status: NOT_ACTIVE_PROPOSAL}
+                       experimental_status: EXPERIMENT_REVIEW_REQUIRED, approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
+
+  # SURVEY-06 design D, implemented but SWITCHED OFF until the owner approves it.
+  # Rotation: level index = (a * i + b * (block // block_div) + c) mod 3, i = context index.
+  # Identifiability of the generated designs: scripts/survey/identifiability_check.py.
+  variation_design:
+    # Owner OWNER APPROVAL s.4: approved for the TEST pilot only - prices are HYPOTHETICAL
+    # experiment values, never a commercial price version; research collection stays closed.
+    active: false
+    design: D
+    approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4) - not for research collection"
+    experimental_status: EXPERIMENT_REVIEW_REQUIRED
+    baseline_bounds: {d_min: 0.20, d_max: 0.60, alpha: 0.50}   # Baseline car_urban (locked)
+    factors:
+      pool_discount_d:    {levels: [0.20, 0.25, 0.35], a: 1, b: 1, c: 0}
+      private_price_mult: {levels: [0.90, 1.00, 1.10], a: 1, b: 2, c: 1}
+      bike_price_mult:    {levels: [0.90, 1.00, 1.10], a: 2, b: 1, c: 2}
+      car_time_mult:      {levels: [0.80, 1.00, 1.20], a: 1, b: 1, c: 0, block_div: 2}
+      bike_time_mult:     {levels: [0.80, 1.00, 1.20], a: 2, b: 1, c: 1, block_div: 3}
+
+  # Statistical adjustment PROPOSED after the TEST pilot (not active, owner decision pending):
+  # with D the time effect is not estimable at N = 150 (expected |t| 1.1); D2 below gives
+  # |t| 2.7 for time with the lean primary specification. Overrides of variation_design.factors.
+  variation_design_proposals:
+    D2:
+      approval_status: PROPOSED
+      experimental_status: EXPERIMENT_REVIEW_REQUIRED
+      factor_overrides:
+        car_time_mult:  {levels: [0.70, 1.00, 1.30]}
+        bike_time_mult: {levels: [0.70, 1.00, 1.30], a: 1, b: 1, c: 1, block_div: 2}
+        detour_mult:    {levels: [0.50, 1.00, 1.50], a: 2, b: 2, c: 1}
+      primary_mnl_spec: "ASC_bike, ASC_pool, price, time, likelihood (MEDIUM, LOW), walk_200, rain x ASC_bike; detour and unmatched gap reported as exploratory"
 
 part_1b:                            # R9:65.2 - intercity, 2 tasks
   tasks_per_respondent: 2
@@ -146,12 +177,13 @@ part_1b:                            # R9:65.2 - intercity, 2 tasks
       # Survey item 5: hypothetical scenario values - not a system / AI prediction.
       fill_likelihood:
         levels:
-          - {code: HIGH, text: "Đã có 2/3 hành khách tối thiểu đặt chỗ — nhiều khả năng chuyến được chạy"}
-          - {code: LOW, text: "Chưa có hành khách nào trong 3 hành khách tối thiểu đặt chỗ"}
-        source: "Baseline car_intercity_pool.default_min_seats_to_run = 3; levels are hypothetical (survey item 5)"
-        derivation: "two booked-seat situations, labelled as an assumption on the card"
+          - {code: LOW, text: "Thấp (tình huống giả định)"}
+          - {code: MEDIUM, text: "Trung bình (tình huống giả định)"}
+          - {code: HIGH, text: "Cao (tình huống giả định)"}
+        source: "owner OWNER APPROVAL s.5: three hypothetical levels, not tied to the seat price"
+        derivation: "words only - no seat counts, no percentages, not a system forecast"
         experimental_status: HYPOTHETICAL_SCENARIO
-        approval_status: PENDING_OWNER_APPROVAL
+        approval_status: "OWNER_DECIDED (OWNER APPROVAL s.5)"
       lead_days: {value: "3–5", source: "R9:65.2", derivation: "", experimental_status: SOURCED_R9,
                   approval_status: "OWNER_DECIDED (P1-D5)"}
     CAR_INTERCITY_PRIVATE:
@@ -160,9 +192,9 @@ part_1b:                            # R9:65.2 - intercity, 2 tasks
                   derivation: "floor(150000 + 7500 x 65); OSRM gives 58.06 km (A8 context, not used)",
                   experimental_status: SOURCED_R9, approval_status: "OWNER_DECIDED (P1-D5)"}
     OTHER: {label: Phương tiện khác / Không đi}
-  pairing: {rule: "task j gets fill level (j + block // 3) mod 2 -> both price x fill pairings over the 6 blocks",
+  pairing: {rule: "task j gets fill level (j + block) mod 3 -> over the 6 blocks every seat price meets every level twice (orthogonal, not hard-wired)",
             source: "design (survey_design.py)", derivation: "", experimental_status: DESIGN_PARAMETER,
-            approval_status: PENDING_OWNER_APPROVAL}
+            approval_status: "OWNER_DECIDED (OWNER APPROVAL s.5: level not tied to seat price)"}
 
 part_2_h4:                          # R9:65.2 / 16.1 - fairness, 3 Likert ratings + 1 choice
   scenario:

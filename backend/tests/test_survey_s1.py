@@ -98,7 +98,7 @@ def test_design_follows_section_65_and_is_deterministic(client: TestClient) -> N
         {"BIKE_URBAN": 16, "CAR_URBAN_POOL": None, "CAR_URBAN_PRIVATE": 19}
     assert pools[6]["max_detour_min"] == 6 and pools[14]["max_detour_min"] == 12
     fills = [next(c for c in t["cards"] if c["alternative"] == "CAR_INTERCITY_POOL") for t in t1b]
-    assert {c["fill_likelihood"] for c in fills} == {"HIGH", "LOW"}  # hypothetical levels, one per seat price
+    assert len({c["fill_likelihood"] for c in fills}) == 2 and {c["fill_likelihood"] for c in fills} <= {"LOW", "MEDIUM", "HIGH"}
     assert all(c["fill_likelihood_text"] for c in fills)
     assert not any(v == "TBD" for t in d["tasks"] for c in t["cards"] for v in c.values())
     q = load_questionnaire(Path(get_settings().survey_s1_questionnaire_path))
@@ -114,18 +114,22 @@ def test_block_rotation_covers_all_pool_combinations() -> None:
     from tests.conftest import QUESTIONNAIRE
 
     q = load_questionnaire(Path(QUESTIONNAIRE))
-    seen, pairings = set(), set()
+    seen, pairings, pairings_all = set(), set(), []
     for block in range(N_BLOCKS):
         d = build_design(q, uuid.uuid4(), block)
         for t in d["tasks"]:
             for c in t["cards"]:
                 if c["alternative"] == "CAR_URBAN_POOL":
                     seen.add((c["match_likelihood"], c["walk_m"]))
-        pairings.add(tuple(sorted((c["price_vnd"], c["fill_likelihood"]) for t in d["tasks"] for c in t["cards"]
-                                  if c["alternative"] == "CAR_INTERCITY_POOL")))
+        pair = tuple(sorted((c["price_vnd"], c["fill_likelihood"]) for t in d["tasks"] for c in t["cards"]
+                            if c["alternative"] == "CAR_INTERCITY_POOL"))
+        pairings.add(pair)
+        pairings_all.append(pair)
     assert seen == set(itertools.product(("HIGH", "MEDIUM", "LOW"), (0, 200)))
-    # Part 1B: both price x fill-likelihood pairings occur (2x2 balanced over the 6 blocks).
-    assert pairings == {((180000, "HIGH"), (220000, "LOW")), ((180000, "LOW"), (220000, "HIGH"))}
+    # Part 1B: over the 6 blocks every seat price meets every one of the 3 levels exactly twice.
+    from collections import Counter
+    counts = Counter(pair for p in pairings_all for pair in p)
+    assert counts == {(price, lvl): 2 for price in (180000, 220000) for lvl in ("LOW", "MEDIUM", "HIGH")}
 
 
 def test_submit_validation_and_single_submission(client: TestClient) -> None:
@@ -335,11 +339,43 @@ def test_research_parameters_stay_out_of_pricing_configs() -> None:
     from app.modules.pricing import seed
 
     q = yaml.safe_load(Path(QUESTIONNAIRE).read_text(encoding="utf-8"))
-    assert q["draft_version"] == 3
+    assert q["draft_version"] == 4
     source = Path(seed.__file__).read_text(encoding="utf-8")
     for marker in ("questionnaire", "price_variation", "survey"):
         assert marker not in source
     six = q["part_1a"]["levels_by_distance"]["6"]
     assert six["CAR_URBAN_POOL"]["expected_price_vnd"]["experimental_status"] == "DERIVED_LOCKED_FORMULA"
-    assert all(v["approval_status"] == "NOT_ACTIVE_PROPOSAL" or v["experimental_status"] == "SOURCED_R9"
+    # Non-base levels are never research-active: at most approved for the TEST pilot, and the
+    # variation switch in the questionnaire file stays off.
+    assert all(v["experimental_status"] == "SOURCED_R9"
+               or v["approval_status"] in ("NOT_ACTIVE_PROPOSAL",)
+               or v["approval_status"].startswith("APPROVED_FOR_TEST_PILOT_ONLY")
                for v in q["part_1a"]["price_variation_proposal"]["levels"].values())
+    assert q["part_1a"]["variation_design"]["active"] is False
+
+
+def test_variation_design_is_off_and_valid_when_switched_on() -> None:
+    """SURVEY-06: design D is implemented but inactive; switched on (in memory only), every
+    card respects the Baseline bounds and prices / times no longer follow distance alone."""
+    import copy
+
+    from app.modules.ml_models.survey_design import build_design
+    from app.modules.ml_models.survey_service import load_questionnaire
+
+    q = load_questionnaire(Path(QUESTIONNAIRE))
+    vd = q["part_1a"]["variation_design"]
+    assert vd["active"] is False and vd["approval_status"].startswith("APPROVED_FOR_TEST_PILOT_ONLY")
+    on = copy.deepcopy(q)
+    on["part_1a"]["variation_design"]["active"] = True
+    private_prices: dict[int, set[int]] = {6: set(), 14: set()}
+    for block in range(6):
+        for t in build_design(on, uuid.UUID(int=block + 1), block)["tasks"]:
+            if t["part"] != "1A":
+                continue
+            c = {x["alternative"]: x for x in t["cards"]}
+            pool, priv = c["CAR_URBAN_POOL"], c["CAR_URBAN_PRIVATE"]
+            assert pool["price_vnd"] <= pool["quote_cap_vnd"] < pool["max_price_if_unmatched_vnd"] < priv["price_vnd"]
+            assert pool["quote_cap_vnd"] == int(priv["price_vnd"] * 0.80 // 1000) * 1000  # Quote_i, Baseline d_min
+            assert pool["price_vnd"] >= int(priv["price_vnd"] * 0.40 // 1000) * 1000      # d <= d_max
+            private_prices[t["context"]["distance_km"]].add(priv["price_vnd"])
+    assert all(len(v) == 3 for v in private_prices.values())  # three price levels within each distance

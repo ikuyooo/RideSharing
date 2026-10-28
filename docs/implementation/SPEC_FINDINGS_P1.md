@@ -83,3 +83,25 @@ Bảng gốc ở trên được giữ nguyên. Phiên bản ứng viên mới: *
 | SF-P1-21 | Thiết kế thí nghiệm S1 đang chạy **không nhận dạng được**: hạng 7/9 (giá, thời gian chỉ đổi theo quãng đường) | `survey/SURVEY_S1_PRICE_VARIATION_DESIGN.md`, `survey/evidence/s1_identifiability.json` | Duyệt ma trận D (hạng 9/9, VIF ≤ 5,3, khả thi 48/48) hoặc phương án khác | **Blocker phát hành S1** |
 | SF-P1-22 | Snapshot OSM còn 6 quan hệ cấp tỉnh cũ chồng lên tỉnh mới: `Tỉnh Hòa Bình`, `Tỉnh Yên Bái`, `Tỉnh Quảng Bình`, `Tỉnh An Giang cũ`, `Tỉnh Lào Cai cũ`, `Tỉnh Quảng Trị cũ` | `admin_boundaries.geojsonseq` (39 quan hệ admin_level 4) | Không (đã xử lý trong thống kê; hình học vùng không phụ thuộc) | Thống kê theo tỉnh |
 | SF-P1-23 | TOTAL thô v4 là vùng bao ứng viên 68.374 km², lớn hơn nhiều vùng thực sự phục vụ được | `GEOMETRY_REVIEW_P1_HARDENING.md` §3 | Không công bố polygon này như vùng phục vụ | Truyền thông / hiển thị |
+
+## Cập nhật 2026-10-28 — xử lý tiếp 2 blocker
+
+| Mã | Xử lý | Trạng thái |
+|---|---|---|
+| SF-P1-14 Đông Anh | Quan hệ OSM 17627914 không thực sự hở: way 1412300271 chạy quá nút chữ T 2,25 km. `ST_Polygonize` các way thành viên (không thêm đường) → 4,344 km², IoU 0,855 với GADM, chứa node thị trấn, chia 3 xã đúng NQ1656 k113–k115. Ứng viên v5 `sa-cand-0d5347b4294e` đưa polygon này vào nội đô: Đông Anh → Hoàn Kiếm = URBAN (2a); 15/15 ca PASS trên ứng viên | **Có bằng chứng — chờ Chủ dự án duyệt v5** (không có bản đồ ranh giới có thẩm quyền; v4 giữ làm phương án không có Đông Anh) |
+| SF-P1-21 Thiết kế S1 | Thiết kế D hiện thực trong bộ sinh thật, khóa bằng `variation_design.active: false`; trên thiết kế sinh thật: tắt = hạng 7/9 (không nhận dạng), bật = hạng 9/9, VIF ≤ 5,3, 48/48 khả thi | **Sẵn sàng — chờ Chủ dự án duyệt ma trận D** (bật = đổi 1 cờ, không đổi mã) |
+
+## Cập nhật sau "P1 OWNER APPROVAL & FINAL CLOSURE GATES" (2026-10-28)
+
+| Mã | Trạng thái |
+|---|---|
+| SF-P1-14 Đông Anh | **Đóng cho MVP**: v5 `GEOMETRY_APPROVED_FOR_MVP` (8/8 cổng). Rủi ro còn lại ghi ở `GEOMETRY_REVIEW_P1_HARDENING.md` §10 (không có bản đồ địa giới nhà nước) |
+| SF-P1-21 Thiết kế S1 | **Một phần**: D nhận dạng được (hạng 11/11) nhưng hệ số thời gian không ước lượng được ở N = 150 (|t| kỳ vọng 1,1) → đề xuất D2 (|t| 2,7) chờ duyệt |
+
+### Phát hiện mới
+
+| Mã | Phát hiện | Bằng chứng | Cần quyết định |
+|---|---|---|---|
+| SF-P1-24 | Với β giả định, hệ số đi vòng, chênh "tối đa nếu không ghép" và đi bộ 200 m có |t| kỳ vọng < 1 ở N = 150 kể cả với D2 | `evidence/s1_design_diagnostics.json` | Công bố là phân tích thăm dò, hoặc tăng N / số câu |
+| SF-P1-25 | Giới hạn 10 phiên/giờ theo IP băm có thể chặn nhầm nhiều sinh viên dùng chung IP (Wi-Fi trường, NAT) → thiếu mẫu có hệ thống | `SURVEY_S1_DESIGN_REVIEW.md` §14 (R2) | Nâng giới hạn trước khi phát hành |
+| SF-P1-26 | Một lần mô phỏng pilot dao động mạnh (t thời gian của D: −1,8 rồi −2,7 với hạt giống khác) → đánh giá phải dựa trên sai số chuẩn kỳ vọng, không dựa trên một lần chạy | `evidence/s1_pilot_*.json` | Không |

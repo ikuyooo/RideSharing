@@ -1,0 +1,132 @@
+{
+  "service_area_version": "sa-cand-0d5347b4294e",
+  "checked_at": "2026-10-28T05:45:25+00:00",
+  "outcome": "GEOMETRY_APPROVED_FOR_MVP",
+  "approval_reference": "GEOMETRY_APPROVED_FOR_MVP | Owner conditional approval 2026-10-28 (P1 OWNER APPROVAL & FINAL CLOSURE GATES s.2): academic MVP scope only - NOT a legal certification of administrative boundaries; Dong Anh former-town boundary reconstructed from OSM relation 17627914 (member ways polygonized, no line added), compared with GADM 4.1 and HDX COD-AB; no state boundary certification",
+  "gates": [
+    {
+      "gate": "G1 version rows, checksums, stored geometry = bundle",
+      "result": "PASS",
+      "detail": {
+        "rows": {
+          "URBAN": "CANDIDATE",
+          "TOTAL": "CANDIDATE",
+          "EXCLUDED": "CANDIDATE"
+        },
+        "files_checked": 13,
+        "checksum_mismatch": [],
+        "geometry_mismatch": [],
+        "sha256": {
+          "urban.geojson": "33ca5346a75e065a5af883ac6e2097b6deaae3bb81b8fe8d7b5bcf77fdb80307",
+          "total.geojson": "c3de995abbcd80a6ab6935887e802462d0503a2f5f4c417bd2e5ebf446946353",
+          "excluded.geojson": "dcb26c8f860047c8ed77b11b20b3523f86892610d0c5b0b1b00f6471952782cf"
+        }
+      }
+    },
+    {
+      "gate": "G2 candidate evidence (U4 Đông Anh, concordance)",
+      "result": "PASS",
+      "detail": {
+        "u4": {
+          "osm": "relation/17627914",
+          "label": "Thị trấn Đông Anh (pre-2025)",
+          "rule": "U4 historic unit polygon",
+          "assembly": "ST_Polygonize over noded member ways (no line added)",
+          "faces": 2,
+          "km2": 4.3471,
+          "km2_in_city": 4.3471,
+          "unused_member_m": 2251.8,
+          "evidence": "OSM member ways polygonized (no line added); GADM 4.1 IoU 0.855; NQ1656 k113-k115 three-way split",
+          "status": "PENDING_OWNER_APPROVAL"
+        },
+        "union_vs_gadm": {
+          "polygon": "union of faces",
+          "km2": 4.3444,
+          "iou_with_gadm": 0.855,
+          "hausdorff_to_gadm_m": 222.4,
+          "contains_osm_town_node": true,
+          "split_km2": {
+            "Xã Phúc Thịnh": 1.487,
+            "Xã Đông Anh": 0.554,
+            "Xã Thư Lâm": 2.303
+          }
+        }
+      }
+    },
+    {
+      "gate": "G3 fresh evaluation: every case PASS",
+      "result": "PASS",
+      "detail": {
+        "report": "APPROVAL_GATE_EVAL",
+        "cases": 15,
+        "failed": []
+      }
+    },
+    {
+      "gate": "G4 Đông Anh -> Hoàn Kiếm = URBAN",
+      "result": "PASS",
+      "detail": {
+        "actual": "URBAN",
+        "branch": "2a",
+        "direct_distance_km": null
+      }
+    },
+    {
+      "gate": "G5 Phenikaa -> La Phù = URBAN via buffer (2b)",
+      "result": "PASS",
+      "detail": {
+        "actual": "URBAN",
+        "branch": "2b",
+        "direct_distance_km": 5.9768
+      }
+    },
+    {
+      "gate": "G6 points beyond 150 km rejected",
+      "result": "PASS",
+      "detail": [
+        {
+          "case": "limit > 150 km from anchor",
+          "anchor_road_km": 150.024
+        },
+        {
+          "case": "inside polygon, BEYOND_MAX_ROAD_DISTANCE (tier 2)",
+          "anchor_road_km": 256.43
+        }
+      ]
+    },
+    {
+      "gate": "G7 outside area / bad snap / EXCLUDED / ferry blocked",
+      "result": "PASS",
+      "detail": {
+        "no_road_access_snap_m": 1576.6,
+        "excluded_reason": "UNSERVICEABLE_COMPONENT",
+        "ferry": {
+          "exclude": [
+            "ferry"
+          ],
+          "destinations_checked": 412,
+          "routes_using_ferry_by_default": 3,
+          "ferry_steps_with_policy": 0
+        },
+        "cat_ba_with_policy": {
+          "code": "NoRoute",
+          "km": null,
+          "ferry_steps": 0,
+          "ferry_km": 0.0
+        }
+      }
+    },
+    {
+      "gate": "G8 re-import identical, evidence never overwritten",
+      "result": "PASS",
+      "detail": {
+        "reimport_sha256": {
+          "urban.geojson": "33ca5346a75e065a5af883ac6e2097b6deaae3bb81b8fe8d7b5bcf77fdb80307",
+          "total.geojson": "c3de995abbcd80a6ab6935887e802462d0503a2f5f4c417bd2e5ebf446946353",
+          "excluded.geojson": "dcb26c8f860047c8ed77b11b20b3523f86892610d0c5b0b1b00f6471952782cf"
+        },
+        "existing_bundle_refused": true
+      }
+    }
+  ]
+}

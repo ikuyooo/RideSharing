@@ -81,6 +81,38 @@ def rows_for(design: str) -> tuple[list[list[float]], list[dict]]:
     return rows, checks
 
 
+def rows_generated(active: bool) -> tuple[list[list[float]], list[dict]]:
+    """Rows from the REAL generator (backend survey_design.build_design) over the 6 blocks,
+    with the questionnaire's variation design forced on/off in memory only."""
+    import copy
+    import uuid
+
+    import yaml
+
+    sys.path.insert(0, str(ROOT / "backend"))
+    from app.modules.ml_models.survey_design import build_design  # noqa: PLC0415
+
+    q = copy.deepcopy(yaml.safe_load((ROOT / "survey" / "s1" / "questionnaire.draft.yaml").read_text(encoding="utf-8")))
+    q["part_1a"]["variation_design"]["active"] = active
+    rows, checks = [], []
+    for block in range(6):
+        d = build_design(q, uuid.UUID(int=block + 1), block)
+        for t in d["tasks"]:
+            if t["part"] != "1A":
+                continue
+            c = {x["alternative"]: x for x in t["cards"]}
+            bike, pool, priv = c["BIKE_URBAN"], c["CAR_URBAN_POOL"], c["CAR_URBAN_PRIVATE"]
+            checks.append({"ok": pool["price_vnd"] <= pool["quote_cap_vnd"] < pool["max_price_if_unmatched_vnd"]
+                           < priv["price_vnd"] and pool["price_vnd"] >= floor_k(priv["price_vnd"] * (1 - D_MAX))})
+            rows.append([1, 0, (bike["price_vnd"] - priv["price_vnd"]) / 1000, bike["travel_min"] - priv["travel_min"],
+                         0, 0, 0, 0, 0])
+            rows.append([0, 1, (pool["price_vnd"] - priv["price_vnd"]) / 1000, 0, pool["max_detour_min"],
+                         (pool["max_price_if_unmatched_vnd"] - pool["price_vnd"]) / 1000,
+                         int(pool["match_likelihood"] == "MEDIUM"), int(pool["match_likelihood"] == "LOW"),
+                         int(pool["walk_m"] == 200)])
+    return rows, checks
+
+
 def corr(a: list[float], b: list[float]) -> float | None:
     n = len(a)
     ma, mb = sum(a) / n, sum(b) / n
@@ -127,7 +159,12 @@ def inverse(m: list[list[float]]) -> list[list[float]] | None:
 
 
 def analyse(design: str) -> dict:
-    rows, checks = rows_for(design)
+    if design == "generator_inactive":
+        rows, checks = rows_generated(False)
+    elif design == "generator_D_active":
+        rows, checks = rows_generated(True)
+    else:
+        rows, checks = rows_for(design)
     cols = list(zip(*rows, strict=True))
     attrs = [k for k in range(2, len(COLUMNS))]  # VIF on attribute columns (ASCs are intercept-like)
     r = [[corr(cols[i], cols[j]) or 0.0 for j in attrs] for i in attrs]
@@ -144,7 +181,7 @@ def analyse(design: str) -> dict:
 
 
 def main() -> None:
-    results = [analyse(d) for d in ("A", "B", "C", "D")]
+    results = [analyse(d) for d in ("A", "B", "C", "D", "generator_inactive", "generator_D_active")]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")

@@ -195,3 +195,28 @@ Kiểm thử khảo sát (`backend/tests/test_survey_s1.py`): thiết kế tất
 | SURVEY-07 | 150 hợp lệ (75/75), 40–60%; một link HTTPS + QR; không triển khai khi thiếu domain / máy chủ | Quota trần 90/nhóm (đã có); phương án HTTPS [`SURVEY_S1_DEPLOYMENT_PLAN.md`](SURVEY_S1_DEPLOYMENT_PLAN.md) | `PREPARED — NOT DEPLOYED` |
 
 Bảng kịch bản (draft 3): 52 dòng — xem [`SURVEY_S1_SCENARIO_TABLE.md`](SURVEY_S1_SCENARIO_TABLE.md).
+
+---
+
+## 14. Đánh giá quy tắc dữ liệu R1–R4 (OWNER APPROVAL §5) — **chưa đánh dấu ACCEPTED**
+
+Nguyên văn lấy từ `analysis_rules` trong `survey/s1/questionnaire.draft.yaml` (bản tóm tắt ở §13). Trạng thái hiện tại của cả 4 quy tắc: `PENDING_OWNER_APPROVAL`.
+
+| Rule | Original Text | Purpose | Potential Bias | Test | Recommended Decision |
+|---|---|---|---|---|---|
+| **R1 incomplete** | "sessions without a submission are not exported (no partial answers exist: the API accepts only complete submissions)" | Phân tích chỉ dùng bài làm đầy đủ; không có dữ liệu nửa chừng cần xử lý | **Thiên lệch bỏ dở**: người bỏ dở (ít kiên nhẫn, dùng điện thoại, gặp lỗi) bị loại hoàn toàn; hiện chỉ đếm bài **hoàn thành** nên không đo được tỷ lệ bỏ dở theo nhóm | `test_export_formats_groupkfold_and_h4` (phiên chưa nộp không được export); `test_submit_validation_and_single_submission` (thiếu câu → 422) | **Chấp nhận có điều chỉnh**: báo cáo thêm số phiên bắt đầu / hoàn thành theo nhóm và dataset (đã có dữ liệu `started_at`, chỉ thiếu thống kê) để công bố tỷ lệ hoàn thành |
+| **R2 duplicate** | "one submission per session (409 ALREADY_SUBMITTED); repeated sessions by one person cannot be linked (anonymous) - limited by rate limits; no identity matching is attempted" | Ngăn nộp lặp trong một phiên mà không thu định danh | (a) Một người làm nhiều phiên → trọng số lớn hơn, không phát hiện được; (b) **giới hạn 10 phiên/giờ theo IP** có thể chặn nhầm nhiều người dùng chung một IP (Wi-Fi ký túc xá, giảng đường, NAT nhà mạng) → **thiếu mẫu sinh viên** | `ALREADY_SUBMITTED` trong `test_submit_validation_and_single_submission`; `test_rate_limit_rejects_bursts`; `test_rate_limit_key_never_contains_the_address` | **Chấp nhận có điều chỉnh**: nâng giới hạn bắt đầu phiên (đề xuất 60/giờ/khóa IP băm) trước khi phát hành qua mạng trường; thêm dấu "đã hoàn thành" trong `localStorage` trình duyệt (không phải PII) để nhắc người đã làm; ghi nhận giới hạn "không phát hiện được người làm lại" trong báo cáo |
+| **R3 invalid** | "answers outside the shown options, unknown fields or a forged start token are rejected by the API (422) and never stored" | Chỉ lưu dữ liệu đúng schema đã duyệt; chống giả mạo, chống thu PII qua trường lạ | Nếu biểu mẫu có lỗi hiển thị trên một loại thiết bị, mọi bài từ thiết bị đó bị từ chối **âm thầm** → mất mẫu có hệ thống; người dùng chỉ thấy thông báo lỗi | `test_submit_validation_and_single_submission` (phương án ngoài thẻ, trường lạ, D3 sai mã, token giả → 422); staging HTTPS: trường lạ → 422 | **Chấp nhận có điều chỉnh**: đếm số lần 422 theo mã lỗi (bộ đếm tổng hợp, không IP, không nội dung) và theo dõi hằng ngày trong thời gian thu thập |
+| **R4 flags** | "primary analysis keeps every stored response; a sensitivity analysis drops FAST_RESPONSE_REVIEW, QC3 and QC4 flagged responses; both are reported" | Không tự loại mẫu (quyết định SURVEY-05) nhưng vẫn kiểm tra độ vững của kết luận | Cờ có thể đánh dấu bài hợp lệ: người quen thuộc làm nhanh (FAST_RESPONSE_REVIEW), người thực sự thờ ơ giữa 3 cách chia (QC4); phân tích độ nhạy nghiêng về người "chăm chỉ". QC3 (cùng vị trí cả 8 câu) hiếm khi hợp lệ vì vị trí thẻ được xáo | `test_quality_flags`; `test_qc2_uses_signed_duration_and_publishes_threshold` (cờ, không loại); export giữ `quality_flags`, `duration_s` | **Chấp nhận**: công bố trước rằng kết luận dựa trên phân tích chính; báo cáo tỷ lệ từng cờ theo nhóm; nếu hai phân tích khác dấu/ý nghĩa thì nêu rõ là hạn chế |
+
+Ghi chú: các điều chỉnh đề xuất ở R1–R3 **chưa được thực hiện** — chờ Chủ dự án quyết định.
+
+## 15. Hoàn thiện câu hỏi theo OWNER APPROVAL §5 (draft 4)
+
+| Nội dung | Hiện thực |
+|---|---|
+| 145.000 đ = giá ước tính của xe chưa có người thứ hai; 143.000 đ = phân bổ đã ghép A+B | Thẻ 14 km chỉ hiển thị 145.000 đ; 143.000 đ không hiển thị (giữ nguyên) |
+| Giá 6 km theo Baseline + ngữ cảnh minh họa; 19 / 16 phút và +6 phút là giả định thí nghiệm | Giữ nguyên; ghi trên biểu mẫu "giá trị giả định cho khảo sát" |
+| Giá biến thiên ±10% là giá giả định của thí nghiệm, không phải phiên bản giá thương mại | Ghi chú trong `variation_design`; không có gì ghi vào `pricing_configs` (test pilot so sánh `md5` của `pricing_configs` trước/sau) |
+| Khả năng đủ khách liên tỉnh: 3 mức giả định Thấp / Trung bình / Cao, **không gắn cứng theo giá ghế** | `fill_likelihood` 3 mức chữ; xoay `(câu + khối) mod 3` → qua 6 khối mỗi giá ghế gặp mỗi mức đúng 2 lần (trực giao); test `test_block_rotation_covers_all_pool_combinations` |
+| FAST_RESPONSE_REVIEW không tự loại; mục tiêu 150 hợp lệ, 40–60% mỗi nhóm | Giữ nguyên (cờ; quota trần 90/nhóm); pilot 75/75 kiểm chứng quota |

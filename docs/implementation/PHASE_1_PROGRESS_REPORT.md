@@ -1,85 +1,77 @@
 # PHASE 1 — BÁO CÁO TIẾN ĐỘ (chưa phải báo cáo hoàn thành)
 
-- **Cập nhật:** 2026-10-28 (sau "P1 FINAL HARDENING & APPROVAL GATES").
-- **Trạng thái P1: `PHASE_1_IN_PROGRESS__APPROVAL_REQUIRED`.** `PHASE_1_COMPLETION_REPORT.md` **không được tạo** — còn blocker (mục 8).
+- **Cập nhật:** 2026-10-28 (sau "P1 OWNER APPROVAL & FINAL CLOSURE GATES").
+- **Trạng thái P1: `PHASE_1_IN_PROGRESS__APPROVAL_REQUIRED`.** `PHASE_1_COMPLETION_REPORT.md` **không được tạo**: khảo sát S1 chưa phát hành, chưa thu dữ liệu thật (mục 8).
 - Giữ nguyên: `PHASE_0_CONDITIONAL__REVIEW_REQUIRED`; SF-06 = OPEN; Revision 9 và Baseline v1 không bị sửa; không chuyển sang P2.
-- Tài liệu chi tiết: `service_area/GEOMETRY_REVIEW_P1_HARDENING.md`, `survey/SURVEY_S1_DESIGN_REVIEW.md` §13, `survey/SURVEY_S1_PRICE_VARIATION_DESIGN.md`, `P1_DESIGN_DECISIONS.md` §5, `SPEC_FINDINGS_P1.md`.
+- Lịch sử các vòng trước: `P1_DESIGN_DECISIONS.md` §1–6, `SPEC_FINDINGS_P1.md`, `service_area/GEOMETRY_REVIEW_P1_FINAL_CLOSURE.md`, `service_area/GEOMETRY_REVIEW_P1_HARDENING.md`.
 
-## 1. Quyết định đã thực hiện
+## 1. Hình học vùng phục vụ — `GEOMETRY_APPROVED_FOR_MVP`
 
-| Mã | Kết quả |
+`sa-cand-0d5347b4294e` (rules v5) đạt **8/8 cổng kiểm** của Chủ dự án (`service_area/sa-cand-0d5347b4294e/APPROVAL_GATES.json`) và được ghi `status = APPROVED`, `approval_reference = GEOMETRY_APPROVED_FOR_MVP | … academic MVP scope only - NOT a legal certification …`. Cấu hình chạy: `SERVICE_AREA_VERSION = sa-cand-0d5347b4294e`, `ALLOW_CANDIDATE_SERVICE_AREA = false`. v1–v4 giữ nguyên.
+
+| | Giá trị |
 |---|---|
-| GEO-A | 4 nguồn đối chiếu (OSM snapshot, lịch sử OSM v1–v9, GADM 4.1, HDX COD-AB/GSO); không nguồn có thẩm quyền → `PENDING_GEOMETRY_EVIDENCE` giữ nguyên; không nối, không thay thế, không sửa kết quả phân loại |
-| GEO-B | Sơn Tây, Chương Mỹ ngoài URBAN trong MVP, vẫn trong TOTAL |
-| GEO-C | Lớp 1 = cận dưới trắc địa (không thể từ chối nhầm); lớp 2 bắt buộc; đọc đúng phần tử ma trận; ≤ 150 km |
-| GEO-D | `max_snap_m = 300` ngưỡng tạm thời MVP; khảo sát điểm đón thực tế |
-| GEO-E | `exclude=ferry` trên graph hiện có (không build lại OSRM); 0 chặng phà |
-| GEO-F | Ứng viên mới `sa-cand-9bd44393e699`; v1/v2/v3 nguyên vẹn |
-| SURVEY-01…07 | Draft 3: trần cam kết trên thẻ ghép, 19/16 phút & 6 phút đi vòng là giả định khảo sát, khả năng ghép 3 mức chữ, D2–D4 mới (không bắt buộc), cờ `FAST_RESPONSE_REVIEW`, quy tắc dữ liệu R1–R5, kiểm tra nhận dạng thí nghiệm |
+| URBAN | 344,381 km², 7 phần — 48 phường k1–k48 + Xã Gia Lâm + 7 polygon An Khánh / Splendora + thị trấn Đông Anh cũ (tái dựng từ OSM) |
+| TOTAL (vùng bao sàng lọc) / EXCLUDED / vùng chấp nhận lớp 1 | 68.374,523 / 488,167 / 67.886,357 km² |
+| Lớp 2 bắt buộc | OSRM car từng điểm: snap ≤ 300 m, có tuyến từ anchor, ≤ 150 km, không đi phà |
+| SHA-256 | urban `33ca5346…0307`, total `c3de995a…6353`, excluded `dcb26c8f…82cf` |
 
-## 2. Ứng viên vùng phục vụ
+Rủi ro địa giới Đông Anh còn lại: `GEOMETRY_REVIEW_P1_HARDENING.md` §10 (không có bản đồ địa giới nhà nước; biên lệch GADM tới 222 m; 9,9% diện tích GADM ngoài polygon OSM).
 
-| | v3 `7da7fbe2e01b` | **v4 `9bd44393e699`** |
-|---|---|---|
-| URBAN | 340,034 km², 6 phần | 340,034 km², 6 phần (không đổi) |
-| TOTAL thô (vùng bao lớp 1) | 42.275,390 km², 913 đơn vị | 68.374,523 km², 1.140 đơn vị |
-| EXCLUDED | 29,158 km², 324 phần | 488,167 km², 1.770 phần |
-| Lớp 2 | snap 300 m, ≤ 150 km | + không đi phà |
+## 2. Ca biên địa lý trên hình học đã duyệt (đánh giá mới `APPROVAL_GATE_EVAL`)
 
-SHA-256 v4: urban `fc11eb3e…f268`, total `bf7047cb…4a43`, excluded `295585b5…1bc5`; import lại: `unchanged (ST_Equals)` cả 3 lớp, hash trùng.
+| Ca | Kết quả |
+|---|---|
+| Phenikaa → La Phù | URBAN (2b), 5,977 km |
+| ~3 km TP Hưng Yên | UNSUPPORTED_INTER_PROVINCE_ROUTE (3b) |
+| Đệm 14,992 / 15,321 km | URBAN / INTERCITY |
+| Giới hạn 149,984 / 150,024 km | INTERCITY / OUT_OF_SERVICE_AREA (lớp 2) |
+| Đông Anh → Hoàn Kiếm | **URBAN (2a)** |
+| An Khánh / Tùng Thiện / Phố Hiến / La Phù → Hoàn Kiếm | URBAN / INTERCITY / INTERCITY / INTERCITY |
+| Điểm > 150 km (256,4 km), snap 1.576,6 m, điểm trong EXCLUDED, điểm đúng biên polygon | đều OUT_OF_SERVICE_AREA đúng lớp |
+| Phà: 412 đích, Hà Nội → Cát Bà | 0 chặng phà; Cát Bà `NoRoute` |
 
-## 3. Phân loại thực tế trên v4 (mã sản phẩm + OSRM, hai lớp)
+15/15 PASS. Đánh giá chạy lại **sau** khi phê duyệt (`sa-cand-0d5347b4294e/POST_APPROVAL_EVAL.md`): cột nghiệm thu = **PASS** cả 15 ca.
 
-| Ca | Kết quả | So với v3 |
-|---|---|---|
-| Phenikaa → La Phù | URBAN 2b, 5,977 km — PASS | như cũ |
-| ~3 km TP Hưng Yên | UNSUPPORTED 3b — PASS | như cũ |
-| Đệm 14,992 / 15,321 km | URBAN / INTERCITY — PASS | như cũ |
-| Giới hạn 149,984 / 150,024 km | INTERCITY / OUT_OF_SERVICE_AREA (lớp 2) — PASS | như cũ |
-| **Đông Anh → Hoàn Kiếm** | **INTERCITY 19,678 km — FAIL so với Mục 2.3** | như cũ (blocker) |
-| An Khánh (Splendora) / Tùng Thiện / Phố Hiến → Hoàn Kiếm | URBAN 2a / INTERCITY / INTERCITY — PASS | như cũ |
-| Điểm > 150 km / xa đường / trong EXCLUDED / đúng biên polygon | OUT_OF_SERVICE_AREA (lớp 2 / lớp 2 / lớp 1 / lớp 2) — PASS | biên polygon: mới |
-| Hà Nội → Cát Bà | không đi phà → không có tuyến | mới (trước: 150,577 km qua phà 2,015 km) |
+## 3. Khảo sát S1 (draft 4) — chưa phát hành
 
-Nghiệm thu mọi ca = NOT_VERIFIED vì hình học chưa phê duyệt.
+- Câu hỏi: 145.000 đ (xe chưa có người thứ hai) và 143.000 đ (phân bổ A+B) tách bạch; 19/16 phút, +6 phút, giá ±10% là giả định thí nghiệm; khả năng đủ khách liên tỉnh 3 mức Thấp / Trung bình / Cao, xoay trực giao với giá ghế; `FAST_RESPONSE_REVIEW` chỉ gắn cờ; quota 150 (40–60%).
+- Ma trận D: `APPROVED_FOR_TEST_PILOT_ONLY`, công tắc trong tệp vẫn **tắt**. Kiểm định (`survey/SURVEY_S1_PRICE_VARIATION_DESIGN.md` §5): hạng 11/11, VIF lớn nhất 5,42 ("5,3" trước đây là VIF trên đặc tả 9 cột), condition number 151 / 241, D0 1,34 / Dp 4,68; **mức thời gian xe máy lệch; hệ số thời gian không ước lượng được ở N = 150 (|t| kỳ vọng 1,1)** → đề xuất **D2** (cân bằng, |t| thời gian 2,7 với đặc tả gọn, condition number 98 / 115) — chờ duyệt.
+- Pilot TEST 150 người (75/75) qua API → DB → export → ước lượng: chuỗi đúng (mọi tham số trong 3,5 SE), giá ước lượng tốt, `pricing_configs` không đổi, RESEARCH rỗng.
+- R1–R4: bảng đánh giá ở `SURVEY_S1_DESIGN_REVIEW.md` §14 — **chưa ACCEPTED**; khuyến nghị: R1, R2, R3 chấp nhận có điều chỉnh; R4 chấp nhận.
 
-## 4. Số liệu kiểm thử thực tế (2026-10-28)
+## 4. HTTPS / quyền riêng tư
+
+`PREPARED — NOT DEPLOYED` (thiếu domain, máy chủ). Kiểm thử phát hành cục bộ qua HTTPS (`scripts/survey/staging_e2e.sh`): TLS (CA nội bộ Caddy), HSTS, CSP, chỉ mở route khảo sát, 1 câu trả lời TEST đi hết quy trình, log không có IP, CSDL staging TEST = 1 / CSDL chính 0 — **PASS**, đã dọn sạch. Lưu trữ đề xuất 12 tháng sau khi đóng khảo sát (không phải thời hạn luật định), backup 30 ngày, `purge_survey.sh` đã thử trên CSDL tạm.
+
+## 5. Kiểm thử (2026-10-28, sau thay đổi)
 
 | Bộ | Kết quả |
 |---|---|
-| Backend pytest | **131 passed, 0 failed, 0 skipped** (architecture 2, config 4, driver 6, health 2, identity 11, official units 4, routing 8, schema 24, service-area versioning 7, survey 16, trip API 23, trip rules 24) |
-| Migration | DB chính `0004 (head)`; CSDL tạm: head → **base** → head → `alembic check` không lệch |
-| 150 km | Unit: 149,98 / 150,00 nhận; 150,001 / 150,02 từ chối; thực tế: 149,984 nhận, 150,024 từ chối |
-| Snap 300 m | Unit: 300,0 nhận / 300,1 từ chối; thực tế: điểm đón 3.296 mẫu → 1,3% từ chối do xa đường (Hà Nội 0%) |
-| Phà | Test OSRM thật Hà Nội → Cát Bà; 412 đích trên v4: 0 chặng phà khi áp chính sách |
-| Khảo sát & export | 16 test (thiết kế, giá/thời gian hiển thị, D2–D4 tùy chọn, cờ, quota, rate limit, xóa, TEST/RESEARCH, export gồm `quote_cap_vnd`, `duration_s`) |
-| Backup / restore | Diễn tập PASS (3 người / 30 câu trả lời, hash nội dung trùng) |
-| Smoke check P0 (`--restart-test`) | **18/18 PASS** — `evidence/p0_smoke_check_p1_hardening.json` |
+| Backend pytest | **136 passed, 0 failed, 0 skipped** (architecture 2, config 4, driver 6, health 2, identity 11, official units 5, routing 8, schema 24, service-area versioning 7, survey pilot 3, survey 17, trip API 23, trip rules 24) |
+| Migration | DB chính `0004 (head)`; CSDL tạm head → base → head → `alembic check` |
+| Cổng phê duyệt v5 | 8/8 PASS |
+| Pilot TEST (D, D_bal, D2) | 3/3 PASS |
+| HTTPS staging | PASS |
+| Purge / backup-restore | PASS (CSDL tạm) |
+| Smoke check P0 (`--restart-test`) | **18/18 PASS** — `evidence/p0_smoke_check_p1_owner_gates.json`; sau restart v5 vẫn APPROVED |
 
-## 5. Khảo sát S1 — giá và thời gian hiển thị (draft 3)
+## 6. Còn chờ Chủ dự án
 
-| Ngữ cảnh | Xe máy | Taxi bao xe | Taxi ghép: dự kiến / trần cam kết / tối đa nếu không ghép / đi vòng thêm |
-|---|---|---|---|
-| 14 km | 81.000 đ · 35 phút | 194.000 đ · 40 phút | 145.000 / 155.000 / 174.000 đ · +12 phút |
-| 6 km | 41.000 đ · 16 phút | 95.000 đ · 19 phút | 71.000 / 76.000 / 85.000 đ · +6 phút |
-| Liên tỉnh (Hà Đông → TP Hưng Yên) | — | 637.000 đ | ghép: giá ghế 180.000 / 220.000 đ, đặt trước 3–5 ngày |
+1. Chọn D hay D2 cho pilot tiếp theo; chốt đặc tả MNL chính.
+2. Duyệt R1–R4 (và các điều chỉnh đề xuất: thống kê tỷ lệ hoàn thành, nâng giới hạn phiên/IP, bộ đếm 422).
+3. Duyệt thông báo đồng ý + thời hạn lưu trữ 12 tháng + đầu mối liên hệ.
+4. Cung cấp domain/subdomain và quyền máy chủ.
 
-Khả năng ghép: Cao / Trung bình / Thấp (giả định, không phần trăm). Đi bộ 0 / 200 m (không giảm giá). 143.000 đ không xuất hiện trên thẻ (chỉ thuộc kịch bản A Mục 16.1).
-Bảng kịch bản 52 dòng: 42 đã quyết định, 6 chờ duyệt (mức "đủ khách" 1B, ghép 1B, quy tắc dữ liệu R1–R4), 4 đề xuất không kích hoạt (d 0,20 / 0,35, giá ±10%, thời gian ±20%).
+## 7. Điều kiện cuối cùng trước khi đóng P1
 
-## 6. Thiết kế thí nghiệm
-
-Thiết kế đang chạy **không nhận dạng được** (hạng 7/9 — giá và thời gian chỉ đổi theo quãng đường). Đề xuất D (d ghép, giá ±10%, thời gian ±20% riêng từng phương tiện): hạng 9/9, VIF lớn nhất 5,3, khả thi 48/48 theo cận Baseline — **chờ duyệt, chưa kích hoạt**.
-
-## 7. HTTPS / công khai
-
-`PREPARED — NOT DEPLOYED`: thiếu domain, quyền máy chủ, bộ câu hỏi cuối được duyệt, thời hạn lưu trữ. Đã kiểm: Caddy config hợp lệ, rate limit (Redis thật), consent nháp, backup/restore, tách TEST/RESEARCH. TLS chưa thể kiểm (chưa có domain). Không thu dữ liệu thật qua localhost; DB chính 0 câu trả lời.
-
-## 8. Blocker và tiêu chí đóng P1
-
-| Tiêu chí | Trạng thái |
+| Điều kiện | Trạng thái |
 |---|---|
-| Schema, Identity, Driver/KYC mock | ĐẠT |
-| Trip Intent đúng mọi ca biên trên hình học **đã phê duyệt** | **CHƯA** — Đông Anh (SF-P1-14); `sa-cand-9bd44393e699` chưa phê duyệt |
-| S1 phát hành và thu thập | **CHƯA** — thiết kế không nhận dạng được (SF-P1-21), 6 dòng chờ duyệt, chưa có domain / máy chủ |
-| `PHASE_1_COMPLETION_REPORT.md` | **Không tạo** |
+| Schema, Identity/RBAC, Driver/KYC mock | ĐẠT |
+| Trip Intent đúng mọi ca biên trên hình học đã duyệt | **ĐẠT (MVP)** — v5 `GEOMETRY_APPROVED_FOR_MVP` |
+| Thiết kế thí nghiệm S1 ước lượng được các tham số chính | **CHƯA** — chờ D2 / đặc tả MNL |
+| Quy tắc dữ liệu R1–R4, thông báo đồng ý, lưu trữ | **CHƯA** — chờ duyệt |
+| HTTPS công khai: domain, TLS hợp lệ, truy cập từ thiết bị ngoài, QR | **CHƯA** — chờ hạ tầng |
+| Một câu trả lời thử qua hệ thống công khai không làm bẩn dữ liệu nghiên cứu | **CHƯA** trên domain thật (đã đạt ở staging cục bộ) |
+| S1 phát hành (`SURVEY_S1_RELEASED`) và bắt đầu thu dữ liệu thật | **CHƯA** |
+| `PHASE_1_COMPLETION_REPORT.md` | Không tạo |

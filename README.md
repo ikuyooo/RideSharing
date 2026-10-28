@@ -124,7 +124,12 @@ docker compose --profile osrm-prep run --rm --no-deps --entrypoint sh osm-fetch 
   /scripts/export_historic_boundaries.sh           # ranh giới trước 2025 (bằng chứng, rules v3)
 docker compose build backend                       # service-area-build dùng chung ảnh ridesharing-backend:local
 docker compose --profile service-area run --rm service-area-build \
-  python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v4.yaml
+  python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v5.yaml
+  # v5 = v4 + thị trấn Đông Anh cũ (U4); v4 vẫn build được làm phương án thay thế
+# Phê duyệt có điều kiện (chỉ ghi APPROVED khi 8 cổng kiểm đều PASS; v5 đã duyệt 2026-10-28):
+docker compose --profile service-area run --rm service-area-build sh -c   'python -m app.modules.trip.boundary_eval --version sa-cand-0d5347b4294e --report-name <TÊN_MỚI> &&
+   python -m app.modules.trip.service_area_build --rules /app/config/service_area_rules.candidate.v5.yaml --out /tmp/repro &&
+   python -m app.modules.trip.service_area_approve --version sa-cand-0d5347b4294e --eval-report <TÊN_MỚI>      --reimport-dir /tmp/repro/sa-cand-0d5347b4294e --reference "<căn cứ phê duyệt>"'
 docker compose --profile service-area run --rm service-area-build \
   python -m app.modules.trip.boundary_eval --version <service_area_version>
 docker compose --profile service-area run --rm service-area-build \

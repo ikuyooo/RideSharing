@@ -14,8 +14,9 @@ Trang không dùng công cụ phân tích hay mã của bên thứ ba.
 **Dữ liệu được lưu.** Nhóm (sinh viên / người đi làm), các lựa chọn của bạn, điểm đánh giá, ba câu hỏi tần suất
 theo khoảng, và một mã phiên ngẫu nhiên.
 
-**Lưu trữ.** Dữ liệu nằm trên máy chủ của dự án, chỉ nhóm nghiên cứu truy cập. Thời hạn lưu trữ:
-**[CHỜ CHỦ DỰ ÁN QUYẾT ĐỊNH]**; hết thời hạn, dữ liệu chi tiết bị xóa, chỉ giữ số liệu tổng hợp.
+**Lưu trữ.** Dữ liệu nằm trên máy chủ của dự án, chỉ nhóm nghiên cứu truy cập. Câu trả lời ẩn danh được lưu
+**12 tháng kể từ ngày đóng khảo sát** (đề xuất, chờ Chủ dự án phê duyệt — đây là chính sách của dự án, không phải
+thời hạn luật định); hết hạn, dữ liệu chi tiết và các bản sao lưu bị xóa, chỉ giữ số liệu tổng hợp đã công bố.
 
 **Yêu cầu xóa.** Khi hoàn thành, trang hiển thị **mã phiên** của bạn. Gửi mã này tới
 **[ĐẦU MỐI LIÊN HỆ — CHỜ CHỦ DỰ ÁN]** để yêu cầu xóa toàn bộ câu trả lời của phiên đó.

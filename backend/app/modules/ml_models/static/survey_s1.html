@@ -53,7 +53,7 @@ function cardHtml(task, c) {
   if (c.match_likelihood) rows.push(`Khả năng ghép (tình huống giả định): ${LIKE[c.match_likelihood]}`);
   if (c.walk_m !== undefined) rows.push(`Đi bộ ra điểm đón: ${c.walk_m} m`);
   if (c.lead_days) rows.push(`Đặt trước: ${c.lead_days} ngày`);
-  if (c.fill_likelihood_text !== undefined) rows.push(`Khả năng đủ khách (giả định): ${c.fill_likelihood_text}`);
+  if (c.fill_likelihood_text !== undefined) rows.push(`Khả năng đủ khách: ${c.fill_likelihood_text}`);
   return `<label class="card"><input type="radio" name="${task.task_id}" value="${c.alternative}" required>
     <b>${c.label}</b>${rows.join("<br>")}</label>`;
 }

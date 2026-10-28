@@ -62,3 +62,16 @@ def test_rules_v4_hardening() -> None:
     review = {x["name"]: x["status"] for x in v4["urban"]["excluded_review"]}
     assert review["Phường Sơn Tây"].endswith("GEO-B (MVP)") and review["Phường Chương Mỹ"].endswith("GEO-B (MVP)")
     assert "PENDING_GEOMETRY_EVIDENCE" in review["Xã Đông Anh"]
+
+
+def test_rules_v5_adds_only_the_former_dong_anh_town() -> None:
+    """v5 = v4 + the pre-2025 town polygon (U4); no whole commune, no Global Gate, same envelope."""
+    v4 = yaml.safe_load((CONFIG / "service_area_rules.candidate.v4.yaml").read_text(encoding="utf-8"))
+    v5 = yaml.safe_load((CONFIG / "service_area_rules.candidate.v5.yaml").read_text(encoding="utf-8"))
+    assert v5["urban"]["include_units"] == v4["urban"]["include_units"]
+    assert v5["urban"]["include_osm_areas"] == v4["urban"]["include_osm_areas"]
+    assert [h["relation"] for h in v5["urban"]["include_historic_areas"]] == [17627914]
+    assert v5["urban"]["include_historic_areas"][0]["status"] == "PENDING_OWNER_APPROVAL"
+    assert v5["total"] == v4["total"] and v5["serviceability"] == v4["serviceability"]
+    names = {u["name"] for u in v5["urban"]["include_units"]}
+    assert not names & {"Xã Đông Anh", "Xã Thư Lâm", "Xã Phúc Thịnh"}

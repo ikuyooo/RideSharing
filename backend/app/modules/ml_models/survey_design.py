@@ -7,9 +7,17 @@ Part 1A: full factorial of the three Section 65.2 context factors (2x2x2 = 8
 tasks), random order per respondent. The pool card's rotated attributes
 (match likelihood x walk = 6 combinations) follow a block rotation:
 combo(context i, block k) = (i + 2(k mod 3)) mod 6, so the three rotations start
-at different combinations. Part 1B pairs the two seat prices with the two
-hypothetical fill-likelihood levels; block k // 3 selects which pairing, so both
-pairings appear equally across the 6 blocks. Card positions are shuffled per task.
+at different combinations. Part 1B rotates the three hypothetical fill-likelihood levels
+over the two seat prices with (task + block) mod 3, so across the 6 blocks every seat
+price meets every level twice (orthogonal - the level is not tied to the price). Card positions are shuffled per task.
+
+Variation design (SURVEY-06, `part_1a.variation_design`): when - and only when - the
+owner activates it, each Part-1A task gets its own pool discount d, private / bike
+price multipliers and per-mode time multipliers, rotated independently of the
+distance; every displayed pool price is then recomputed from the displayed private
+price with the locked Baseline rules (expected = floor((1 - d) P), cap = Quote =
+floor((1 - d_min) P), unmatched = floor(Quote + alpha (P - Quote))). Inactive: the
+base levels of `levels_by_distance` are shown unchanged.
 """
 
 import itertools
@@ -30,6 +38,36 @@ def _value(spec: Any) -> Any:
     return TBD
 
 
+def _floor_k(v: float) -> int:
+    return int(v // 1000) * 1000
+
+
+def variation_levels(spec: dict[str, Any], i: int, block: int) -> dict[str, float]:
+    """Level of every varied factor for context i in block `block` (rotation rules from
+    the questionnaire: level index = (a * i + b * block + c) mod n, with block // m for
+    the slower factors)."""
+    out = {}
+    for name, f in spec["factors"].items():
+        k = block // f.get("block_div", 1)
+        out[name] = f["levels"][(f["a"] * i + f["b"] * k + f["c"]) % len(f["levels"])]
+    return out
+
+
+def varied_cards(levels: dict[str, Any], v: dict[str, float], bounds: dict[str, float]) -> dict[str, Any]:
+    """Displayed values of one Part-1A task under the variation design."""
+    p = _floor_k(_value(levels["CAR_URBAN_PRIVATE"]["price_vnd"]) * v["private_price_mult"])
+    quote = _floor_k(p * (1 - bounds["d_min"]))
+    expected = _floor_k(p * (1 - v["pool_discount_d"]))
+    unmatched = _floor_k(quote + bounds["alpha"] * (p - quote))
+    if not (bounds["d_min"] <= v["pool_discount_d"] <= bounds["d_max"] and expected <= quote < unmatched < p):
+        raise ValueError(f"variation level outside the Baseline bounds: {v}")
+    return {"bike_price": _floor_k(_value(levels["BIKE_URBAN"]["price_vnd"]) * v["bike_price_mult"]),
+            "bike_min": round(_value(levels["BIKE_URBAN"]["travel_min"]) * v["bike_time_mult"]),
+            "private_price": p, "private_min": round(_value(levels["CAR_URBAN_PRIVATE"]["travel_min"]) * v["car_time_mult"]),
+            "pool_expected": expected, "pool_quote": quote, "pool_unmatched": unmatched,
+            "pool_detour": round(_value(levels["CAR_URBAN_POOL"]["max_detour_min"]) * v.get("detour_mult", v["car_time_mult"]))}
+
+
 def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dict[str, Any]:
     rng = random.Random(respondent_id.int)
     p1a = q["part_1a"]
@@ -38,10 +76,13 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
     rotated = p1a["rotated_attributes"]
     combos = list(itertools.product(rotated["match_likelihood"]["levels"], rotated["walk_m"]["levels"]))
 
+    vd = p1a.get("variation_design", {})
+    active = bool(vd.get("active"))
     tasks_1a = []
     for i, (distance, weather, urgency) in enumerate(contexts):
         levels = p1a["levels_by_distance"][str(distance)]
         likelihood, walk = combos[(i + 2 * (block % 3)) % len(combos)]
+        varied = varied_cards(levels, variation_levels(vd, i, block), vd["baseline_bounds"]) if active else None
         cards = [
             {"alternative": "BIKE_URBAN", "label": p1a["alternatives"]["BIKE_URBAN"]["label"],
              "price_vnd": _value(levels["BIKE_URBAN"]["price_vnd"]), "travel_min": _value(levels["BIKE_URBAN"]["travel_min"])},
@@ -55,6 +96,12 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
              "price_vnd": _value(levels["CAR_URBAN_PRIVATE"]["price_vnd"]),
              "travel_min": _value(levels["CAR_URBAN_PRIVATE"]["travel_min"])},
         ]
+        if varied:
+            bike, pool, private = cards
+            bike |= {"price_vnd": varied["bike_price"], "travel_min": varied["bike_min"]}
+            private |= {"price_vnd": varied["private_price"], "travel_min": varied["private_min"]}
+            pool |= {"price_vnd": varied["pool_expected"], "quote_cap_vnd": varied["pool_quote"],
+                     "max_price_if_unmatched_vnd": varied["pool_unmatched"], "max_detour_min": varied["pool_detour"]}
         rng.shuffle(cards)
         for pos, card in enumerate(cards, start=1):
             card["position"] = pos
@@ -68,7 +115,7 @@ def build_design(q: dict[str, Any], respondent_id: uuid.UUID, block: int) -> dic
     tasks_1b = []
     fill_levels = pool_b["fill_likelihood"]["levels"]
     for j, seat_price in enumerate(pool_b["seat_price_vnd"]["levels"]):
-        fill = fill_levels[(j + block // 3) % len(fill_levels)]
+        fill = fill_levels[(j + block) % len(fill_levels)]
         cards = [
             {"alternative": "CAR_INTERCITY_POOL", "label": pool_b["label"], "price_vnd": seat_price,
              "fill_likelihood": fill["code"], "fill_likelihood_text": fill["text"],

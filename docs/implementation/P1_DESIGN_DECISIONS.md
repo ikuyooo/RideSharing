@@ -102,3 +102,21 @@ Revision 9, Baseline v1 hay Decision Register.
 | GEO-E | Không hỗ trợ hành trình bắt buộc đi phà | `serviceability.exclude: [ferry]`, áp dụng cho mọi request OSRM (lớp 2, khoảng cách pickup→dropoff, pipeline). Graph CH hiện có hỗ trợ `exclude=ferry` (đã kiểm: Hà Nội → Cát Bà có phà 2,015 km khi không loại; `NoRoute` khi loại) → **không build lại OSRM** | — |
 | GEO-F | Bảo toàn v1/v2/v3; candidate mới; không gán GEOMETRY_APPROVED khi còn blocker | Rules v4 → candidate mới (mục báo cáo); v1/v2/v3 không đổi | Phê duyệt hình học |
 | SURVEY-01…07 | Xem `survey/SURVEY_S1_DESIGN_REVIEW.md` §13 | Draft 3 | Ma trận biến thiên (SURVEY-06), quy tắc dữ liệu R1–R4, mức "đủ khách" 1B |
+
+### Bổ sung 2026-10-28 (xử lý blocker)
+
+| Hạng mục | Nội dung |
+|---|---|
+| U4 `urban.include_historic_areas` (rules v5) | Polygon đơn vị cũ lấy từ quan hệ lịch sử OSM: vùng osmium nếu dựng được, nếu không thì `ST_Polygonize` trên các way thành viên đã nút hóa — không thêm/nối/dịch chuyển đường; báo cáo số mặt và chiều dài thành viên không dùng (Đông Anh: 2 mặt, 2.251 m) |
+| `historic_sources` | So sánh thêm polygon ghép từ thành viên OSM với GADM (IoU, Hausdorff, node, phân bố xã) — chỉ ghi số liệu |
+| `variation_design` (S1) | Thiết kế D trong `survey_design.build_design`, mặc định tắt; khi bật mọi giá tính lại bằng quy tắc Baseline, mức vi phạm cận → lỗi |
+
+## 6. Quyết định "P1 OWNER APPROVAL & FINAL CLOSURE GATES" (2026-10-28) — cách hiện thực
+
+| Mã | Quyết định | Hiện thực | Trạng thái |
+|---|---|---|---|
+| §2 Hình học v5 | Duyệt có điều kiện `sa-cand-0d5347b4294e`; chỉ thành `GEOMETRY_APPROVED_FOR_MVP` khi đạt 8 điều kiện | `app.modules.trip.service_area_approve`: 8 cổng (checksum + hình học = bundle, bằng chứng U4, đánh giá mới, Đông Anh URBAN, La Phù 2b, > 150 km bị chặn, snap/EXCLUDED/phà bị chặn, import lại không đổi + không ghi đè). Chỉ khi tất cả PASS mới cập nhật `status = APPROVED` + `approval_reference` | **8/8 PASS → GEOMETRY_APPROVED_FOR_MVP** (phạm vi học thuật, không chứng nhận pháp lý) |
+| §3 Chính sách không gian | Giữ Sơn Tây / Chương Mỹ ngoài URBAN; snap 300 m tạm thời; 150 km kiểm từng điểm bằng OSRM car; polygon chỉ sàng lọc an toàn; không tính phà | Không đổi mã; giữ test hồi quy: 149,98 / 150,00 / 150,001 / 150,02 km, snap 300,0 / 300,1 m, điểm đúng biên polygon, phiên bản thiếu lớp 2 → 503, phà (OSRM thật), quy tắc trắc địa, rules v4/v5 | Đã giữ |
+| §4 Ma trận D | Duyệt cho pilot TEST; kiểm định thống kê trước khi phát hành | `survey_stats` (mã hóa MNL, hạng, VIF, condition number, D-error, ước lượng logit), `design_diagnostics.py`, pilot `test_survey_pilot.py`; phát hiện vấn đề (thời gian không ước lượng được ở N = 150, mức thời gian xe máy lệch) → đề xuất **D2** (chưa kích hoạt); `detour_mult` là yếu tố tùy chọn (không có thì đi vòng theo thời gian ô tô như D) | D: pilot TEST; D2: chờ duyệt |
+| §5 Câu hỏi | 3 mức "khả năng đủ khách" không gắn giá ghế; các ghi chú giả định | Draft 4: xoay `(câu + khối) mod 3`, trực giao với giá ghế; R1–R4 đánh giá, chưa ACCEPTED | R1–R4 chờ duyệt |
+| §6 HTTPS & quyền riêng tư | Chuẩn bị; lưu trữ đề xuất 12 tháng | Kiểm thử phát hành cục bộ qua HTTPS (`staging_e2e.sh`, CA nội bộ Caddy, CSDL tạm) PASS; `purge_survey.sh` (xác nhận bằng từ khóa, giao dịch); chính sách lưu trữ 12 tháng + backup 30 ngày + quy trình gia hạn ghi trong kế hoạch triển khai | Chờ domain / máy chủ / phê duyệt |

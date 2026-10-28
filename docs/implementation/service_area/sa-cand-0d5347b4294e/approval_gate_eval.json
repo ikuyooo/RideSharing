@@ -1,0 +1,760 @@
+{
+  "cases": [
+    {
+      "case": "Phenikaa → La Phù",
+      "section": "72.2",
+      "expected": "URBAN",
+      "pickup": "way/973433275",
+      "pickup_name": "Đại học Phenikaa",
+      "dropoff": "node/12147486706",
+      "dropoff_name": "La Phù",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "spec implies La Phù outside urban polygon -> branch 2b (buffer)",
+      "expected_branch": "2b",
+      "actual": "URBAN",
+      "branch": "2b",
+      "direct_distance_km": 5.9768,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 15.208,
+        "snap_m": 18.5
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 17.403,
+        "snap_m": 37.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "~3 km inside TP Hưng Yên",
+      "section": "72.2",
+      "expected": "UNSUPPORTED_INTER_PROVINCE_ROUTE",
+      "pickup": "node/13155709564",
+      "pickup_name": "Phố Hiến",
+      "dropoff": "node/11518465547",
+      "dropoff_name": "Minh Khai",
+      "pickup_urban": false,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "dropoff = place node closest to 3.0 km road",
+      "selected_road_km": 2.589,
+      "actual": "UNSUPPORTED_INTER_PROVINCE_ROUTE",
+      "branch": "3b",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 56.409,
+        "snap_m": 2.8
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 58.033,
+        "snap_m": 1.9
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "buffer <= 15 km from Phenikaa",
+      "section": "2.3",
+      "expected": "URBAN",
+      "pickup": "way/973433275",
+      "pickup_name": "Đại học Phenikaa",
+      "dropoff": "node/12607118252",
+      "dropoff_name": "Vĩnh Thịnh",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "",
+      "selected_road_km": 14.992,
+      "actual": "URBAN",
+      "branch": "2b",
+      "direct_distance_km": 14.9919,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 15.208,
+        "snap_m": 18.5
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 14.362,
+        "snap_m": 1.1
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "buffer > 15 km from Phenikaa",
+      "section": "2.3",
+      "expected": "INTERCITY",
+      "pickup": "way/973433275",
+      "pickup_name": "Đại học Phenikaa",
+      "dropoff": "node/12611713598",
+      "dropoff_name": "Yên Kiện",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "",
+      "selected_road_km": 15.321,
+      "actual": "INTERCITY",
+      "branch": "3a",
+      "direct_distance_km": 15.321299999999999,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 15.208,
+        "snap_m": 18.5
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 14.294,
+        "snap_m": 13.4
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "limit <= 150 km from anchor",
+      "section": "2.3 / Baseline max_total_service_radius_km",
+      "expected": "INTERCITY",
+      "pickup": "node/74132064",
+      "pickup_name": "Hà Nội",
+      "dropoff": "node/11578421390",
+      "dropoff_name": "Tứ Quận",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "tier 2 checks the point's own road distance (GEO-03)",
+      "selected_road_km": 149.984,
+      "actual": "INTERCITY",
+      "branch": "3a",
+      "direct_distance_km": 149.9839,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.0,
+        "snap_m": 24.4
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 149.984,
+        "snap_m": 9.8
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "limit > 150 km from anchor",
+      "section": "2.3 / Baseline max_total_service_radius_km",
+      "expected": "OUT_OF_SERVICE_AREA",
+      "pickup": "node/74132064",
+      "pickup_name": "Hà Nội",
+      "dropoff": "node/6766268697",
+      "dropoff_name": null,
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "tier 2 checks the point's own road distance (GEO-03)",
+      "selected_road_km": 150.024,
+      "actual": "OUT_OF_SERVICE_AREA",
+      "branch": "1",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.0,
+        "snap_m": 24.4
+      },
+      "dropoff_tier": {
+        "reason": "BEYOND_MAX_ROAD_DISTANCE",
+        "layer": "SERVICEABILITY",
+        "anchor_road_km": 150.024,
+        "snap_m": 32.7
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "Đông Anh (town node) → Hoàn Kiếm",
+      "section": "landmark (GEO closure)",
+      "expected": "URBAN",
+      "pickup": "node/13799910539",
+      "pickup_name": "Đông Anh",
+      "dropoff": "node/13709921432",
+      "dropoff_name": "Hoàn Kiếm",
+      "pickup_urban": true,
+      "dropoff_urban": true,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "R9 §2.3 lists Đông Anh as urban; GEO-01 geometry PENDING - reached only through the 15 km buffer",
+      "actual": "URBAN",
+      "branch": "2a",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 20.166,
+        "snap_m": 6.5
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "An Khánh (Splendora) → Hoàn Kiếm",
+      "section": "landmark (GEO closure)",
+      "expected": "URBAN",
+      "pickup": "way/1565297218",
+      "pickup_name": "Splendora Terrace Mailand",
+      "dropoff": "node/13709921432",
+      "dropoff_name": "Hoàn Kiếm",
+      "pickup_urban": true,
+      "dropoff_urban": true,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "R9 §2.3 lists An Khánh as urban",
+      "actual": "URBAN",
+      "branch": "2a",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 17.486,
+        "snap_m": 12.7
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "La Phù → Hoàn Kiếm",
+      "section": "landmark (GEO closure)",
+      "expected": "INFO",
+      "pickup": "node/12147486706",
+      "pickup_name": "La Phù",
+      "dropoff": "node/13709921432",
+      "dropoff_name": "Hoàn Kiếm",
+      "pickup_urban": false,
+      "dropoff_urban": true,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "La Phù is outside the urban polygon (§72.2)",
+      "actual": "INTERCITY",
+      "branch": "3a",
+      "direct_distance_km": 17.1913,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 17.403,
+        "snap_m": 37.5
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "Tùng Thiện (Xuân Khanh) → Hoàn Kiếm",
+      "section": "landmark (GEO closure)",
+      "expected": "INTERCITY",
+      "pickup": "node/12629466848",
+      "pickup_name": "Xuân Khanh",
+      "dropoff": "node/13709921432",
+      "dropoff_name": "Hoàn Kiếm",
+      "pickup_urban": false,
+      "dropoff_urban": true,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "GEO-02: Tùng Thiện not urban",
+      "actual": "INTERCITY",
+      "branch": "3a",
+      "direct_distance_km": 47.377300000000005,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 47.837,
+        "snap_m": 22.2
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "Phố Hiến → Hoàn Kiếm",
+      "section": "landmark (GEO closure)",
+      "expected": "INTERCITY",
+      "pickup": "node/13155709564",
+      "pickup_name": "Phố Hiến",
+      "dropoff": "node/13709921432",
+      "dropoff_name": "Hoàn Kiếm",
+      "pickup_urban": false,
+      "dropoff_urban": true,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "A8 representative of TP Hưng Yên",
+      "actual": "INTERCITY",
+      "branch": "3a",
+      "direct_distance_km": 56.3785,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 56.409,
+        "snap_m": 2.8
+      },
+      "dropoff_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "inside polygon, BEYOND_MAX_ROAD_DISTANCE (tier 2)",
+      "section": "GEO-03",
+      "expected": "OUT_OF_SERVICE_AREA",
+      "pickup": "node/13709921432",
+      "pickup_name": "Hoàn Kiếm",
+      "dropoff": "sample point",
+      "dropoff_name": "",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "sampled point: anchor road km 256.4295, snap 50.4 m",
+      "expected_reason": "BEYOND_MAX_ROAD_DISTANCE",
+      "actual": "OUT_OF_SERVICE_AREA",
+      "branch": "1",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "dropoff_tier": {
+        "reason": "BEYOND_MAX_ROAD_DISTANCE",
+        "layer": "SERVICEABILITY",
+        "anchor_road_km": 256.43,
+        "snap_m": 50.4
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "inside polygon, NO_ROAD_ACCESS (tier 2)",
+      "section": "GEO-03",
+      "expected": "OUT_OF_SERVICE_AREA",
+      "pickup": "node/13709921432",
+      "pickup_name": "Hoàn Kiếm",
+      "dropoff": "sample point",
+      "dropoff_name": "",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "sampled point: anchor road km 177.321, snap 1576.6 m",
+      "expected_reason": "NO_ROAD_ACCESS",
+      "actual": "OUT_OF_SERVICE_AREA",
+      "branch": "1",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "dropoff_tier": {
+        "reason": "NO_ROAD_ACCESS",
+        "layer": "SERVICEABILITY",
+        "anchor_road_km": 177.321,
+        "snap_m": 1576.6
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "point in largest EXCLUDED component (tier 1)",
+      "section": "GEO-04",
+      "expected": "OUT_OF_SERVICE_AREA",
+      "pickup": "node/13709921432",
+      "pickup_name": "Hoàn Kiếm",
+      "dropoff": "EXCLUDED component",
+      "dropoff_name": "",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "component 167.0607 km²",
+      "expected_reason": "UNSERVICEABLE_COMPONENT",
+      "actual": "OUT_OF_SERVICE_AREA",
+      "branch": "1",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": null,
+        "snap_m": null
+      },
+      "dropoff_tier": {
+        "reason": "UNSERVICEABLE_COMPONENT",
+        "layer": "POLYGON",
+        "anchor_road_km": null,
+        "snap_m": null
+      },
+      "tier2_applied": false,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    },
+    {
+      "case": "point exactly on the TOTAL polygon boundary",
+      "section": "GEO-C",
+      "expected": "INFO",
+      "pickup": "node/13709921432",
+      "pickup_name": "Hoàn Kiếm",
+      "dropoff": "boundary vertex",
+      "dropoff_name": "",
+      "pickup_urban": true,
+      "dropoff_urban": false,
+      "pickup_total": true,
+      "dropoff_total": true,
+      "note": "polygon tier must pass; tier 2 decides",
+      "expected_layer_not": "POLYGON",
+      "actual": "OUT_OF_SERVICE_AREA",
+      "branch": "1",
+      "direct_distance_km": null,
+      "pickup_tier": {
+        "reason": null,
+        "layer": null,
+        "anchor_road_km": 0.724,
+        "snap_m": 0.5
+      },
+      "dropoff_tier": {
+        "reason": "BEYOND_MAX_ROAD_DISTANCE",
+        "layer": "SERVICEABILITY",
+        "anchor_road_km": 205.38,
+        "snap_m": 161.4
+      },
+      "tier2_applied": true,
+      "result_on_candidate": "PASS",
+      "acceptance_status": "NOT_VERIFIED (geometry not approved)",
+      "service_area_version": "sa-cand-0d5347b4294e"
+    }
+  ],
+  "context_checks": [
+    {
+      "case": "A8 context: Hà Đông → Phố Hiến road distance",
+      "section": "25.2",
+      "revision9_value_km": 65.0,
+      "osrm_km": 58.055,
+      "relative_difference": -0.1068
+    }
+  ],
+  "tier2_sample": {
+    "sample": "400 points, ST_GeneratePoints seed 1 over TOTAL minus EXCLUDED",
+    "by_outcome": {
+      "BEYOND_MAX_ROAD_DISTANCE": 68,
+      "NO_ROAD_ACCESS": 172,
+      "SERVED": 160
+    },
+    "ferry_check": {
+      "exclude": [
+        "ferry"
+      ],
+      "destinations_checked": 412,
+      "routes_using_ferry_by_default": 3,
+      "ferry_steps_with_policy": 0,
+      "rows": [
+        {
+          "destination": "component 2",
+          "default": {
+            "code": "Ok",
+            "km": 214.708,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 214.708,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 3",
+          "default": {
+            "code": "Ok",
+            "km": 123.498,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 123.498,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 4",
+          "default": {
+            "code": "Ok",
+            "km": 197.094,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 197.094,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 5",
+          "default": {
+            "code": "Ok",
+            "km": 140.367,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 140.367,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 6",
+          "default": {
+            "code": "Ok",
+            "km": 146.414,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 146.414,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 7",
+          "default": {
+            "code": "Ok",
+            "km": 118.046,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 118.046,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 8",
+          "default": {
+            "code": "Ok",
+            "km": 149.726,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 149.726,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 9",
+          "default": {
+            "code": "Ok",
+            "km": 205.285,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 205.285,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 10",
+          "default": {
+            "code": "Ok",
+            "km": 204.246,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 204.246,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 11",
+          "default": {
+            "code": "Ok",
+            "km": 227.071,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 227.071,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "component 12",
+          "default": {
+            "code": "Ok",
+            "km": 119.575,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 119.575,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "Cát Bà town (107.0496, 20.7262)",
+          "default": {
+            "code": "Ok",
+            "km": 150.577,
+            "ferry_steps": 1,
+            "ferry_km": 2.015
+          },
+          "with_policy": {
+            "code": "NoRoute",
+            "km": null,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "sample 155",
+          "default": {
+            "code": "Ok",
+            "km": 75.324,
+            "ferry_steps": 1,
+            "ferry_km": 0.204
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 77.531,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        },
+        {
+          "destination": "sample 367",
+          "default": {
+            "code": "Ok",
+            "km": 212.472,
+            "ferry_steps": 1,
+            "ferry_km": 0.733
+          },
+          "with_policy": {
+            "code": "Ok",
+            "km": 218.092,
+            "ferry_steps": 0,
+            "ferry_km": 0.0
+          },
+          "ok": true
+        }
+      ]
+    }
+  }
+}

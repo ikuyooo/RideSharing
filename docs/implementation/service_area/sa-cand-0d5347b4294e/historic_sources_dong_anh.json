@@ -1,0 +1,72 @@
+{
+  "relation": "relation/17627914",
+  "service_area_version": "sa-cand-0d5347b4294e",
+  "osm": {
+    "member_ways": 9,
+    "length_km": 31.084,
+    "closed": false,
+    "open_ring_gap_m": 1885.0
+  },
+  "gadm": {
+    "dataset": "GADM 4.1 gadm41_VNM_3.json (level 3, pre-2025 units)",
+    "sha256": "fe29b396acefba3b49172ff46c2734658ee97c6a96635d506d1fd4070993b23d",
+    "gid": "VNM.27.9.5_1",
+    "area_km2": 4.544,
+    "vertices": 54,
+    "perimeter_km": 24.183,
+    "contains_osm_town_node": true,
+    "split_over_current_units_km2": {
+      "Xã Thư Lâm": 2.37,
+      "Xã Phúc Thịnh": 1.566,
+      "Xã Đông Anh": 0.609
+    },
+    "overlap_with_current_urban_km2": 4.096
+  },
+  "deviation_osm_to_gadm_boundary_m": {
+    "samples_every_25m": 1240,
+    "median": 23.7,
+    "p95": 184.2,
+    "max": 434.9
+  },
+  "gadm_boundary_farther_than_100m_from_osm_km": 0.355,
+  "osm_members_polygonized": {
+    "method": "ST_Polygonize(ST_Node(member ways)) - no line added",
+    "unused_member_length_m": 2251.1,
+    "polygons": [
+      {
+        "polygon": "union of faces",
+        "km2": 4.3444,
+        "iou_with_gadm": 0.855,
+        "hausdorff_to_gadm_m": 222.4,
+        "contains_osm_town_node": true,
+        "split_km2": {
+          "Xã Phúc Thịnh": 1.487,
+          "Xã Đông Anh": 0.554,
+          "Xã Thư Lâm": 2.303
+        }
+      },
+      {
+        "polygon": "face 1",
+        "km2": 3.0417,
+        "iou_with_gadm": 0.597,
+        "hausdorff_to_gadm_m": 1787.3,
+        "contains_osm_town_node": false,
+        "split_km2": {
+          "Xã Phúc Thịnh": 0.184,
+          "Xã Đông Anh": 0.554,
+          "Xã Thư Lâm": 2.303
+        }
+      },
+      {
+        "polygon": "face 2",
+        "km2": 1.3027,
+        "iou_with_gadm": 0.275,
+        "hausdorff_to_gadm_m": 4096.6,
+        "contains_osm_town_node": true,
+        "split_km2": {
+          "Xã Phúc Thịnh": 1.303
+        }
+      }
+    ]
+  }
+}

@@ -132,6 +132,25 @@ def main() -> None:
         urban_overlap = conn.execute(text(f"""SELECT ST_Area(ST_Intersection(ST_Transform(u.geom, {UTM}), a.g)) / 1e6
             FROM service_areas u, {SCHEMA}.gadm a WHERE u.service_area_version = :v AND u.area_type = 'URBAN'"""),
             {"v": args.version}).scalar_one()
+        # The relation as assembled from its member ways only (ST_Polygonize over noded lines,
+        # nothing added): compare the union of the faces and each face with GADM.
+        conn.execute(text(f"""CREATE TABLE {SCHEMA}.faces AS SELECT row_number() OVER (ORDER BY ST_Area(g) DESC) AS k, g
+            FROM (SELECT (ST_Dump(ST_Polygonize(g))).geom AS g FROM (SELECT ST_Node(ST_Collect(g)) AS g FROM {SCHEMA}.osm) n) z"""))
+        conn.execute(text(f"INSERT INTO {SCHEMA}.faces SELECT 0, ST_Union(g) FROM {SCHEMA}.faces"))
+        polygonized = []
+        for k, km2, iou, haus, node_in in conn.execute(text(f"""SELECT f.k, ST_Area(f.g) / 1e6,
+                ST_Area(ST_Intersection(f.g, a.g)) / ST_Area(ST_Union(f.g, a.g)),
+                ST_HausdorffDistance(ST_Boundary(f.g), ST_Boundary(a.g)),
+                ST_Contains(f.g, ST_Transform(ST_SetSRID(ST_MakePoint(:x, :y), 4326), {UTM}))
+            FROM {SCHEMA}.faces f, {SCHEMA}.gadm a ORDER BY f.k"""), {"x": node_xy[0], "y": node_xy[1]}).all():
+            parts = conn.execute(text(f"""SELECT u.name, ST_Area(ST_Intersection(u.g, f.g)) / 1e6 FROM {SCHEMA}.units u,
+                {SCHEMA}.faces f WHERE f.k = :k AND ST_Intersects(u.g, f.g)"""), {"k": k}).all()
+            polygonized.append({"polygon": "union of faces" if k == 0 else f"face {k}", "km2": round(km2, 4),
+                                "iou_with_gadm": round(iou, 3), "hausdorff_to_gadm_m": round(haus, 1),
+                                "contains_osm_town_node": node_in,
+                                "split_km2": {n: round(a, 3) for n, a in parts if a >= 0.01}})
+        unused = conn.execute(text(f"""SELECT ST_Length(ST_Difference(ST_Collect(o.g),
+                ST_Buffer(ST_Boundary((SELECT g FROM {SCHEMA}.faces WHERE k = 0)), 0.5))) FROM {SCHEMA}.osm o""")).scalar_one()
         conn.execute(text(f"DROP SCHEMA {SCHEMA} CASCADE"))
 
     report = {
@@ -147,6 +166,8 @@ def main() -> None:
         "deviation_osm_to_gadm_boundary_m": {"samples_every_25m": m["samples"], "median": round(m["median_m"], 1),
                                              "p95": round(m["p95_m"], 1), "max": round(m["max_m"], 1)},
         "gadm_boundary_farther_than_100m_from_osm_km": round(m["gadm_boundary_not_near_osm_km"], 3),
+        "osm_members_polygonized": {"method": "ST_Polygonize(ST_Node(member ways)) - no line added",
+                                    "unused_member_length_m": round(unused, 1), "polygons": polygonized},
     }
     (args.out / "historic_sources_dong_anh.json").write_text(json.dumps(report, ensure_ascii=False, indent=2),
                                                              encoding="utf-8")

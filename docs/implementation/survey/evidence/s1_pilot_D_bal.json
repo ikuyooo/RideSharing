@@ -1,0 +1,76 @@
+{
+  "variant": "D_bal",
+  "respondents": 150,
+  "choice_sets": 1200,
+  "log_likelihood": -591.09,
+  "parameters": {
+    "asc_bike": {
+      "true_prior": 0.5,
+      "estimate": 0.5841,
+      "se": 0.3183,
+      "z_vs_true": 0.26
+    },
+    "asc_pool": {
+      "true_prior": -0.2,
+      "estimate": -1.0477,
+      "se": 0.4684,
+      "z_vs_true": -1.81
+    },
+    "price_k": {
+      "true_prior": -0.03,
+      "estimate": -0.0289,
+      "se": 0.0043,
+      "z_vs_true": 0.24
+    },
+    "time_min": {
+      "true_prior": -0.025,
+      "estimate": -0.0038,
+      "se": 0.0179,
+      "z_vs_true": 1.19
+    },
+    "detour_min": {
+      "true_prior": -0.03,
+      "estimate": -0.0595,
+      "se": 0.0649,
+      "z_vs_true": -0.46
+    },
+    "unmatched_gap_k": {
+      "true_prior": -0.01,
+      "estimate": 0.0112,
+      "se": 0.013,
+      "z_vs_true": 1.63
+    },
+    "like_medium": {
+      "true_prior": -0.3,
+      "estimate": 0.2153,
+      "se": 0.2781,
+      "z_vs_true": 1.85
+    },
+    "like_low": {
+      "true_prior": -0.8,
+      "estimate": -0.2495,
+      "se": 0.3184,
+      "z_vs_true": 1.73
+    },
+    "walk_200": {
+      "true_prior": -0.2,
+      "estimate": 0.1656,
+      "se": 0.2399,
+      "z_vs_true": 1.52
+    },
+    "rain_x_bike": {
+      "true_prior": -0.8,
+      "estimate": -0.8669,
+      "se": 0.1726,
+      "z_vs_true": -0.39
+    },
+    "urgent_x_time": {
+      "true_prior": -0.02,
+      "estimate": -0.0304,
+      "se": 0.0261,
+      "z_vs_true": -0.4
+    }
+  },
+  "t_price": -6.68,
+  "t_time": -0.21
+}
