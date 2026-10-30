@@ -13,8 +13,10 @@ Latency must be measured INSIDE the compose network (backend -> osrm-*:5000, pos
 where the backend runs: from the Windows host, Docker Desktop's port proxy adds ~1 s per new
 connection (measured 2026-10-29), which says nothing about the system.
 
-Usage (repo root, stack running):
-    MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W):/repo" backend         python -I /repo/scripts/p2_benchmark.py --in-network [--requests 200] [--seed 20261029]
+Modes: bench (latency per stage; --verify adds the independent checks of scripts/p2_verify.py),
+explain (EXPLAIN (ANALYZE, BUFFERS) of every SQL statement of a generation run), cprofile.
+Run it through scripts/p2_bench_run.sh, which stores each run in its own evidence folder
+(run id, git commit, seed, workload, docker stats, exit code) and never overwrites one.
 """
 
 import argparse
@@ -34,7 +36,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 import app  # noqa: E402,F401  bind `app` to this checkout before alembic prepends its own cwd
 
-import httpx  # noqa: E402
 from alembic import command  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from sqlalchemy import create_engine, make_url, text  # noqa: E402
@@ -43,10 +44,12 @@ from sqlalchemy.orm import sessionmaker  # noqa: E402
 sys.path.insert(0, str(ROOT / "backend" / "tests"))
 import p2_fixtures as fx  # noqa: E402
 
+sys.path.insert(0, str(ROOT / "scripts"))
+from p2_verify import TOL_M, TOL_S, Osrm, check_plan, check_single_reject, verify_candidate  # noqa: E402
+
 DB = "p2_bench"
 CENTER = (105.8520, 21.0285)
 CONFIGS = [(50, 0), (200, 0), (1000, 0), (200, 10), (200, 20), (1000, 20)]
-TOL_S, TOL_M = 1.0, 1.0  # per leg: OSRM /route vs /table rounding
 
 
 def dotenv() -> dict[str, str]:
@@ -99,150 +102,12 @@ def summary(values: list[float]) -> dict:
             "max": round(max(values), 2) if values else None, "mean": round(statistics.fmean(values), 2) if values else None}
 
 
-class OsrmLegs:
-    """Independent OSRM access for the verifier: /route legs, raw httpx."""
-
-    def __init__(self, urls: dict[str, str]) -> None:
-        self.urls = urls
-        self._memo: dict[tuple, list[tuple[float, float]] | None] = {}
-
-    def legs(self, profile: str, pts: list[tuple[float, float]]) -> list[tuple[float, float]] | None:
-        key = (profile, tuple(pts))
-        if key not in self._memo:
-            self._memo[key] = self._legs(profile, pts)
-        return self._memo[key]
-
-    def _legs(self, profile: str, pts: list[tuple[float, float]]) -> list[tuple[float, float]] | None:
-        path = ";".join(f"{x:.6f},{y:.6f}" for x, y in pts)
-        body = httpx.get(f"{self.urls[profile]}/route/v1/driving/{path}",
-                         # Each leg independent, as the /table pairs that R9 Sections 34 / 36 specify
-                         # (car default continue_straight=true forbids U-turns at waypoints; SF-P2-15).
-                         params={"overview": "false", "steps": "false", "exclude": "ferry", "continue_straight": "false"},
-                         headers={"Connection": "close"}, timeout=10).json()
-        if body.get("code") != "Ok":
-            return None
-        return [(leg["distance"], leg["duration"]) for leg in body["routes"][0]["legs"]]
+HC_CONFIG = ("hc", 200, 20)  # constraint-stress workload (hardening directive section 4.1)
 
 
-def window(trip: dict, service: str) -> tuple[datetime, datetime]:
-    lo_min, hi_min = (3, 15) if service == "BIKE_URBAN" else (5, 20)   # R9 Section 2.2 / Baseline
-    pref = trip["preferred_departure"]
-    return pref + timedelta(minutes=lo_min), pref + timedelta(minutes=hi_min)  # NOW trips, no own window
-
-
-def fare(base: int, per_km: int, per_min: int, m: float, s: float) -> int:
-    return int((base + per_km * m / 1000 + per_min * s / 60) // 1000) * 1000
-
-
-def verify(c, session, osrm: OsrmLegs, trip: dict, now: datetime) -> tuple[set[str], set[str]]:  # noqa: ANN001
-    """Independent re-derivation of the 11 constraints of R9 Section 7 for one candidate."""
-    bad, edge = set(), set()
-    profile = "motorbike" if c.service_code == "BIKE_URBAN" else "car"
-    d = session.execute(text(
-        "SELECT dl.availability, ST_X(dl.geom) x, ST_Y(dl.geom) y, EXTRACT(EPOCH FROM (:now - dl.updated_at)) age, "
-        "dp.kyc_status, dp.accepts_urban, dp.pool_enabled, dp.max_additional_pickups, dp.max_driver_detour_km, "
-        "dp.max_driver_detour_min, v.vehicle_type, v.capacity, v.is_active FROM driver_locations dl "
-        "JOIN driver_profiles dp ON dp.user_id = dl.driver_id JOIN vehicles v ON v.id = dl.active_vehicle_id "
-        "WHERE dl.driver_id = :d"), {"d": c.driver_id, "now": now}).mappings().one()
-    new_vehicle = c.source_type == "NEW_SINGLE_VEHICLE"
-    if (d["availability"] == "OFFLINE" or d["age"] > 120 or (new_vehicle and d["availability"] != "IDLE")
-            or not d["is_active"] or d["vehicle_type"] != ("BIKE" if c.service_code == "BIKE_URBAN" else "CAR4")
-            or not d["accepts_urban"]
-            or (c.service_code == "CAR_URBAN_POOL" and (not d["pool_enabled"] or d["kyc_status"] != "VERIFIED"))):
-        bad.add("HC01")
-    if c.service_code not in trip["allowed_service_codes"]:
-        bad.add("HC09")
-    # riders and stop coordinates
-    riders = {"new": {"seats": trip["passenger_count"], "onboard": False, "window": window(trip, c.service_code),
-                      "pick": trip["p"], "drop": trip["q"], "same_gender": False}}
-    direct = osrm.legs(profile, [trip["p"], trip["q"]])
-    if direct is None:
-        return {"HC02"}, edge
-    riders["new"] |= {"direct": direct[0], "traveled": 0.0}
-    if c.service_code == "BIKE_URBAN":
-        riders["new"]["max_price"] = fare(10000, 4500, 250, *direct[0])
-    else:
-        private = fare(20000, 11000, 500, *direct[0])
-        quote = int(private * 0.8 // 1000) * 1000
-        riders["new"]["max_price"] = private if c.service_code == "CAR_URBAN_PRIVATE" else int((quote + 0.5 * (private - quote)) // 1000) * 1000
-    stop_pts = {}
-    added_pickups = 0
-    if c.plan_id:
-        rows = session.execute(text(
-            "SELECT s.booking_id, s.kind, s.status, s.completed_at, ST_X(s.geom) x, ST_Y(s.geom) y, b.seat_count, "
-            "b.quoted_price_cap_vnd, p.traveled_km_before_last_replan km, p.direct_distance_m dm, p.direct_duration_s ds, "
-            "t.preferred_departure, t.budget_max FROM ride_stops s JOIN bookings b ON b.id = s.booking_id "
-            "JOIN ride_participants p ON p.booking_id = s.booking_id JOIN trip_requests t ON t.id = b.request_id "
-            "WHERE s.ride_plan_id = :p ORDER BY s.seq"), {"p": c.plan_id}).mappings().all()
-        completed = sum(r["status"] == "COMPLETED" for r in rows)
-        for r in rows:
-            ref = str(r["booking_id"])
-            stop_pts[(ref, r["kind"])] = (r["x"], r["y"])
-            if r["status"] == "COMPLETED" and r["kind"] == "PICKUP":
-                riders[ref] = {"onboard": True, "boarded": r["completed_at"]}
-            riders.setdefault(ref, {"onboard": False})
-            riders[ref] |= {"seats": r["seat_count"], "direct": (r["dm"], r["ds"]), "traveled": r["km"] * 1000,
-                            "max_price": r["quoted_price_cap_vnd"], "budget": r["budget_max"],
-                            "window": (r["preferred_departure"] + timedelta(minutes=5),
-                                       r["preferred_departure"] + timedelta(minutes=20))}
-        riders = {k: v for k, v in riders.items() if k == "new" or any(s[0] == k for s in c.insertion["chain"])}
-        added_pickups = len(riders) - 1
-        total_stops = completed + len(c.insertion["chain"])
-        if total_stops > 8 or added_pickups > d["max_additional_pickups"]:
-            bad.add("HC07")
-    riders["new"]["budget"] = trip["budget_max"]
-    pts = [(d["x"], d["y"])]
-    for ref, kind in c.insertion["chain"]:
-        pts.append(stop_pts.get((ref, kind)) or (trip["p"] if kind == "PICKUP" else trip["q"]))
-    legs = osrm.legs(profile, pts)
-    if legs is None:
-        return bad | {"HC02"}, edge
-    clock = dist = 0.0
-    seats = sum(r["seats"] for r in riders.values() if r["onboard"])
-    at = {}
-    for (ref, kind), (lm, ls) in zip(c.insertion["chain"], legs, strict=True):
-        if seats > d["capacity"]:
-            bad.add("HC04")
-        clock += ls
-        dist += lm
-        r = riders[ref]
-        if kind == "PICKUP":
-            clock = max(clock, (r["window"][0] - now).total_seconds())
-            seats += r["seats"]
-        else:
-            seats -= r["seats"]
-        at[(ref, kind)] = (clock, dist)
-        clock += 60
-    n = len(legs)
-    for ref, r in riders.items():
-        t_drop, m_drop = at[(ref, "DROPOFF")]
-        if r["onboard"]:
-            ride, inveh = r["traveled"] + m_drop, (now - r["boarded"]).total_seconds() + t_drop
-        else:
-            t_pick, m_pick = at[(ref, "PICKUP")]
-            pick = now + timedelta(seconds=t_pick)
-            if pick > r["window"][1] + timedelta(seconds=TOL_S * n):
-                bad.add("HC03")
-            elif pick > r["window"][1]:
-                edge.add("HC03")
-            ride, inveh = m_drop - m_pick, t_drop - t_pick
-        direct_m, direct_s = r["direct"]
-        max_inveh = direct_s * 1.5 + 600
-        if inveh > max_inveh + TOL_S * n:
-            bad.add("HC06")
-        elif inveh > max_inveh:
-            edge.add("HC06")
-        if c.service_code == "CAR_URBAN_POOL" and direct_m:
-            if ride > 1.3 * direct_m + TOL_M * n:
-                bad.add("HC05")
-            elif ride > 1.3 * direct_m:
-                edge.add("HC05")
-        if r.get("budget") is not None and r["max_price"] > r["budget"]:
-            bad.add("HC08")
-    return bad, edge
-
-
-def make_world(session, rng: random.Random, n_drivers: int, n_plans: int, now: datetime, osrm: OsrmLegs) -> None:  # noqa: ANN001
+def make_world(session, rng: random.Random, n_drivers: int, n_plans: int, now: datetime, osrm: Osrm) -> None:  # noqa: ANN001
+    """Workload of the 6 standard configurations - unchanged since the first run, so before /
+    after compare the same world for the same seed."""
     session.execute(text("TRUNCATE ride_stops, ride_participants, ride_candidates, candidate_runs, bookings, ride_plans, "
                          "driver_locations, vehicles, trip_requests, driver_profiles, users RESTART IDENTITY CASCADE"))
     for i in range(n_drivers):
@@ -265,13 +130,133 @@ def make_world(session, rng: random.Random, n_drivers: int, n_plans: int, now: d
     session.commit()
 
 
-def main() -> None:
+def make_world_hc(session, rng: random.Random, n_drivers: int, n_plans: int, now: datetime, osrm: Osrm) -> None:  # noqa: ANN001
+    """Constraint-stress workload: plans with 1-3 riders (first rider onboard, others onboard or
+    waiting, up to 5 stops ahead), driver detour limits (HC07), same-gender riders (HC11 - never
+    satisfiable while no gender verification exists, P1-D6) and budgets on new trips (HC08)."""
+    make_world(session, rng, n_drivers, 0, now, osrm)
+    for _ in range(n_plans):
+        pos = disk(rng, CENTER, 4)
+        limit = rng.choice([None, None, (3.0, 10.0), (6.0, 15.0)])
+        car, vehicle = fx.driver(session, *pos, now, pool=True, max_additional_pickups=3,
+                                 detour_km=limit[0] if limit else None, detour_min=limit[1] if limit else None)
+        riders: list[dict] = []
+        ahead: list[tuple[int, str]] = []
+        for k in range(rng.choice([1, 2, 2, 3])):
+            onboard = k == 0 or rng.random() < 0.3
+            pick = disk(rng, pos, 2 if onboard else 1.5)
+            drop = disk(rng, pos, 6)
+            legs = osrm.legs("car", [pick, drop])
+            so_far = osrm.legs("car", [pick, pos]) if onboard else [(0.0, 0.0)]
+            if legs is None or so_far is None:
+                continue
+            user = fx.user(session)
+            trip_id = fx.trip(session, user, pick, drop, now - timedelta(minutes=25 if onboard else 2),
+                              allowed=["CAR_URBAN_POOL"], same_gender=rng.random() < 0.2)
+            riders.append({"user": user, "trip": trip_id, "pickup": pick, "dropoff": drop, "onboard": onboard,
+                           "boarded": now - timedelta(minutes=8), "direct_m": legs[0][0], "direct_s": legs[0][1],
+                           "traveled_km": so_far[0][0] / 1000, "cap_vnd": 174000})
+            i = len(riders) - 1
+            if onboard:
+                ahead.insert(rng.randint(0, len(ahead)), (i, "DROPOFF"))
+            else:
+                j = rng.randint(0, len(ahead))
+                ahead.insert(j, (i, "PICKUP"))
+                ahead.insert(rng.randint(j + 1, len(ahead)), (i, "DROPOFF"))
+        if riders and riders[0]["onboard"]:
+            fx.plan(session, car, vehicle, riders, ahead)
+    session.commit()
+
+
+def capture_sql(engine):  # noqa: ANN001, ANN201
+    from sqlalchemy import event
+
+    captured: list[tuple[str, object]] = []
+
+    def before(conn, cursor, statement, parameters, context, executemany):  # noqa: ANN001, ANN202
+        captured.append((statement, parameters))
+
+    event.listen(engine, "before_cursor_execute", before)
+    return captured, lambda: event.remove(engine, "before_cursor_execute", before)
+
+
+def stop_point(session, ref: str, kind: str, trip_id: uuid.UUID) -> tuple[float, float]:  # noqa: ANN001
+    if ref == "new":
+        col = "pickup_geom" if kind == "PICKUP" else "dropoff_geom"
+        return tuple(session.execute(text(f"SELECT ST_X({col}), ST_Y({col}) FROM trip_requests WHERE id = :t"),
+                                     {"t": trip_id}).one())
+    return tuple(session.execute(text("SELECT ST_X(geom), ST_Y(geom) FROM ride_stops WHERE booking_id = :b AND kind = :k"),
+                                 {"b": ref, "k": kind}).one())
+
+
+def radius_check(session, osrm: Osrm, requests: list, now: datetime, name: str) -> str:  # noqa: ANN001
+    """OD-P2-05: are feasible drivers lost by the 5 km PostGIS radius? For every request, the IDLE
+    urban drivers within 12 km straight-line get their real ETA to P from ONE independent OSRM
+    table per profile; a driver beyond 5 km is a potential false negative when it reaches P before
+    the end of the pickup window AND (a) fewer than 15 drivers inside 5 km are in time, or (b) it is
+    faster than the slowest of the 15 nearest inside 5 km (the list the generator keeps)."""
+    import httpx
+
+    out = {"requests": 0, "requests_with_case_a": 0, "requests_with_case_b": 0, "drivers_beyond_5km_in_time": 0,
+           "by_profile": {}}
+    for trip_id in requests:
+        p = tuple(session.execute(text("SELECT ST_X(pickup_geom), ST_Y(pickup_geom) FROM trip_requests WHERE id = :t"),
+                                  {"t": trip_id}).one())
+        out["requests"] += 1
+        hit_a = hit_b = False
+        for profile, vt, window_s in (("motorbike", "BIKE", 15 * 60), ("car", "CAR4", 20 * 60)):
+            rows = session.execute(text(
+                "SELECT ST_X(dl.geom), ST_Y(dl.geom), ST_Distance(dl.geom::geography, "
+                "ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography) d FROM driver_locations dl "
+                "JOIN vehicles v ON v.id = dl.active_vehicle_id JOIN driver_profiles dp ON dp.user_id = dl.driver_id "
+                "WHERE dl.availability = 'IDLE' AND v.vehicle_type = :vt AND dp.accepts_urban AND ST_DWithin("
+                "dl.geom::geography, ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography, 12000) ORDER BY d"),
+                {"x": p[0], "y": p[1], "vt": vt}).all()
+            if not rows:
+                continue
+            pts = [(r[0], r[1]) for r in rows] + [p]
+            path = ";".join(f"{x:.6f},{y:.6f}" for x, y in pts)
+            body = httpx.get(f"{osrm.urls[profile]}/table/v1/driving/{path}",
+                             params={"sources": ";".join(map(str, range(len(rows)))), "destinations": str(len(rows)),
+                                     "annotations": "duration", "exclude": "ferry"},
+                             headers={"Connection": "close"}, timeout=30).json()
+            eta = [row[0] for row in body["durations"]]
+            inside = [(r[2], e) for r, e in zip(rows, eta, strict=True) if r[2] <= 5000]
+            kept = inside[:15]
+            in_time_inside = [e for _, e in kept if e is not None and e <= window_s]
+            beyond = [e for r, e in zip(rows, eta, strict=True) if r[2] > 5000 and e is not None and e <= window_s]
+            stat = out["by_profile"].setdefault(profile, {"beyond_5km_in_time": 0, "case_a": 0, "case_b": 0})
+            stat["beyond_5km_in_time"] += len(beyond)
+            out["drivers_beyond_5km_in_time"] += len(beyond)
+            if beyond and len(in_time_inside) < 15:
+                stat["case_a"] += 1
+                hit_a = True
+            slowest = max((e for _, e in kept if e is not None), default=None)
+            if beyond and slowest is not None and min(beyond) < slowest:
+                stat["case_b"] += 1
+                hit_b = True
+        out["requests_with_case_a"] += hit_a
+        out["requests_with_case_b"] += hit_b
+    return f"===== {name}: radius check =====" + chr(10) + json.dumps(out, indent=2)
+
+
+def bump(counter: dict, key: str, by: int = 1) -> None:
+    counter[key] = counter.get(key, 0) + by
+
+
+def main() -> None:  # noqa: C901, PLR0912, PLR0915
     ap = argparse.ArgumentParser()
     ap.add_argument("--requests", type=int, default=200)
     ap.add_argument("--seed", type=int, default=20261029)
-    ap.add_argument("--out", default=str(ROOT / "docs" / "implementation" / "evidence" / "p2_benchmark.json"))
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--run-id", default="")
     ap.add_argument("--in-network", action="store_true", help="run inside the compose network (required for latency)")
-    ap.add_argument("--configs", default="", help="subset, e.g. 200x10,200x20")
+    ap.add_argument("--configs", default="", help="subset, e.g. 200x10,200x20,hc")
+    ap.add_argument("--mode", choices=["bench", "explain", "cprofile", "radius"], default="bench")
+    ap.add_argument("--verify", action="store_true", help="independent re-check of every candidate and rejection")
+    ap.add_argument("--analyze", action="store_true",
+                    help="ANALYZE after loading the synthetic world (planner statistics, as autovacuum keeps them in a "
+                         "running database); runs without it measure a freshly loaded, never-analysed database")
     args = ap.parse_args()
     env = dotenv()
     if args.in_network:
@@ -290,6 +275,7 @@ def main() -> None:
                    "JWT_SECRET": "bench-" + uuid.uuid4().hex, "SERVICE_AREA_VERSION": fx.VERSION}
     from app.core.settings import get_settings
     from app.modules.candidate.generator import generate
+    from app.modules.candidate.service import OFFERABLE_PRICING_CHECKS, persist
     from app.modules.routing.osrm import OsrmRoutingProvider
     from app.modules.routing.provider import Profile, RoutingPolicy
     from app.modules.trip.service import trip_snapshots
@@ -298,84 +284,183 @@ def main() -> None:
     engine = create_engine(url)
     session = sessionmaker(bind=engine, expire_on_commit=False)()
     fx.setup_reference_data(session)
-    osrm = OsrmLegs(urls)
-    report = {"label": "SYNTHETIC benchmark data on a throwaway database - local machine only",
+    osrm = Osrm(urls)
+    policy = RoutingPolicy(("ferry",), settings.routing_version)
+    report = {"run_id": args.run_id, "mode": args.mode, "verify": args.verify, "analyze": args.analyze,
+              "label": "SYNTHETIC benchmark data on a throwaway database - local machine only",
               "network": "compose network (backend container)" if args.in_network else "Windows host via port proxy",
-              "host": {"platform": platform.platform(), "processor": platform.processor(), "python": platform.python_version(),
-                       "cpu_count": os.cpu_count()},
+              "started_utc": datetime.now(UTC).isoformat(),
+              "host": {"platform": platform.platform(), "python": platform.python_version(), "cpu_count": os.cpu_count()},
               "parameters": {"R_urban_m": 5000, "N_single": 15, "N_pool": 20, "k_max_stops": 8, "requests": args.requests,
                              "seed": args.seed, "tolerance_per_leg": {"s": TOL_S, "m": TOL_M}},
               "target": "R9 Section 77: PostGIS + 1 OSRM table p95 <= 300 ms; Section 79 P2: generation < 300 ms",
               "configs": []}
+    wanted = [c for c in args.configs.split(",") if c]
+    workloads = [("std", d, p) for d, p in CONFIGS if not wanted or f"{d}x{p}" in wanted]
+    if not wanted or "hc" in wanted:
+        workloads.append(HC_CONFIG)
+    texts: list[str] = []
     try:
-        wanted = {tuple(map(int, c.split("x"))) for c in args.configs.split(",") if c}
-        for n_drivers, n_plans in [c for c in CONFIGS if not wanted or c in wanted]:
-            rng = random.Random(f"{args.seed}-{n_drivers}-{n_plans}")
+        for kind, n_drivers, n_plans in workloads:
+            rng = random.Random(f"{args.seed}-{n_drivers}-{n_plans}" + ("-hc" if kind == "hc" else ""))
             now = datetime.now(UTC).replace(microsecond=0)
-            make_world(session, rng, n_drivers, n_plans, now, osrm)
-            stages: dict[str, list[float]] = {}
-            stage_total: list[float] = []
-            spatial_osrm: list[float] = []
-            osrm_requests: list[int] = []
-            feasible = violations = edges = 0
-            by_code: dict[str, int] = {}
-            edge_codes: dict[str, int] = {}
-            rejected: dict[str, int] = {}
-            samples: list[dict] = []
+            (make_world_hc if kind == "hc" else make_world)(session, rng, n_drivers, n_plans, now, osrm)
+            if args.analyze:
+                session.execute(text("ANALYZE"))
+                session.commit()
             provider = OsrmRoutingProvider({Profile.CAR: urls["car"], Profile.MOTORBIKE: urls["motorbike"]},
-                                           settings.routing_timeout_s, RoutingPolicy(("ferry",), settings.routing_version),
-                                           settings.osrm_max_table_size)
+                                           settings.routing_timeout_s, policy, settings.osrm_max_table_size)
+            requests = []
             for _ in range(args.requests):
                 p = disk(rng, CENTER, 5)
                 q = disk(rng, p, rng.uniform(2, 10))
-                trip_id = fx.trip(session, fx.user(session), p, q, now)
-                session.commit()
+                if kind == "hc":
+                    sg = rng.random() < 0.2
+                    budget = rng.choice([None, None, None, 90000, 150000])
+                    requests.append(fx.trip(session, fx.user(session), p, q, now, same_gender=sg, budget_max=budget))
+                else:
+                    requests.append(fx.trip(session, fx.user(session), p, q, now))
+            session.commit()
+            name = f"{n_drivers}x{n_plans}" + ("-hc" if kind == "hc" else "")
+            if args.mode == "explain":
+                captured, stop = capture_sql(engine)
+                for trip_id in requests[:3]:
+                    generate(session, settings, trip_snapshots(session, [trip_id])[trip_id], provider, now)
+                stop()
+                texts.append(f"===== {name}: {len(captured) / 3:.1f} SQL statements per generation run "
+                             "(incl. the trip snapshot read before generate) =====")
+                seen = set()
+                for stmt, params in captured:
+                    if stmt in seen:
+                        continue
+                    seen.add(stmt)
+                    with engine.connect() as conn:
+                        rows = conn.exec_driver_sql("EXPLAIN (ANALYZE, BUFFERS) " + stmt, params).all()
+                    texts.append("-- " + " ".join(stmt.split())[:500])
+                    texts += [r[0] for r in rows]
+                    texts.append("")
+                continue
+            if args.mode == "radius":
+                texts.append(radius_check(session, osrm, requests, now, name))
+                continue
+            if args.mode == "cprofile":
+                import cProfile
+                import io
+                import pstats
+
+                prof = cProfile.Profile()
+                for trip_id in requests:
+                    snap = trip_snapshots(session, [trip_id])[trip_id]
+                    prof.enable()
+                    generate(session, settings, snap, provider, now)
+                    prof.disable()
+                for key in ("cumulative", "tottime"):
+                    buf = io.StringIO()
+                    pstats.Stats(prof, stream=buf).sort_stats(key).print_stats(40)
+                    texts.append(f"===== {name}: {len(requests)} runs, sorted by {key} =====\n{buf.getvalue()}")
+                continue
+
+            stages: dict[str, list[float]] = {}
+            totals: list[float] = []
+            with_persist: list[float] = []
+            osrm_requests: list[int] = []
+            errors: dict[str, int] = {}
+            rejected: dict[str, int] = {}
+            ver: dict = {"candidates_checked": 0, "with_violation": 0, "violations_by_code": {}, "borderline_by_code": {},
+                         "pending_p3": 0, "pending_p3_offerable": 0, "single_rejections": {}, "plan_checks": {},
+                         "sf_p2_15_default_routing": {"pool_candidates": 0, "would_violate": 0, "by_code": {}},
+                         "samples": []}
+            ratios: list[float] = []
+            for trip_id in requests:
                 snap = trip_snapshots(session, [trip_id])[trip_id]
                 started = time.perf_counter()
-                result = generate(session, settings, snap, provider, now)
-                stage_total.append((time.perf_counter() - started) * 1000)
-                for k, v in result.timings_ms.items():
+                try:
+                    result = generate(session, settings, snap, provider, now)
+                except Exception as exc:  # noqa: BLE001 - counted and reported, never hidden
+                    bump(errors, type(exc).__name__)
+                    session.rollback()
+                    continue
+                totals.append((time.perf_counter() - started) * 1000)
+                t_persist = time.perf_counter()
+                persist(session, trip_id, policy, fx.VERSION, result)
+                persist_ms = (time.perf_counter() - t_persist) * 1000
+                with_persist.append(totals[-1] + persist_ms)
+                timings = dict(result.timings_ms) | {"persist": persist_ms}
+                timings["postgis"] = timings.get("postgis_drivers", 0) + timings.get("plan_lookup", 0)
+                timings["postgis_plus_osrm"] = timings["postgis"] + timings.get("osrm_wall", 0)
+                for k, v in timings.items():
                     stages.setdefault(k, []).append(v)
-                spatial_osrm.append(result.timings_ms.get("postgis", 0) + result.timings_ms.get("osrm_wall", 0))
                 osrm_requests.append(result.osrm_requests)
                 for codes in result.rejections.values():
                     for code, k in codes.items():
-                        rejected[code] = rejected.get(code, 0) + k
-                trip = {"p": p, "q": q, "preferred_departure": now, "passenger_count": 1, "budget_max": None,
-                        "allowed_service_codes": snap.allowed_service_codes}
+                        bump(rejected, code, k)
+                if not args.verify:
+                    continue
+                produced = {(c.service_code, c.driver_id) for c in result.candidates if c.plan_id is None}
                 for c in result.candidates:
-                    feasible += 1
-                    bad, edge = verify(c, session, osrm, trip, now)
-                    violations += bool(bad)
-                    edges += bool(edge)
+                    ver["candidates_checked"] += 1
+                    if c.pricing_check == "PENDING_P3":
+                        ver["pending_p3"] += 1
+                        ver["pending_p3_offerable"] += int(c.pricing_check in OFFERABLE_PRICING_CHECKS)
+                    bad, edge = verify_candidate(c, session, osrm, trip_id, now)
+                    ver["with_violation"] += int(bool(bad))
                     for code in bad:
-                        by_code[code] = by_code.get(code, 0) + 1
-                    if bad and len(samples) < 10:
-                        samples.append({"codes": sorted(bad), "service": c.service_code, "source": c.source_type,
-                                        "insertion": c.insertion, "audit": c.audit})
+                        bump(ver["violations_by_code"], code)
                     for code in edge:
-                        edge_codes[code] = edge_codes.get(code, 0) + 1
-            entry = {"drivers": n_drivers, "open_plans": n_plans,
-                     "generation_total_ms": summary(stage_total),
-                     "postgis_plus_osrm_ms": summary(spatial_osrm),
-                     "stages_ms": {k: summary(v) for k, v in stages.items()},
-                     "osrm_requests_per_run": sorted(set(osrm_requests)),
-                     "candidates_feasible": feasible, "candidates_with_violation": violations,
-                     "violations_by_code": by_code, "borderline_within_tolerance": edges, "borderline_by_code": edge_codes,
-                     "rejections_by_code": rejected, "violation_samples": samples,
-                     "meets_300ms_p95_total": (pct(stage_total, 95) or 0) < 300}
+                        bump(ver["borderline_by_code"], code)
+                    if bad and len(ver["samples"]) < 10:
+                        ver["samples"].append({"codes": sorted(bad), "service": c.service_code, "source": c.source_type,
+                                               "insertion": c.insertion, "audit": c.audit})
+                    if c.service_code == "CAR_URBAN_POOL":
+                        sf = ver["sf_p2_15_default_routing"]
+                        sf["pool_candidates"] += 1
+                        bad_default, _ = verify_candidate(c, session, osrm, trip_id, now, continue_straight=None)
+                        extra = bad_default - bad
+                        sf["would_violate"] += int(bool(extra))
+                        for code in extra:
+                            bump(sf["by_code"], code)
+                        start = tuple(session.execute(text("SELECT ST_X(geom), ST_Y(geom) FROM driver_locations "
+                                                           "WHERE driver_id = :d"), {"d": c.driver_id}).one())
+                        pts = [start] + [stop_point(session, r, k, trip_id) for r, k in c.insertion["chain"]]
+                        table_like, default = osrm.legs("car", pts), osrm.legs("car", pts, None)
+                        if table_like and default:
+                            ratios.append(sum(x[0] for x in default) / max(1.0, sum(x[0] for x in table_like)))
+                for service, driver_id in result.evaluated_drivers:
+                    if (service, driver_id) not in produced:
+                        bump(ver["single_rejections"], check_single_reject(session, osrm, service, driver_id, trip_id, now))
+                deltas = {c.plan_id: c.insertion["delta_cost_vnd"] for c in result.candidates if c.plan_id}
+                for plan_id in result.evaluated_plans:
+                    bump(ver["plan_checks"], check_plan(session, osrm, plan_id, trip_id, now, deltas.get(plan_id)))
+            if args.verify:
+                sf = ver["sf_p2_15_default_routing"]
+                sf["chain_distance_ratio_default_over_table"] = summary(ratios)
+                sf["chains_longer_than_1pct"] = sum(r > 1.01 for r in ratios)
+            entry = {"config": name, "drivers": n_drivers, "open_plans": n_plans, "requests": len(requests),
+                     "errors": errors, "generation_total_ms": summary(totals),
+                     "generation_plus_persist_ms": summary(with_persist),
+                     "stages_ms": {k: summary(v) for k, v in sorted(stages.items())},
+                     "osrm_requests_per_run": sorted(set(osrm_requests)), "rejections_by_code": rejected,
+                     "meets_300ms_p95_total": (pct(totals, 95) or 0) < 300}
+            if args.verify:
+                entry["verification"] = ver
             report["configs"].append(entry)
-            print(json.dumps({k: entry[k] for k in ("drivers", "open_plans", "candidates_feasible",
-                                                    "candidates_with_violation", "borderline_within_tolerance")}),
-                  "| total p95", entry["generation_total_ms"]["p95"], "| PostGIS+OSRM p95", entry["postgis_plus_osrm_ms"]["p95"],
-                  "| osrm_car p95", entry["stages_ms"].get("osrm_car", {}).get("p95"),
-                  "| constraints p95", entry["stages_ms"]["constraints"]["p95"], flush=True)
+            s = entry["stages_ms"]
+            print(name, "| total p50/p95/p99", entry["generation_total_ms"]["p50"], entry["generation_total_ms"]["p95"],
+                  entry["generation_total_ms"]["p99"], "| postgis p95", s["postgis"]["p95"], "| osrm_car p95",
+                  s.get("osrm_car", {}).get("p95"), "| step3 p95", s["constraints"]["p95"], "| errors", errors,
+                  ("| viol " + str(ver["violations_by_code"]) + " plans " + str(ver["plan_checks"])
+                   + " singles " + str(ver["single_rejections"])) if args.verify else "", flush=True)
     finally:
         session.close()
         engine.dispose()
         drop(base)
-    Path(args.out).write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8", newline="\n")
-    print("written", args.out)
+    report["finished_utc"] = datetime.now(UTC).isoformat()
+    out = Path(args.out)
+    if args.mode == "bench":
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2, default=str), encoding="utf-8", newline="\n")
+    else:
+        out.write_text("\n".join(texts) + "\n", encoding="utf-8", newline="\n")
+    print("written", out)
 
 
 if __name__ == "__main__":

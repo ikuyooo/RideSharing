@@ -25,6 +25,7 @@ A new single vehicle (Section 35.1) and a new pool plan from an idle driver (Sec
 35.2 branch B) are the same computation on an empty plan: chain [P, Q].
 """
 
+import time
 import uuid
 from collections import Counter
 from collections.abc import Callable, Sequence
@@ -158,7 +159,7 @@ def _loads(chain: Sequence[Stop], riders: dict[str, RiderSpec]) -> tuple[int, ..
 
 def evaluate_chain(state: PlanState, chain: Sequence[Stop], riders: dict[str, RiderSpec], sim: Simulation,
                    service_code: str, source_type: str, booking_time: tuple[bool, str], params: Params,
-                   base: Simulation | None) -> Evaluation:
+                   base: Simulation | None, loads: tuple[int, ...] | None = None) -> Evaluation:
     now = state.now
     index = {(s.ref, s.kind): i for i, s in enumerate(chain)}
     outcomes = []
@@ -188,7 +189,7 @@ def evaluate_chain(state: PlanState, chain: Sequence[Stop], riders: dict[str, Ri
     return Evaluation(
         service_code=service_code, source_type=source_type, driver=state.driver,
         location_stale_s=params.location_stale_s, unroutable_legs=sim.unroutable,
-        segment_loads=_loads(chain, riders), riders=tuple(outcomes),
+        segment_loads=loads if loads is not None else _loads(chain, riders), riders=tuple(outcomes),
         booking_time_ok=booking_time[0], booking_time_detail=booking_time[1],
         added_distance_m=added_m, added_duration_s=added_s,
         added_pickups=max(0, len(riders) - 1), total_stops=state.completed_stops + len(chain),
@@ -197,7 +198,9 @@ def evaluate_chain(state: PlanState, chain: Sequence[Stop], riders: dict[str, Ri
 
 def insert(state: PlanState, new: RiderSpec, p_node: int, q_node: int, D: Sequence[Sequence[Cell]],
            T: Sequence[Sequence[Cell]], service_code: str, source_type: str, booking_time: tuple[bool, str],
-           params: Params, pricing_check: PricingCheck | None = None) -> InsertionReport:
+           params: Params, pricing_check: PricingCheck | None = None,
+           stats: dict[str, float] | None = None) -> InsertionReport:
+    """`stats` (optional instrumentation) accumulates check_all seconds and options evaluated."""
     riders = {r.ref: r for r in state.riders} | {new.ref: new}
     now = state.now
     windows = {ref: (r.pickup_window[0] - now).total_seconds() for ref, r in riders.items()
@@ -226,8 +229,15 @@ def insert(state: PlanState, new: RiderSpec, p_node: int, q_node: int, D: Sequen
                 report.rejections["HC04"] += 1
                 continue
             sim = simulate(chain, state.current_node, D, T, windows, params.dwell_s)
-            ev = evaluate_chain(state, chain, riders, sim, service_code, source_type, booking_time, params, base)
-            violations = check_all(ev)
+            ev = evaluate_chain(state, chain, riders, sim, service_code, source_type, booking_time, params, base,
+                                loads)
+            if stats is not None:
+                t_check = time.perf_counter()
+                violations = check_all(ev)
+                stats["check_all_s"] = stats.get("check_all_s", 0.0) + time.perf_counter() - t_check
+                stats["options_checked"] = stats.get("options_checked", 0) + 1
+            else:
+                violations = check_all(ev)
             if violations:
                 for code in {v.code for v in violations}:
                     report.rejections[code] += 1

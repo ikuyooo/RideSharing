@@ -177,26 +177,56 @@ _CANDIDATE_COLUMNS = """
 """
 
 
-def nearby_idle_drivers(session: Session, lon: float, lat: float, radius_m: float, vehicle_type: str, limit: int,
-                        now: datetime, fresh_s: float, pool_only: bool = False) -> list[DriverCandidate]:
-    """Section 35.1 steps 1-3: online IDLE drivers of the vehicle type within radius_m
-    (PostGIS ST_DWithin on geography), nearest first, at most `limit`. The `&&`
-    bounding box lets the GIST index on the geometry column prune first."""
+_RANKED_COLUMNS = ("driver_id, lon, lat, distance_m, availability, location_age_s, kyc_status, accepts_urban, "
+                   "pool_enabled, accepts_intercity, max_additional_pickups, max_driver_detour_km, "
+                   "max_driver_detour_min, vehicle_id, vehicle_type, capacity, vehicle_active")
+
+
+def nearby_idle_drivers(session: Session, lon: float, lat: float, radius_m: float, limit: int, now: datetime,
+                        fresh_s: float) -> dict[str, list[DriverCandidate]]:
+    """Section 35.1 steps 1-3 for the three urban lists at once - ONE spatial scan instead of one
+    query per list: online IDLE drivers with an active vehicle and accepts_urban within radius_m
+    (PostGIS ST_DWithin on geography; the `&&` bounding box lets the GIST index prune first),
+    nearest first. Returns the nearest `limit` of each list:
+      BIKE       vehicle BIKE
+      CAR4       vehicle CAR4
+      CAR4_POOL  vehicle CAR4, pool_enabled and KYC VERIFIED (Section 35.2 branch B)
+    Same filters and the same distance order as three separate `... ORDER BY distance LIMIT n`
+    queries, so the lists are identical."""
     deg = radius_m / (111_320.0 * max(0.1, math.cos(math.radians(lat))))
-    pool = "AND dp.pool_enabled AND dp.kyc_status = 'VERIFIED'" if pool_only else ""
+    # The ranking happens in SQL: only the nearest `limit` rows of each list leave the database
+    # (row_number per vehicle type and per pool eligibility), not every driver in the radius.
     rows = session.execute(text(f"""
-        SELECT {_CANDIDATE_COLUMNS}
-        FROM driver_locations dl
-        JOIN driver_profiles dp ON dp.user_id = dl.driver_id
-        JOIN vehicles v ON v.id = dl.active_vehicle_id
-        WHERE dl.availability = 'IDLE' AND dl.updated_at >= :now - make_interval(secs => :fresh_s)
-          AND v.vehicle_type = :vt AND v.is_active AND dp.accepts_urban {pool}
-          AND dl.geom && ST_Expand(ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), :deg)
-          AND ST_DWithin(dl.geom::geography, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography, :r)
-        ORDER BY distance_m
-        LIMIT :n"""), {"lon": lon, "lat": lat, "now": now, "fresh_s": fresh_s, "vt": vehicle_type, "deg": deg,
-                       "r": radius_m, "n": limit}).mappings().all()
-    return [DriverCandidate(**dict(r)) for r in rows]
+        WITH near AS (
+            SELECT {_CANDIDATE_COLUMNS}
+            FROM driver_locations dl
+            JOIN driver_profiles dp ON dp.user_id = dl.driver_id
+            JOIN vehicles v ON v.id = dl.active_vehicle_id
+            WHERE dl.availability = 'IDLE' AND dl.updated_at >= :now - make_interval(secs => :fresh_s)
+              AND v.is_active AND dp.accepts_urban
+              AND dl.geom && ST_Expand(ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), :deg)
+              AND ST_DWithin(dl.geom::geography, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography, :r)
+        ), ranked AS (
+            SELECT near.*,
+                   (vehicle_type = 'CAR4' AND pool_enabled AND kyc_status = 'VERIFIED') AS pool_ok,
+                   row_number() OVER (PARTITION BY vehicle_type ORDER BY distance_m) AS rn_type,
+                   row_number() OVER (PARTITION BY (vehicle_type = 'CAR4' AND pool_enabled AND kyc_status = 'VERIFIED')
+                                      ORDER BY distance_m) AS rn_pool
+            FROM near
+        )
+        SELECT {_RANKED_COLUMNS} FROM ranked
+        WHERE rn_type <= :n OR (pool_ok AND rn_pool <= :n)
+        ORDER BY distance_m"""), {"lon": lon, "lat": lat, "now": now, "fresh_s": fresh_s, "deg": deg,
+                                  "r": radius_m, "n": limit}).mappings().all()
+    lists: dict[str, list[DriverCandidate]] = {"BIKE": [], "CAR4": [], "CAR4_POOL": []}
+    for r in rows:
+        d = DriverCandidate(**dict(r))
+        kinds = [d.vehicle_type] + (["CAR4_POOL"] if d.vehicle_type == "CAR4" and d.pool_enabled
+                                    and d.kyc_status == "VERIFIED" else [])
+        for kind in kinds:
+            if kind in lists and len(lists[kind]) < limit:
+                lists[kind].append(d)
+    return lists
 
 
 def driver_snapshots(session: Session, driver_ids: list[uuid.UUID], lon: float, lat: float,

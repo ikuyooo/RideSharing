@@ -1,0 +1,100 @@
+===== 200x20: 100 runs, sorted by cumulative =====
+         3017734 function calls (2995607 primitive calls) in 14.882 seconds
+
+   Ordered by: cumulative time
+   List reduced from 1219 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      100    0.293    0.003   15.798    0.158 /repo/backend/app/modules/candidate/generator.py:157(generate)
+      599    0.039    0.000    8.733    0.015 /usr/local/lib/python3.12/threading.py:323(wait)
+      200    0.022    0.000    8.555    0.043 /usr/local/lib/python3.12/concurrent/futures/_base.py:428(result)
+4207/2207    0.139    0.000    6.417    0.003 {method 'acquire' of '_thread.lock' objects}
+      200    0.002    0.000    6.351    0.032 /usr/local/lib/python3.12/threading.py:1117(join)
+      200    0.002    0.000    6.320    0.032 /usr/local/lib/python3.12/threading.py:1155(_wait_for_tstate_lock)
+      100    0.002    0.000    6.025    0.060 /usr/local/lib/python3.12/concurrent/futures/_base.py:646(__exit__)
+      100    0.003    0.000    6.021    0.060 /usr/local/lib/python3.12/concurrent/futures/thread.py:220(shutdown)
+  200/100    0.016    0.000    5.909    0.059 /usr/local/lib/python3.12/threading.py:1018(_bootstrap)
+  200/100    0.003    0.000    5.894    0.059 /usr/local/lib/python3.12/threading.py:1058(_bootstrap_inner)
+  200/100    0.012    0.000    5.788    0.058 /usr/local/lib/python3.12/concurrent/futures/thread.py:54(run)
+      100    0.010    0.000    5.753    0.058 /repo/backend/app/modules/candidate/generator.py:241(car_table)
+  200/100    0.014    0.000    5.711    0.057 /repo/backend/app/modules/routing/osrm.py:95(matrix)
+  200/100    0.004    0.000    5.584    0.056 /repo/backend/app/modules/routing/osrm.py:80(_get)
+  200/100    0.010    0.000    5.572    0.056 /repo/backend/app/modules/routing/osrm.py:32(osrm_get)
+  200/100    0.005    0.000    5.542    0.055 /usr/local/lib/python3.12/threading.py:1001(run)
+  200/100    0.003    0.000    5.525    0.055 /usr/local/lib/python3.12/concurrent/futures/thread.py:70(_worker)
+  200/100    0.049    0.000    5.523    0.055 {method 'get' of '_queue.SimpleQueue' objects}
+  200/100    0.010    0.000    5.177    0.052 /usr/local/lib/python3.12/site-packages/httpx/_client.py:1036(get)
+  200/100    0.003    0.000    5.140    0.051 /usr/local/lib/python3.12/site-packages/httpx/_client.py:771(request)
+  200/101    0.003    0.000    5.125    0.051 /usr/local/lib/python3.12/site-packages/httpx/_client.py:879(send)
+  200/101    0.003    0.000    5.016    0.050 /usr/local/lib/python3.12/site-packages/httpx/_client.py:930(_send_handling_auth)
+  200/101    0.010    0.000    5.010    0.050 /usr/local/lib/python3.12/site-packages/httpx/_client.py:964(_send_handling_redirects)
+  200/101    0.013    0.000    4.986    0.049 /usr/local/lib/python3.12/site-packages/httpx/_client.py:1001(_send_single_request)
+  200/101    0.010    0.000    4.863    0.048 /usr/local/lib/python3.12/site-packages/httpx/_transports/default.py:230(handle_request)
+  200/101    0.007    0.000    4.843    0.048 /usr/local/lib/python3.12/site-packages/httpcore/_sync/connection_pool.py:199(handle_request)
+  200/101    0.010    0.000    4.809    0.048 /usr/local/lib/python3.12/site-packages/httpcore/_sync/connection.py:69(handle_request)
+  200/103    0.012    0.000    4.674    0.045 /usr/local/lib/python3.12/site-packages/httpcore/_sync/http11.py:65(handle_request)
+  200/103    0.005    0.000    4.648    0.045 /usr/local/lib/python3.12/site-packages/httpcore/_sync/http11.py:170(_receive_response_headers)
+      902    0.040    0.000    3.509    0.004 /usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py:2138(_execute_internal)
+      902    0.022    0.000    3.164    0.004 /usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1371(execute)
+      902    0.006    0.000    3.142    0.003 /usr/local/lib/python3.12/site-packages/sqlalchemy/sql/elements.py:514(_execute_on_connection)
+      902    0.040    0.000    3.136    0.003 /usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1587(_execute_clauseelement)
+      800    0.007    0.000    3.127    0.004 /usr/local/lib/python3.12/site-packages/sqlalchemy/orm/session.py:2305(execute)
+      902    0.045    0.000    2.744    0.003 /usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1787(_execute_context)
+      100    0.005    0.000    2.667    0.027 /repo/backend/app/modules/candidate/generator.py:228(bike_table)
+      702    0.011    0.000    2.386    0.003 /usr/local/lib/python3.12/site-packages/sqlalchemy/orm/context.py:296(orm_execute_statement)
+      902    0.034    0.000    2.344    0.003 /usr/local/lib/python3.12/site-packages/sqlalchemy/engine/base.py:1846(_exec_single_context)
+     5864    0.367    0.000    2.255    0.000 /repo/backend/app/modules/pooling/insertion.py:199(insert)
+  600/310    0.016    0.000    2.021    0.007 /usr/local/lib/python3.12/site-packages/httpcore/_sync/http11.py:209(_receive_event)
+
+
+
+===== 200x20: 100 runs, sorted by tottime =====
+         3017734 function calls (2995607 primitive calls) in 14.882 seconds
+
+   Ordered by: internal time
+   List reduced from 1219 to 40 due to restriction <40>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+  398/204    2.845    0.007    1.912    0.009 {method 'recv' of '_socket.socket' objects}
+      902    0.980    0.001    1.910    0.002 /usr/local/lib/python3.12/site-packages/psycopg/connection.py:406(wait)
+     7074    0.501    0.000    0.817    0.000 /repo/backend/app/modules/pooling/insertion.py:160(evaluate_chain)
+     5864    0.367    0.000    2.255    0.000 /repo/backend/app/modules/pooling/insertion.py:199(insert)
+     5864    0.351    0.000    0.829    0.000 /repo/backend/app/modules/candidate/generator.py:310(record)
+      100    0.293    0.003   15.798    0.158 /repo/backend/app/modules/candidate/generator.py:157(generate)
+      100    0.269    0.003    1.232    0.012 /repo/backend/app/modules/driver/service.py:180(nearby_idle_drivers)
+163031/161002    0.224    0.000    0.348    0.000 /usr/local/lib/python3.12/site-packages/httpx/_urlparse.py:273(<genexpr>)
+    25755    0.185    0.000    0.185    0.000 {method 'isoformat' of 'datetime.datetime' objects}
+     2056    0.174    0.000    0.616    0.000 /usr/local/lib/python3.12/site-packages/psycopg/_cursor_base.py:264(_maybe_prepare_gen)
+      902    0.164    0.000    0.213    0.000 /usr/local/lib/python3.12/site-packages/psycopg/cursor.py:212(fetchall)
+     7074    0.154    0.000    0.510    0.000 /repo/backend/app/modules/candidate/constraints.py:220(check_all)
+   284136    0.148    0.000    0.148    0.000 {method 'isascii' of 'str' objects}
+160972/156972    0.145    0.000    0.225    0.000 {built-in method builtins.isinstance}
+ 6312/902    0.145    0.000    0.239    0.000 /usr/local/lib/python3.12/site-packages/sqlalchemy/sql/cache_key.py:221(_gen_cache_key)
+      544    0.144    0.000    0.144    0.000 /usr/local/lib/python3.12/site-packages/psycopg/_cursor_base.py:545(_send_query_prepared)
+4207/2207    0.139    0.000    6.417    0.003 {method 'acquire' of '_thread.lock' objects}
+      358    0.136    0.000    0.136    0.000 /usr/local/lib/python3.12/site-packages/psycopg/_cursor_base.py:404(_execute_send)
+9279/9265    0.133    0.000    0.727    0.000 {built-in method builtins.any}
+   121401    0.131    0.000    0.231    0.000 /usr/local/lib/python3.12/site-packages/httpx/_urlparse.py:223(<genexpr>)
+   283232    0.122    0.000    0.122    0.000 {method 'isprintable' of 'str' objects}
+     6657    0.115    0.000    0.354    0.000 /usr/local/lib/python3.12/site-packages/sqlalchemy/sql/coercions.py:313(expect)
+  200/165    0.111    0.001    0.113    0.001 {built-in method _socket.getaddrinfo}
+      100    0.105    0.001    1.864    0.019 /repo/backend/app/modules/pooling/repository.py:43(plan_records)
+    34833    0.102    0.000    0.102    0.000 {built-in method builtins.round}
+    60163    0.098    0.000    0.110    0.000 {method 'get' of 'dict' objects}
+   129213    0.096    0.000    0.096    0.000 {method 'append' of 'list' objects}
+    11302    0.095    0.000    0.196    0.000 /usr/local/lib/python3.12/site-packages/psycopg/_column.py:19(__init__)
+     7074    0.093    0.000    0.095    0.000 /repo/backend/app/modules/candidate/constraints.py:121(hc03_pickup_window)
+     7679    0.090    0.000    0.167    0.000 /repo/backend/app/modules/pooling/insertion.py:129(simulate)
+     7074    0.087    0.000    0.149    0.000 /repo/backend/app/modules/pooling/insertion.py:151(_loads)
+     7074    0.079    0.000    0.090    0.000 /repo/backend/app/modules/candidate/constraints.py:96(hc01_vehicle_and_driver)
+      902    0.075    0.000    0.103    0.000 /usr/local/lib/python3.12/site-packages/psycopg/_cursor_base.py:488(_select_current_result)
+      702    0.073    0.000    0.162    0.000 /usr/local/lib/python3.12/site-packages/sqlalchemy/orm/loading.py:78(instances)
+  200/193    0.072    0.000    0.068    0.000 {method 'send' of '_socket.socket' objects}
+     1412    0.070    0.000    0.070    0.000 /usr/local/lib/python3.12/json/decoder.py:344(raw_decode)
+     5864    0.065    0.000    0.159    0.000 /repo/backend/app/modules/candidate/generator.py:90(_state)
+     3924    0.064    0.000    0.232    0.000 /usr/local/lib/python3.12/site-packages/sqlalchemy/orm/loading.py:1067(_instance)
+      100    0.061    0.001    0.580    0.006 /repo/backend/app/modules/driver/service.py:214(driver_snapshots)
+    12128    0.059    0.000    0.138    0.000 /usr/local/lib/python3.12/collections/__init__.py:669(update)
+
+
+

@@ -1,0 +1,17 @@
+ Container ridesharing-backend-run-717975f30eb0 Creating 
+ Container ridesharing-backend-run-717975f30eb0 Created 
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, p1 core schema
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, p1 survey s1 draft storage
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, p1 service area excluded layer
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, p1 survey s1 duration
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, p2 routing candidate pooling
+50x0 | total p50/p95/p99 27.8 63.28 99.25 | postgis p95 14.0 | osrm_car p95 24.3 | step3 p95 11.96 | errors {} | viol {} plans {} singles {'correct': 388}
+200x0 | total p50/p95/p99 39.05 74.5 120.33 | postgis p95 16.67 | osrm_car p95 31.76 | step3 p95 23.07 | errors {} | viol {} plans {} singles {'correct': 440}
+1000x0 | total p50/p95/p99 47.57 136.39 223.11 | postgis p95 32.72 | osrm_car p95 44.46 | step3 p95 36.96 | errors {} | viol {} plans {} singles {'correct': 218}
+200x10 | total p50/p95/p99 62.67 145.07 210.67 | postgis p95 49.45 | osrm_car p95 46.77 | step3 p95 30.91 | errors {} | viol {} plans {'optimal': 67, 'correct': 567} singles {'correct': 493}
+200x20 | total p50/p95/p99 69.13 148.86 225.28 | postgis p95 44.32 | osrm_car p95 55.69 | step3 p95 28.35 | errors {} | viol {} plans {'correct': 997, 'optimal': 263} singles {'correct': 491}
+1000x20 | total p50/p95/p99 71.53 166.99 227.51 | postgis p95 63.49 | osrm_car p95 51.72 | step3 p95 27.29 | errors {} | viol {} plans {'correct': 1068, 'optimal': 245} singles {'correct': 333}
+200x20-hc | total p50/p95/p99 87.73 188.47 323.86 | postgis p95 45.24 | osrm_car p95 78.57 | step3 p95 44.89 | errors {} | viol {} plans {'correct': 1281, 'optimal': 247} singles {'correct': 1272}
+written /repo/docs/implementation/evidence/p2_runs/20261030T155758Z-final-verify/result.json

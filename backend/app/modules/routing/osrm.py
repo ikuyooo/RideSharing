@@ -7,7 +7,9 @@ distinct coordinates than the server's --max-table-size is refused here with
 MatrixTooLarge - points are never dropped silently.
 
 A fresh connection per request: osrm-routed v5.27.1 answers small keep-alive
-requests ~40 ms late (Phase 0 finding).
+requests ~40 ms late (Phase 0 finding). The provider still reuses ONE httpx.Client with
+keep-alive disabled: a new Client per call rebuilt an SSL context every time (~10 ms per
+request in the P2 profile, evidence p2_runs/*osrm-client-microbench).
 """
 
 import time
@@ -27,16 +29,23 @@ from app.modules.routing.provider import (
 )
 
 
-def osrm_get(base_url: str, timeout_s: float, service: str, coords: list[Lonlat], params: dict[str, str]) -> dict:
+def osrm_get(base_url: str, timeout_s: float, service: str, coords: list[Lonlat], params: dict[str, str],
+             timing: dict[str, float] | None = None, client: httpx.Client | None = None) -> dict:
     path = ";".join(f"{lon:.6f},{lat:.6f}" for lon, lat in coords)
     try:
-        resp = httpx.get(
+        started = time.perf_counter()
+        resp = (client or httpx).get(
             f"{base_url.rstrip('/')}/{service}/v1/driving/{path}",
             params=params,
             headers={"Connection": "close"},
             timeout=timeout_s,
         )
+        received = time.perf_counter()
         body = resp.json()
+        if timing is not None:
+            timing["http_ms"] = (received - started) * 1000
+            timing["json_ms"] = (time.perf_counter() - received) * 1000
+            timing["response_bytes"] = len(resp.content)
     except httpx.TimeoutException as exc:
         raise RoutingTimeout(f"OSRM did not answer within {timeout_s} s") from exc
     except (httpx.HTTPError, ValueError) as exc:
@@ -56,6 +65,7 @@ class OsrmRoutingProvider:
         self._timeout_s = timeout_s
         self._policy = policy
         self._max_table_size = max_table_size
+        self._client = httpx.Client(limits=httpx.Limits(max_keepalive_connections=0))  # thread-safe
         self.requests = 0  # instrumentation: OSRM HTTP requests made by this instance
 
     @property
@@ -67,9 +77,11 @@ class OsrmRoutingProvider:
             params["exclude"] = ",".join(self._policy.exclude)
         return params
 
-    def _get(self, profile: Profile, service: str, coords: list[Lonlat], params: dict[str, str]) -> dict:
+    def _get(self, profile: Profile, service: str, coords: list[Lonlat], params: dict[str, str],
+             timing: dict[str, float] | None = None) -> dict:
         self.requests += 1
-        return osrm_get(self._urls[profile], self._timeout_s, service, coords, self._params(params))
+        return osrm_get(self._urls[profile], self._timeout_s, service, coords, self._params(params), timing,
+                        self._client)
 
     def route(self, profile: Profile, origin: Lonlat, destination: Lonlat,
               waypoints: tuple[Lonlat, ...] = ()) -> Route:
@@ -94,9 +106,11 @@ class OsrmRoutingProvider:
         dst = [index[p] for p in destinations]
         if src != list(range(len(coords))) or dst != list(range(len(coords))):
             params |= {"sources": ";".join(map(str, src)), "destinations": ";".join(map(str, dst))}
+        timing: dict[str, float] = {}
         started = time.perf_counter()
-        body = self._get(profile, "table", coords, params)
+        body = self._get(profile, "table", coords, params, timing)
         elapsed_ms = (time.perf_counter() - started) * 1000
+        converted = time.perf_counter()
 
         def cells(name: str) -> tuple[tuple[float | None, ...], ...]:
             rows = body.get(name)
@@ -104,8 +118,9 @@ class OsrmRoutingProvider:
                 raise RoutingUnavailable(f"OSRM table answer without a complete '{name}' matrix")
             return tuple(tuple(None if v is None else float(v) for v in row) for row in rows)
 
-        return Matrix(distance_m=cells("distances"), duration_s=cells("durations"),
+        distance, duration = cells("distances"), cells("durations")
+        return Matrix(distance_m=distance, duration_s=duration,
                       source_snap_m=tuple(float(w["distance"]) for w in body["sources"]),
                       destination_snap_m=tuple(float(w["distance"]) for w in body["destinations"]),
-                      stats={"osrm_ms": elapsed_ms, "coordinates": len(coords),
-                             "sources": len(src), "destinations": len(dst)})
+                      stats={"osrm_ms": elapsed_ms, "convert_ms": (time.perf_counter() - converted) * 1000,
+                             "coordinates": len(coords), "sources": len(src), "destinations": len(dst)} | timing)

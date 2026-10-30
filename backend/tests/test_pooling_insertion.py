@@ -241,3 +241,34 @@ def test_random_insertions_have_zero_violations_and_are_optimal(chunk: int) -> N
         # completed stops are never touched and S_curr stays first
         assert rep.best.evaluation.total_stops == state.completed_stops + len(rep.best.chain)
     assert feasible > 150  # the generator produces a meaningful share of feasible cases
+
+
+class _OnlyTo(list):
+    """A matrix row that refuses a destination outside the requested set."""
+
+    def __init__(self, row: list, allowed: set[int]) -> None:
+        super().__init__(row)
+        self.allowed = allowed
+
+    def __getitem__(self, j):  # type: ignore[no-untyped-def]
+        assert j in self.allowed, f"insertion read a cell towards node {j}, which is not a requested destination"
+        return super().__getitem__(j)
+
+
+@pytest.mark.parametrize("chunk", range(3))
+def test_insertion_reads_only_stop_destinations(chunk: int) -> None:
+    """Proof obligation of the rectangular car table (OSRM optimisation): for every option the
+    Section 36 insertion only reads D[u][v] / T[u][v] with v a stop ahead, P or Q - never the
+    vehicle position S_curr. So a table whose destinations are exactly those nodes gives the
+    same results as the full square table."""
+    for seed in range(chunk * 1000, (chunk + 1) * 1000):
+        rng = random.Random(seed)
+        state, new, p, q, D, T = _scenario(rng)
+        allowed = {s.node for s in state.remaining} | {p, q}
+        guard_d = [_OnlyTo(row, allowed) for row in D]
+        guard_t = [_OnlyTo(row, allowed) for row in T]
+        rep = insert(state, new, p, q, guard_d, guard_t, POOL, EXISTING_POOL_PLAN, (True, ""), PARAMS)
+        full = insert(state, new, p, q, D, T, POOL, EXISTING_POOL_PLAN, (True, ""), PARAMS)
+        assert (rep.best is None) == (full.best is None)
+        if rep.best is not None:
+            assert rep.best.chain == full.best.chain and rep.best.delta_cost_vnd == full.best.delta_cost_vnd

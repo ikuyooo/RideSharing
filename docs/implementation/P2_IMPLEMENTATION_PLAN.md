@@ -205,17 +205,30 @@ Routing không có API công khai. Benchmark chạy bằng CLI `scripts/p2_bench
 | P2 cần trước từ P4 | Không bắt buộc. Kế hoạch đang chạy trong test được dựng bằng fixture trực tiếp vào bảng. Khi P4 xong, chạy lại bộ test chèn với trạng thái do P4 tạo |
 | P2 → P6 / P8 | `candidate_runs` + `ride_candidates` (đặc trưng, ETA, giá, nhãn dịch vụ) là nguồn sự kiện cho xếp hạng và `P(match)` / `P(fulfill)`. Không có AI sản xuất trước khi có pipeline dữ liệu (P7) |
 
-## 10. Quyết định còn mở thực sự ảnh hưởng P2
+## 10. Quyết định OD-P2 (cập nhật theo "P2 PERFORMANCE HARDENING & OWNER DECISION", 2026-10-30)
 
-| Mã | Vấn đề | Đề xuất (áp dụng tạm cho local, ghi rõ, đổi được) |
+| Mã | Vấn đề | Cách hiện thực | Trạng thái |
+|---|---|---|---|
+| OD-P2-01 | "1 lệnh OSRM Table duy nhất" (§34, §79) với 2 profile | 1 lệnh **cho mỗi profile** mỗi lượt (tối đa 2, chạy song song); bao xe và ghép dùng chung lệnh `car`. Tối ưu 2026-10-30 giữ nguyên 1 request: chỉ thu hẹp `destinations` về các nút thật sự là đích (§ hồ sơ tối ưu), có chứng minh bằng test | **APPROVED** |
+| OD-P2-02 | Cache xấp xỉ (geohash-7) cho RB | Không cache ma trận phục vụ kiểm RB; chỉ cache `route()` | **APPROVED** |
+| OD-P2-03 | Khung `[T_earliest, T_latest]` mặc định | NOW: cửa sổ §2.2 giao khung khách nhập. Hẹn giờ không nhập: `[T_preferred, + độ rộng cửa sổ NOW]` (12 / 15 phút); chỉ có `T_earliest`: độ rộng mặc định tính từ đó. Kiểm bằng `tests/test_candidate_windows.py` | **LOCAL_PROVISIONAL** — còn chờ Chủ dự án xác nhận quy tắc hẹn giờ |
+| OD-P2-04 | Ứng viên nhánh A trước định giá P3 | `pricing_check = PENDING_P3`; cổng `candidate.service.offerable()` chỉ nhận `COMPLETE` — P4 bắt buộc gọi trước khi chào / giữ chỗ | **APPROVED** |
+| OD-P2-05 | `R_pool` / `R_urban` = 5 km | Giữ 5 km. Phân tích false negative trên dữ liệu synthetic: `P2_PROGRESS_REPORT.md` §6 | **LOCAL_PROVISIONAL** — cần Chủ dự án xem kết quả phân tích |
+| OD-P2-06 | Ngữ nghĩa NULL của `max_driver_detour_km/min` | Hiện tại: NULL = tài xế không khai báo ngưỡng (không giới hạn đi vòng; vẫn áp `k_max_stops`, `max_additional_pickups`). Phương án thay thế: NULL = 0 (không nhận đi vòng) hoặc NULL = giá trị mặc định do Chủ dự án đặt | **LOCAL_PROVISIONAL** — chờ làm rõ |
+| OD-P2-07 | Độ tươi vị trí tài xế | `location_stale_s = 120` (tham số kỹ thuật) | **APPROVED_FOR_LOCAL** |
+
+## 10b. Hồ sơ tối ưu hiệu năng (2026-10-30 / 31)
+
+Tối ưu chỉ dựa trên profiling. Workload, `N_single`, `N_pool`, `k_max`, `R_urban` và SLA không đổi. Chi tiết và số liệu trước / sau: `P2_PROGRESS_REPORT.md` §1–§4.
+
+| Mã | Tối ưu | Chứng minh giữ nguyên kết quả |
 |---|---|---|
-| OD-P2-01 | "1 lệnh OSRM Table duy nhất" (§34, §79) với 3 dịch vụ nội đô dùng 2 profile (xe máy `motorbike`, ô tô `car`) | 1 lệnh **cho mỗi profile** mỗi lượt (tối đa 2, chạy song song); bao xe và ghép dùng chung lệnh `car` |
-| OD-P2-02 | Cache khóa theo geohash-7 (~150 m) có thể đưa sai số tới ~150 m vào RB 3 / 5 / 6 | Không dùng cache cho ma trận phục vụ kiểm RB. Cache dùng cho `route()` ước lượng hiển thị và tra cặp lặp lại; khóa đúng §34 |
-| OD-P2-03 | Khung `[T_earliest, T_latest]` khi đặt hẹn giờ mà khách không nhập | NOW: cửa sổ §2.2 (xe máy 3–15 phút, ô tô 5–20 phút) giao với khung khách nhập. Hẹn giờ không nhập: `[T_preferred, T_preferred + độ rộng cửa sổ NOW]` (12 / 15 phút) |
-| OD-P2-04 | Ứng viên nhánh A trước khi có định giá P3 | Sinh và ghi nhật ký với `pricing_check = PENDING_P3`. Không hiển thị, không đặt cho đến P3 |
-| OD-P2-05 | `R_pool` (bán kính lọc kế hoạch ghép) không có số trong R9 / Baseline | Dùng `R_urban` = 5 km (§35.1) |
-| OD-P2-06 | `max_driver_detour_km/min` để trống | Hiểu là tài xế không khai báo ngưỡng. Vẫn áp `k_max_stops` và `max_additional_pickups` (mặc định 0 → không nhận khách thêm) |
-| OD-P2-07 | Trạng thái trực tuyến / rảnh và độ tươi vị trí (RB 1) | `driver_locations.availability` + `location_stale_s = 120` (tham số kỹ thuật, không phải Baseline) |
+| O1 | Bảng `car`: `destinations` chỉ gồm điểm dừng phía trước + P + Q; vẫn 1 request / profile (OD-P2-01) | `test_insertion_reads_only_stop_destinations` |
+| O2 | Một `httpx.Client` / provider, không keep-alive | `test_provider_reuses_one_client_without_keep_alive` |
+| P1 | Một truy vấn tài xế, top-N mỗi danh sách bằng `row_number()` | `test_one_spatial_query_returns_the_same_lists_as_one_query_per_list` |
+| P2 | Cache dòng `pricing_configs` bất biến | Trigger chặn UPDATE / DELETE (P1) |
+| Y1–Y3 | Tính một lần mỗi dịch vụ / mỗi phương án | 10.000 kịch bản vs duyệt vét cạn |
+| W1 | Ghi ứng viên bằng một lệnh chèn nhiều dòng | Test sinh ứng viên |
 
 ## 11. Thứ tự thực hiện
 

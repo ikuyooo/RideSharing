@@ -1,0 +1,11 @@
+{
+  "run_id": "20261030T155758Z-final-verify",
+  "started_utc": "2026-10-30T15:57:58Z",
+  "finished_utc": "2026-10-30T17:08:20Z",
+  "git_commit": "b3412ba2ce7f836607145345ded0b06250e41d8f",
+  "git_dirty_files": 18,
+  "arguments": "--analyze --verify --requests 200 ",
+  "output": "result.json",
+  "exit_code": 0,
+  "environment": "docker compose network: backend image + osrm-car / osrm-motorbike / postgres; synthetic data, throwaway database p2_bench"
+}

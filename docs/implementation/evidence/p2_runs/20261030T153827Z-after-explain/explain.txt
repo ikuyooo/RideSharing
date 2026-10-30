@@ -1,0 +1,429 @@
+===== 200x20: 10.7 SQL statements per generation run (incl. the trip snapshot read before generate) =====
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Index Scan using pk_trip_requests on trip_requests  (cost=0.14..8.42 rows=1 width=647) (actual time=0.104..0.109 rows=1 loops=1)
+  Index Cond: (id = 'b982f6fb-e4d6-4619-a74e-ed10fb20901e'::uuid)
+  Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=140
+Planning Time: 1.039 ms
+Execution Time: 21.219 ms
+
+-- SELECT dl.driver_id, ST_X(dl.geom) AS lon, ST_Y(dl.geom) AS lat, ST_Distance(dl.geom::geography, ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography) AS distance_m, dl.availability, EXTRACT(EPOCH FROM (%(now)s - dl.updated_at)) AS location_age_s, dp.kyc_status, dp.accepts_urban, dp.pool_enabled, dp.accepts_intercity, dp.max_additional_pickups, dp.max_driver_detour_km, dp.max_driver_detour_min, v.id AS vehicle_id, v.vehicle_type, COALESCE(v.capacity, 0) AS capacity, COALESCE(v.is_active, 
+Sort  (cost=49.66..49.66 rows=1 width=234) (actual time=25.059..25.083 rows=106 loops=1)
+  Sort Key: (st_distance((dl.geom)::geography, '0101000020E6100000BEB1A8D0C3755A40F957A4594A0B3540'::geography, true))
+  Sort Method: quicksort  Memory: 38kB
+  Buffers: shared hit=564
+  ->  Nested Loop  (cost=0.44..49.65 rows=1 width=234) (actual time=15.789..24.876 rows=106 loops=1)
+        Buffers: shared hit=561
+        ->  Nested Loop  (cost=0.29..28.91 rows=1 width=179) (actual time=15.761..24.301 rows=106 loops=1)
+              Buffers: shared hit=349
+              ->  Index Scan using idx_driver_locations_geom on driver_locations dl  (cost=0.14..20.67 rows=1 width=106) (actual time=15.725..24.011 rows=106 loops=1)
+                    Index Cond: (geom && '0103000020E610000001000000050000001F6C7A54AF725A407C41EB68F8FE34401F6C7A54AF725A40766E5D4A9C1735405DF7D64CD8785A40766E5D4A9C1735405DF7D64CD8785A407C41EB68F8FE34401F6C7A54AF725A407C41EB68F8FE3440'::geometry)
+                    Filter: (((availability)::text = 'IDLE'::text) AND (updated_at >= ('2026-10-30 15:38:46+00'::timestamp with time zone - '00:02:00'::interval)) AND st_dwithin((geom)::geography, '0101000020E6100000BEB1A8D0C3755A40F957A4594A0B3540'::geography, '5000'::double precision, true))
+                    Rows Removed by Filter: 46
+                    Buffers: shared hit=137
+              ->  Index Scan using pk_driver_profiles on driver_profiles dp  (cost=0.15..8.17 rows=1 width=89) (actual time=0.002..0.002 rows=1 loops=106)
+                    Index Cond: (user_id = dl.driver_id)
+                    Filter: accepts_urban
+                    Buffers: shared hit=212
+        ->  Index Scan using pk_vehicles on vehicles v  (cost=0.15..8.17 rows=1 width=55) (actual time=0.001..0.001 rows=1 loops=106)
+              Index Cond: (id = dl.active_vehicle_id)
+              Filter: is_active
+              Buffers: shared hit=212
+Planning:
+  Buffers: shared hit=332
+Planning Time: 2.174 ms
+Execution Time: 25.260 ms
+
+-- SELECT ride_plans.driver_id, ride_plans.id FROM ride_plans WHERE ride_plans.status = %(status_1)s::VARCHAR
+Seq Scan on ride_plans  (cost=0.00..13.50 rows=1 width=32) (actual time=0.014..0.022 rows=20 loops=1)
+  Filter: ((status)::text = 'PLAN_OPEN_SEARCHING'::text)
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=52
+Planning Time: 0.427 ms
+Execution Time: 0.045 ms
+
+-- SELECT dl.driver_id, ST_X(dl.geom) AS lon, ST_Y(dl.geom) AS lat, ST_Distance(dl.geom::geography, ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography) AS distance_m, dl.availability, EXTRACT(EPOCH FROM (%(now)s - dl.updated_at)) AS location_age_s, dp.kyc_status, dp.accepts_urban, dp.pool_enabled, dp.accepts_intercity, dp.max_additional_pickups, dp.max_driver_detour_km, dp.max_driver_detour_min, v.id AS vehicle_id, v.vehicle_type, COALESCE(v.capacity, 0) AS capacity, COALESCE(v.is_active, 
+Hash Right Join  (cost=35.24..303.49 rows=20 width=234) (actual time=0.392..0.568 rows=20 loops=1)
+  Hash Cond: (v.id = dl.active_vehicle_id)
+  Buffers: shared hit=9
+  ->  Seq Scan on vehicles v  (cost=0.00..15.20 rows=520 width=55) (actual time=0.008..0.051 rows=220 loops=1)
+        Buffers: shared hit=3
+  ->  Hash  (cost=34.99..34.99 rows=20 width=179) (actual time=0.236..0.238 rows=20 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 11kB
+        Buffers: shared hit=6
+        ->  Hash Join  (cost=19.30..34.99 rows=20 width=179) (actual time=0.187..0.208 rows=20 loops=1)
+              Hash Cond: (dp.user_id = dl.driver_id)
+              Buffers: shared hit=6
+              ->  Seq Scan on driver_profiles dp  (cost=0.00..14.50 rows=450 width=89) (actual time=0.019..0.055 rows=220 loops=1)
+                    Buffers: shared hit=2
+              ->  Hash  (cost=19.05..19.05 rows=20 width=106) (actual time=0.080..0.081 rows=20 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                    Buffers: shared hit=4
+                    ->  Seq Scan on driver_locations dl  (cost=0.05..19.05 rows=20 width=106) (actual time=0.057..0.068 rows=20 loops=1)
+                          Filter: (driver_id = ANY ('{16a26cd9-3f01-480d-9903-3323548e3b3e,fe67669e-66c0-4c4c-99d3-9ea732a20fdf,0ce4eb37-c4da-4a89-aae4-1001da3c9c27,5fd30648-2237-4a6b-98c6-d896af5cfc03,92061ff6-0b4c-4388-91ef-57e69f7740fc,0f848f21-8e09-4c4e-85ae-df807e5542be,9c551231-3298-4d68-a4a3-d4bbaec5f61b,ad331175-2ba3-4b89-b2fd-660969c2ee84,8dad0c90-46d1-41a8-9b2b-2af45ebd793c,a3ba092d-232b-4a80-b4b7-9e7f666a39aa,8bcc198a-5d6d-4c67-ad1d-8a50bd3f898a,45796068-1ad6-46d5-b8bc-141e9166cdf4,fbbdef43-a134-4fa6-b5e5-fee636c0e8bd,afc0fbbd-f4f0-45b9-a4a1-6f0c02e83a9f,78b9d635-a563-4925-b222-a1e0728ce343,6fd8f554-48ff-48d1-b086-8c77af339f27,1c4abdd1-7f48-427a-8d11-cd35728477dc,4143dfa0-e1ee-4e49-9b39-fef3b4457927,0dc716f1-40db-42a7-9a6c-b8c1447da3ac,8b94e2dd-0677-4b1b-8003-5a5c689ea242}'::uuid[]))
+                          Rows Removed by Filter: 200
+                          Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=3
+Planning Time: 0.537 ms
+Execution Time: 0.637 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID, %(id_1_11)s::UUID, %(id_1_12)s::UUID, %(id_1_13)s::UUID, %(id_1_14)s::UUID, %(id_1_15)s::UUID, %(id_1_16)s::UUID, %(id_1_17)s::UUID, %(id_1_18)s::UUID)
+Seq Scan on ride_plans  (cost=0.04..14.25 rows=18 width=40) (actual time=0.017..0.027 rows=18 loops=1)
+  Filter: (id = ANY ('{8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,d606d654-1530-44ec-a2c6-f7af132a2cce,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,6758ed88-e23f-4fca-ab09-42d243490ef9,6521d88f-a96b-4e57-ba26-3e227fd7fac2,7300574b-b71a-4a40-881b-ee5d185890ab,a5b7ec31-9c54-4c6d-9334-33162efb7959,97312420-0bf1-4663-b6c9-6e5e75a6701f,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,b160265c-f57e-48d7-b484-3740cebb1058,883c474b-5ca9-466d-9867-f54e63f10529,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,b53e5873-bcea-42be-931e-bdc780cbe172,d4a5a24a-6434-42b2-bd8c-d8245365be5b,a3864067-0532-4cb6-9887-df88418ad972}'::uuid[]))
+  Rows Removed by Filter: 2
+  Buffers: shared hit=1
+Planning Time: 0.134 ms
+Execution Time: 0.052 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=21.03..21.11 rows=34 width=200) (actual time=0.170..0.175 rows=36 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 30kB
+  Buffers: shared hit=7
+  ->  Seq Scan on ride_stops  (cost=0.04..20.16 rows=34 width=200) (actual time=0.025..0.072 rows=36 loops=1)
+        Filter: (ride_plan_id = ANY ('{8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,d606d654-1530-44ec-a2c6-f7af132a2cce,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,6758ed88-e23f-4fca-ab09-42d243490ef9,6521d88f-a96b-4e57-ba26-3e227fd7fac2,7300574b-b71a-4a40-881b-ee5d185890ab,a5b7ec31-9c54-4c6d-9334-33162efb7959,97312420-0bf1-4663-b6c9-6e5e75a6701f,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,b160265c-f57e-48d7-b484-3740cebb1058,883c474b-5ca9-466d-9867-f54e63f10529,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,b53e5873-bcea-42be-931e-bdc780cbe172,d4a5a24a-6434-42b2-bd8c-d8245365be5b,a3864067-0532-4cb6-9887-df88418ad972}'::uuid[]))
+        Rows Removed by Filter: 4
+        Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=84
+Planning Time: 0.621 ms
+Execution Time: 0.212 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.04..15.89 rows=35 width=56) (actual time=0.016..0.026 rows=18 loops=1)
+  Filter: (ride_plan_id = ANY ('{8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,d606d654-1530-44ec-a2c6-f7af132a2cce,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,6758ed88-e23f-4fca-ab09-42d243490ef9,6521d88f-a96b-4e57-ba26-3e227fd7fac2,7300574b-b71a-4a40-881b-ee5d185890ab,a5b7ec31-9c54-4c6d-9334-33162efb7959,97312420-0bf1-4663-b6c9-6e5e75a6701f,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,b160265c-f57e-48d7-b484-3740cebb1058,883c474b-5ca9-466d-9867-f54e63f10529,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,b53e5873-bcea-42be-931e-bdc780cbe172,d4a5a24a-6434-42b2-bd8c-d8245365be5b,a3864067-0532-4cb6-9887-df88418ad972}'::uuid[]))
+  Rows Removed by Filter: 2
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=78
+Planning Time: 6.660 ms
+Execution Time: 0.052 ms
+
+-- SELECT bookings.id, bookings.request_id, bookings.user_id, bookings.driver_id, bookings.service_code, bookings.booking_type, bookings.seat_count, bookings.ride_plan_id, bookings.scheduled_trip_id, bookings.ride_status, bookings.price_status, bookings.escrow_status, bookings.pool_quote_price_vnd, bookings.quoted_price_cap_vnd, bookings.current_estimated_price_vnd, bookings.final_price_vnd, bookings.cancellation_fee_vnd, bookings.pool_lock_at, bookings.unmatched_cause, bookings.escrow_tx_deposit, 
+Seq Scan on bookings  (cost=0.00..11.93 rows=6 width=704) (actual time=0.013..0.019 rows=6 loops=1)
+  Filter: (id = ANY ('{3005e525-d6f2-447a-890b-8a3004a5bbc8,7fc3cfbb-11c8-4e46-a159-5fce5a701de6,8d094a68-d3ab-40f8-a984-545bd9e6a4bf,e470f228-776a-401a-887e-8c4ba25f4386,ee5c0658-1a32-4dfa-b947-453574c0f512,a40bafc3-7300-4452-b5fe-407c31a41a8c}'::uuid[]))
+  Rows Removed by Filter: 14
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=97
+Planning Time: 0.587 ms
+Execution Time: 0.042 ms
+
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Seq Scan on trip_requests  (cost=0.00..13.66 rows=6 width=647) (actual time=0.085..0.111 rows=6 loops=1)
+  Filter: (id = ANY ('{091a2ba1-9dd0-4455-ba5d-1098f2a99257,98ff3e1c-6412-4043-af73-94239b8a12b0,b7cdda55-4f79-4521-8b50-5650b3b3cf05,eaa1a5b2-0f57-48e0-89f0-321f7cf0f928,40214bfb-01a6-4c53-abd8-9081420b6a81,d588f4b2-b918-4a82-bd93-ed20117770e2}'::uuid[]))
+  Rows Removed by Filter: 17
+  Buffers: shared hit=1
+Planning Time: 0.223 ms
+Execution Time: 0.160 ms
+
+-- SELECT users.id, users.gender, users.gender_verification_status FROM users WHERE users.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID)
+Seq Scan on users  (cost=0.00..10.94 rows=7 width=116) (actual time=0.069..0.082 rows=7 loops=1)
+  Filter: (id = ANY ('{0b045671-954c-4f72-acdc-26d1dd9be835,11abf094-e53d-48f8-b48f-04e7891fe818,ac8d8d6c-95fc-42d5-90fc-abf55eccd9ab,6df2274f-cf39-4d5e-819e-5a01d677bb5e,5d248db8-ed13-4ba4-85eb-936e674cba02,f84db357-a2d7-4bd3-94a1-0fdf8d0d2127,710095d5-1990-4ce2-803f-c5de91f5624c}'::uuid[]))
+  Rows Removed by Filter: 236
+  Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=49
+Planning Time: 0.463 ms
+Execution Time: 0.101 ms
+
+-- SELECT pricing_configs.params_json FROM pricing_configs WHERE pricing_configs.service_code = %(service_code_1)s::VARCHAR AND pricing_configs.version = %(version_1)s::VARCHAR
+Index Scan using pk_pricing_configs on pricing_configs  (cost=0.14..8.16 rows=1 width=32) (actual time=0.048..0.051 rows=1 loops=1)
+  Index Cond: (((version)::text = 'price_v9_two_sided_bounded'::text) AND ((service_code)::text = 'CAR_URBAN_PRIVATE'::text))
+  Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=33
+Planning Time: 0.464 ms
+Execution Time: 0.103 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID, %(id_1_11)s::UUID, %(id_1_12)s::UUID, %(id_1_13)s::UUID, %(id_1_14)s::UUID, %(id_1_15)s::UUID, %(id_1_16)s::UUID)
+Seq Scan on ride_plans  (cost=0.04..14.24 rows=16 width=40) (actual time=0.014..0.024 rows=16 loops=1)
+  Filter: (id = ANY ('{7300574b-b71a-4a40-881b-ee5d185890ab,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,97312420-0bf1-4663-b6c9-6e5e75a6701f,a5b7ec31-9c54-4c6d-9334-33162efb7959,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,8b5409cc-5a13-404e-873b-b9bd461f0e09,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,d606d654-1530-44ec-a2c6-f7af132a2cce,6758ed88-e23f-4fca-ab09-42d243490ef9,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,6521d88f-a96b-4e57-ba26-3e227fd7fac2,d4a5a24a-6434-42b2-bd8c-d8245365be5b,6db901b0-96e9-46e5-8d25-7edd5b8452f6,a3864067-0532-4cb6-9887-df88418ad972,1dd4d3d8-6bce-48c7-ba5a-fed765e846a6}'::uuid[]))
+  Rows Removed by Filter: 4
+  Buffers: shared hit=1
+Planning Time: 0.109 ms
+Execution Time: 0.043 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=20.38..20.45 rows=30 width=200) (actual time=0.105..0.110 rows=32 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 29kB
+  Buffers: shared hit=1
+  ->  Seq Scan on ride_stops  (cost=0.04..19.64 rows=30 width=200) (actual time=0.023..0.067 rows=32 loops=1)
+        Filter: (ride_plan_id = ANY ('{7300574b-b71a-4a40-881b-ee5d185890ab,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,97312420-0bf1-4663-b6c9-6e5e75a6701f,a5b7ec31-9c54-4c6d-9334-33162efb7959,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,8b5409cc-5a13-404e-873b-b9bd461f0e09,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,d606d654-1530-44ec-a2c6-f7af132a2cce,6758ed88-e23f-4fca-ab09-42d243490ef9,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,6521d88f-a96b-4e57-ba26-3e227fd7fac2,d4a5a24a-6434-42b2-bd8c-d8245365be5b,6db901b0-96e9-46e5-8d25-7edd5b8452f6,a3864067-0532-4cb6-9887-df88418ad972,1dd4d3d8-6bce-48c7-ba5a-fed765e846a6}'::uuid[]))
+        Rows Removed by Filter: 8
+        Buffers: shared hit=1
+Planning Time: 0.155 ms
+Execution Time: 0.144 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.04..15.89 rows=31 width=56) (actual time=0.013..0.019 rows=16 loops=1)
+  Filter: (ride_plan_id = ANY ('{7300574b-b71a-4a40-881b-ee5d185890ab,7e6b4326-70ff-4ddd-852c-f32c8bcf257a,97312420-0bf1-4663-b6c9-6e5e75a6701f,a5b7ec31-9c54-4c6d-9334-33162efb7959,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126,8b5409cc-5a13-404e-873b-b9bd461f0e09,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,5a0ccbf2-1ef3-4c2c-bba6-401722924d9e,d606d654-1530-44ec-a2c6-f7af132a2cce,6758ed88-e23f-4fca-ab09-42d243490ef9,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,6521d88f-a96b-4e57-ba26-3e227fd7fac2,d4a5a24a-6434-42b2-bd8c-d8245365be5b,6db901b0-96e9-46e5-8d25-7edd5b8452f6,a3864067-0532-4cb6-9887-df88418ad972,1dd4d3d8-6bce-48c7-ba5a-fed765e846a6}'::uuid[]))
+  Rows Removed by Filter: 4
+  Buffers: shared hit=1
+Planning Time: 0.083 ms
+Execution Time: 0.035 ms
+
+-- SELECT bookings.id, bookings.request_id, bookings.user_id, bookings.driver_id, bookings.service_code, bookings.booking_type, bookings.seat_count, bookings.ride_plan_id, bookings.scheduled_trip_id, bookings.ride_status, bookings.price_status, bookings.escrow_status, bookings.pool_quote_price_vnd, bookings.quoted_price_cap_vnd, bookings.current_estimated_price_vnd, bookings.final_price_vnd, bookings.cancellation_fee_vnd, bookings.pool_lock_at, bookings.unmatched_cause, bookings.escrow_tx_deposit, 
+Seq Scan on bookings  (cost=0.00..12.06 rows=7 width=704) (actual time=0.017..0.023 rows=7 loops=1)
+  Filter: (id = ANY ('{f552894b-f787-45ed-b401-758b108c4b49,7fc3cfbb-11c8-4e46-a159-5fce5a701de6,d312f2e6-3260-4ddc-b71c-db1a44c9aeab,e34ab30e-bf45-479c-8876-5534442e6b4f,4ec30dd5-cdb6-4715-8621-243378a042a1,b2d802e7-3c78-47ba-ae2f-c30bfacd5851,e6152e4a-6466-44a8-b7d3-0602ba536b38}'::uuid[]))
+  Rows Removed by Filter: 13
+  Buffers: shared hit=1
+Planning Time: 0.141 ms
+Execution Time: 0.048 ms
+
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Seq Scan on trip_requests  (cost=0.00..14.07 rows=7 width=647) (actual time=0.021..0.032 rows=7 loops=1)
+  Filter: (id = ANY ('{37cdd6e7-938f-4d4e-ac5b-5701d2cb44fa,77ff1c49-1a1c-4793-9130-44c716f9380c,5b5ce7e7-20f5-4694-b8a5-c487c4dd3cf4,eaa1a5b2-0f57-48e0-89f0-321f7cf0f928,34442256-2487-4e8c-bde3-c4ed9387b6ca,507314ce-5d80-4582-9aa1-64e83fe6dfa4,0605e3c0-3beb-4647-b0c0-4b3de15a186d}'::uuid[]))
+  Rows Removed by Filter: 16
+  Buffers: shared hit=1
+Planning Time: 0.096 ms
+Execution Time: 0.054 ms
+
+-- SELECT users.id, users.gender, users.gender_verification_status FROM users WHERE users.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID)
+Seq Scan on users  (cost=0.00..11.00 rows=8 width=116) (actual time=0.059..0.067 rows=8 loops=1)
+  Filter: (id = ANY ('{251b6343-7bc5-49fc-8181-acf3ccbfefa1,81e0a652-3e32-4e76-b0f5-8c9ba1132c62,ab0430ee-1b4d-4927-b12e-6f08822f6f7f,1386fe98-7543-4e68-bb22-673317c914ab,5d248db8-ed13-4ba4-85eb-936e674cba02,4473ebf4-0b37-4a81-87f4-bb1759b2be5b,85f3bb91-6a2e-4a57-8c67-68aa552d25ac,5488a774-0fdd-4ba8-90dc-f6c2052ab617}'::uuid[]))
+  Rows Removed by Filter: 235
+  Buffers: shared hit=4
+Planning Time: 0.094 ms
+Execution Time: 0.113 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID)
+Seq Scan on ride_plans  (cost=0.03..14.23 rows=10 width=40) (actual time=0.017..0.023 rows=10 loops=1)
+  Filter: (id = ANY ('{b160265c-f57e-48d7-b484-3740cebb1058,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b53e5873-bcea-42be-931e-bdc780cbe172,6521d88f-a96b-4e57-ba26-3e227fd7fac2,883c474b-5ca9-466d-9867-f54e63f10529,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,d606d654-1530-44ec-a2c6-f7af132a2cce,8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126}'::uuid[]))
+  Rows Removed by Filter: 10
+  Buffers: shared hit=1
+Planning Time: 0.106 ms
+Execution Time: 0.042 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=18.60..18.65 rows=19 width=200) (actual time=0.057..0.058 rows=20 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 27kB
+  Buffers: shared hit=1
+  ->  Seq Scan on ride_stops  (cost=0.03..18.20 rows=19 width=200) (actual time=0.023..0.038 rows=20 loops=1)
+        Filter: (ride_plan_id = ANY ('{b160265c-f57e-48d7-b484-3740cebb1058,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b53e5873-bcea-42be-931e-bdc780cbe172,6521d88f-a96b-4e57-ba26-3e227fd7fac2,883c474b-5ca9-466d-9867-f54e63f10529,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,d606d654-1530-44ec-a2c6-f7af132a2cce,8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126}'::uuid[]))
+        Rows Removed by Filter: 20
+        Buffers: shared hit=1
+Planning Time: 0.247 ms
+Execution Time: 0.086 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.03..15.88 rows=20 width=56) (actual time=0.011..0.016 rows=10 loops=1)
+  Filter: (ride_plan_id = ANY ('{b160265c-f57e-48d7-b484-3740cebb1058,6db901b0-96e9-46e5-8d25-7edd5b8452f6,b53e5873-bcea-42be-931e-bdc780cbe172,6521d88f-a96b-4e57-ba26-3e227fd7fac2,883c474b-5ca9-466d-9867-f54e63f10529,b0877454-f2d0-41e4-b8a7-fd15cc640e1d,3f8d75ec-40a7-4031-aa5d-dbfa0b280961,d606d654-1530-44ec-a2c6-f7af132a2cce,8b5409cc-5a13-404e-873b-b9bd461f0e09,f308a2c6-b534-4cd0-a0b5-4fb35f6b2126}'::uuid[]))
+  Rows Removed by Filter: 10
+  Buffers: shared hit=1
+Planning Time: 0.082 ms
+Execution Time: 0.031 ms
+
+===== 1000x20: 10.0 SQL statements per generation run (incl. the trip snapshot read before generate) =====
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Index Scan using pk_trip_requests on trip_requests  (cost=0.14..8.42 rows=1 width=647) (actual time=0.020..0.021 rows=1 loops=1)
+  Index Cond: (id = '0bc7c260-5b40-4292-bbef-5bdd85d74ded'::uuid)
+  Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=2
+Planning Time: 0.162 ms
+Execution Time: 0.045 ms
+
+-- SELECT dl.driver_id, ST_X(dl.geom) AS lon, ST_Y(dl.geom) AS lat, ST_Distance(dl.geom::geography, ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography) AS distance_m, dl.availability, EXTRACT(EPOCH FROM (%(now)s - dl.updated_at)) AS location_age_s, dp.kyc_status, dp.accepts_urban, dp.pool_enabled, dp.accepts_intercity, dp.max_additional_pickups, dp.max_driver_detour_km, dp.max_driver_detour_min, v.id AS vehicle_id, v.vehicle_type, COALESCE(v.capacity, 0) AS capacity, COALESCE(v.is_active, 
+Sort  (cost=49.90..49.90 rows=1 width=234) (actual time=5.485..5.533 rows=478 loops=1)
+  Sort Key: (st_distance((dl.geom)::geography, '0101000020E6100000B0F96B5244785A40977E6B4DEF063540'::geography, true))
+  Sort Method: quicksort  Memory: 85kB
+  Buffers: shared hit=2935
+  ->  Nested Loop  (cost=0.69..49.89 rows=1 width=234) (actual time=0.124..5.120 rows=478 loops=1)
+        Buffers: shared hit=2935
+        ->  Nested Loop  (cost=0.42..29.03 rows=1 width=179) (actual time=0.101..2.525 rows=478 loops=1)
+              Buffers: shared hit=1501
+              ->  Index Scan using idx_driver_locations_geom on driver_locations dl  (cost=0.14..20.67 rows=1 width=106) (actual time=0.081..1.298 rows=478 loops=1)
+                    Index Cond: (geom && '0103000020E610000001000000050000006FAA4AED2F755A409241E6B89DFA34406FAA4AED2F755A409CBBF0E140133540F1488DB7587B5A409CBBF0E140133540F1488DB7587B5A409241E6B89DFA34406FAA4AED2F755A409241E6B89DFA3440'::geometry)
+                    Filter: (((availability)::text = 'IDLE'::text) AND (updated_at >= ('2026-10-30 15:38:51+00'::timestamp with time zone - '00:02:00'::interval)) AND st_dwithin((geom)::geography, '0101000020E6100000B0F96B5244785A40977E6B4DEF063540'::geography, '5000'::double precision, true))
+                    Rows Removed by Filter: 124
+                    Buffers: shared hit=67
+              ->  Index Scan using pk_driver_profiles on driver_profiles dp  (cost=0.27..8.29 rows=1 width=89) (actual time=0.002..0.002 rows=1 loops=478)
+                    Index Cond: (user_id = dl.driver_id)
+                    Filter: accepts_urban
+                    Buffers: shared hit=1434
+        ->  Index Scan using pk_vehicles on vehicles v  (cost=0.28..8.29 rows=1 width=55) (actual time=0.002..0.002 rows=1 loops=478)
+              Index Cond: (id = dl.active_vehicle_id)
+              Filter: is_active
+              Buffers: shared hit=1434
+Planning:
+  Buffers: shared hit=64
+Planning Time: 0.516 ms
+Execution Time: 5.592 ms
+
+-- SELECT ride_plans.driver_id, ride_plans.id FROM ride_plans WHERE ride_plans.status = %(status_1)s::VARCHAR
+Seq Scan on ride_plans  (cost=0.00..13.50 rows=1 width=32) (actual time=0.020..0.024 rows=20 loops=1)
+  Filter: ((status)::text = 'PLAN_OPEN_SEARCHING'::text)
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=18
+Planning Time: 0.307 ms
+Execution Time: 0.076 ms
+
+-- SELECT dl.driver_id, ST_X(dl.geom) AS lon, ST_Y(dl.geom) AS lat, ST_Distance(dl.geom::geography, ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)::geography) AS distance_m, dl.availability, EXTRACT(EPOCH FROM (%(now)s - dl.updated_at)) AS location_age_s, dp.kyc_status, dp.accepts_urban, dp.pool_enabled, dp.accepts_intercity, dp.max_additional_pickups, dp.max_driver_detour_km, dp.max_driver_detour_min, v.id AS vehicle_id, v.vehicle_type, COALESCE(v.capacity, 0) AS capacity, COALESCE(v.is_active, 
+Hash Right Join  (cost=42.84..314.65 rows=20 width=234) (actual time=0.813..0.890 rows=20 loops=1)
+  Hash Cond: (v.id = dl.active_vehicle_id)
+  Buffers: shared hit=35
+  ->  Seq Scan on vehicles v  (cost=0.00..18.24 rows=624 width=55) (actual time=0.007..0.139 rows=1020 loops=1)
+        Buffers: shared hit=12
+  ->  Hash  (cost=42.59..42.59 rows=20 width=179) (actual time=0.502..0.503 rows=20 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 11kB
+        Buffers: shared hit=23
+        ->  Hash Join  (cost=26.90..42.59 rows=20 width=179) (actual time=0.483..0.494 rows=20 loops=1)
+              Hash Cond: (dp.user_id = dl.driver_id)
+              Buffers: shared hit=23
+              ->  Seq Scan on driver_profiles dp  (cost=0.00..14.50 rows=450 width=89) (actual time=0.009..0.113 rows=1020 loops=1)
+                    Buffers: shared hit=9
+              ->  Hash  (cost=26.65..26.65 rows=20 width=106) (actual time=0.242..0.243 rows=20 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 11kB
+                    Buffers: shared hit=14
+                    ->  Seq Scan on driver_locations dl  (cost=0.05..26.65 rows=20 width=106) (actual time=0.227..0.233 rows=20 loops=1)
+                          Filter: (driver_id = ANY ('{8faccf78-da1b-4aec-89d0-a7a1070e6a46,2baac1e2-f96e-4eb8-b8e4-ac2c7d2615cf,75bed2bc-cd52-4cc1-83fa-dd5f01b969d2,8a331cc2-58f7-4847-8f04-d34f490abc8e,19beb72f-ab0e-4568-8d09-7bba26cef788,3882beae-5b12-49be-bf8b-779b13c5352a,f4bbd279-2139-4da6-b2b7-fd2bff65289d,d9085e42-ad45-4f87-b3ee-d0e71ae3bcd5,e32c3d33-0fab-4630-814b-00460c31d684,dee06681-2d90-4c71-93c7-51717d5872da,89af7bd2-14da-4f3b-a5e3-81b8cd1ab654,f6044731-a097-439b-b413-4a10621cb468,fedfae03-b1b4-48cd-8c6e-93019b17cffa,7aa28ce6-8b2a-41c1-85a8-4a25ce41f0f5,1b924f38-ba03-4502-b895-24ab51315338,6a8e71e9-8dd9-4c96-9e98-66383ee30e26,0e111268-2e0e-4240-a591-11e031f3d292,d74131d3-f05d-4e9b-a4a3-e5d9cbd74b76,c56097da-16a4-4c30-8230-43dec22491e0,f14a051d-e3a8-43fc-99a6-579550510e85}'::uuid[]))
+                          Rows Removed by Filter: 1000
+                          Buffers: shared hit=14
+Planning Time: 0.237 ms
+Execution Time: 0.929 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID, %(id_1_11)s::UUID, %(id_1_12)s::UUID, %(id_1_13)s::UUID, %(id_1_14)s::UUID, %(id_1_15)s::UUID)
+Seq Scan on ride_plans  (cost=0.04..14.24 rows=15 width=40) (actual time=0.012..0.016 rows=15 loops=1)
+  Filter: (id = ANY ('{a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,97365f5b-e50d-4e69-9841-b65b9377b069,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,fd744398-9b1d-46b1-aa42-b2d3661a4715,26da6d8b-79a6-4dd9-b9a7-837c712fc019,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,e5e45b0f-f809-4669-a86a-68a0bae089f0,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+  Rows Removed by Filter: 5
+  Buffers: shared hit=1
+Planning Time: 0.075 ms
+Execution Time: 0.031 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=20.05..20.12 rows=28 width=200) (actual time=0.057..0.061 rows=30 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 29kB
+  Buffers: shared hit=1
+  ->  Seq Scan on ride_stops  (cost=0.04..19.38 rows=28 width=200) (actual time=0.016..0.035 rows=30 loops=1)
+        Filter: (ride_plan_id = ANY ('{a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,97365f5b-e50d-4e69-9841-b65b9377b069,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,fd744398-9b1d-46b1-aa42-b2d3661a4715,26da6d8b-79a6-4dd9-b9a7-837c712fc019,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,e5e45b0f-f809-4669-a86a-68a0bae089f0,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+        Rows Removed by Filter: 10
+        Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=32
+Planning Time: 0.230 ms
+Execution Time: 0.084 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.04..15.89 rows=29 width=56) (actual time=0.010..0.016 rows=15 loops=1)
+  Filter: (ride_plan_id = ANY ('{a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,97365f5b-e50d-4e69-9841-b65b9377b069,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,fd744398-9b1d-46b1-aa42-b2d3661a4715,26da6d8b-79a6-4dd9-b9a7-837c712fc019,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,e5e45b0f-f809-4669-a86a-68a0bae089f0,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+  Rows Removed by Filter: 5
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=25
+Planning Time: 0.216 ms
+Execution Time: 0.031 ms
+
+-- SELECT bookings.id, bookings.request_id, bookings.user_id, bookings.driver_id, bookings.service_code, bookings.booking_type, bookings.seat_count, bookings.ride_plan_id, bookings.scheduled_trip_id, bookings.ride_status, bookings.price_status, bookings.escrow_status, bookings.pool_quote_price_vnd, bookings.quoted_price_cap_vnd, bookings.current_estimated_price_vnd, bookings.final_price_vnd, bookings.cancellation_fee_vnd, bookings.pool_lock_at, bookings.unmatched_cause, bookings.escrow_tx_deposit, 
+Seq Scan on bookings  (cost=0.02..11.67 rows=9 width=704) (actual time=0.011..0.014 rows=9 loops=1)
+  Filter: (id = ANY ('{c3bbded7-418b-44a6-85a8-c95ab4322d50,9ed74a57-da30-45bb-b936-aeba7acc9443,3294707c-4e50-47ab-a0c0-1b97527229e6,629f11f5-8d54-4071-a0f0-9d176515ff3b,596003a2-c3ca-446a-827f-6ff938ff1b7e,84a36d0c-6db3-497e-ab66-225fa45d990d,7c33c4b1-543a-4093-9c58-3e3824b5fbb0,f4e6d5a2-7ff6-4b58-a120-8a505aa03e9d,f66f4463-9839-40df-b44e-8d7a503f42c5}'::uuid[]))
+  Rows Removed by Filter: 11
+  Buffers: shared hit=1
+Planning:
+  Buffers: shared hit=33
+Planning Time: 0.288 ms
+Execution Time: 0.031 ms
+
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Seq Scan on trip_requests  (cost=0.02..14.16 rows=9 width=647) (actual time=0.019..0.030 rows=9 loops=1)
+  Filter: (id = ANY ('{89ee52a0-cfaf-486b-a907-8bdc05e19d67,b8ecdcc1-e268-41bb-902e-34bba376b37e,e02c9811-e5b8-4722-ba70-889bbfbc6679,84005c56-e3ff-4e95-950b-a841a6fd816f,12f577e0-6919-418a-920a-33e7cf9b1ff6,e7cf8e71-fcbf-47f2-acaa-bcf99be384a1,f157a02e-d33e-472e-9caf-3cc6b3b00f79,7d0c3f8b-a086-4501-81ec-89726a02b1b0,6aa15467-6a1d-4942-bfdf-a6ddfd168985}'::uuid[]))
+  Rows Removed by Filter: 14
+  Buffers: shared hit=1
+Planning Time: 0.085 ms
+Execution Time: 0.051 ms
+
+-- SELECT users.id, users.gender, users.gender_verification_status FROM users WHERE users.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID)
+Seq Scan on users  (cost=0.03..16.15 rows=10 width=116) (actual time=0.140..0.146 rows=10 loops=1)
+  Filter: (id = ANY ('{3c1115e8-2846-4cb0-8931-7defb3ef284a,77d8c1b5-1052-459d-ba45-ec4ef17b4d87,45c48808-fa5f-45a8-a35e-ad8c299fe80c,a4b70d59-7354-48e7-ac00-d49efa9d7855,645b0d12-db01-4415-a2ac-28af5220fb36,6c5a9957-dec1-46a0-bccf-1efa050d6240,a696cdf9-a0f7-4d81-a149-c51833cd2d36,7d078645-c95c-4444-9c67-a067cfce96fb,7146d0da-68e3-4ab1-85e5-e3a581da39df,d1d14459-b413-4df8-9622-6b16d15f2312}'::uuid[]))
+  Rows Removed by Filter: 1033
+  Buffers: shared hit=15
+Planning Time: 0.072 ms
+Execution Time: 0.159 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID, %(id_1_10)s::UUID, %(id_1_11)s::UUID, %(id_1_12)s::UUID, %(id_1_13)s::UUID, %(id_1_14)s::UUID, %(id_1_15)s::UUID, %(id_1_16)s::UUID)
+Seq Scan on ride_plans  (cost=0.04..14.24 rows=16 width=40) (actual time=0.011..0.017 rows=16 loops=1)
+  Filter: (id = ANY ('{709c921a-ecf7-4108-9c5e-f258a0c7aa1b,a39b301c-40fc-4310-bf76-23a9cd8629c7,97365f5b-e50d-4e69-9841-b65b9377b069,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,26da6d8b-79a6-4dd9-b9a7-837c712fc019,fd744398-9b1d-46b1-aa42-b2d3661a4715,e5e45b0f-f809-4669-a86a-68a0bae089f0,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,ffc56b03-799d-4203-b369-750e7cf560b4,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+  Rows Removed by Filter: 4
+  Buffers: shared hit=1
+Planning Time: 0.103 ms
+Execution Time: 0.031 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=20.38..20.45 rows=30 width=200) (actual time=0.065..0.067 rows=32 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 29kB
+  Buffers: shared hit=1
+  ->  Seq Scan on ride_stops  (cost=0.04..19.64 rows=30 width=200) (actual time=0.020..0.042 rows=32 loops=1)
+        Filter: (ride_plan_id = ANY ('{709c921a-ecf7-4108-9c5e-f258a0c7aa1b,a39b301c-40fc-4310-bf76-23a9cd8629c7,97365f5b-e50d-4e69-9841-b65b9377b069,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,26da6d8b-79a6-4dd9-b9a7-837c712fc019,fd744398-9b1d-46b1-aa42-b2d3661a4715,e5e45b0f-f809-4669-a86a-68a0bae089f0,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,ffc56b03-799d-4203-b369-750e7cf560b4,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+        Rows Removed by Filter: 8
+        Buffers: shared hit=1
+Planning Time: 0.152 ms
+Execution Time: 0.093 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.04..15.89 rows=31 width=56) (actual time=0.013..0.018 rows=16 loops=1)
+  Filter: (ride_plan_id = ANY ('{709c921a-ecf7-4108-9c5e-f258a0c7aa1b,a39b301c-40fc-4310-bf76-23a9cd8629c7,97365f5b-e50d-4e69-9841-b65b9377b069,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,1dfc83ff-3c95-45b4-9cf2-93e73f0dade5,289a239a-c119-4d75-912b-0d3914e8d6f4,26da6d8b-79a6-4dd9-b9a7-837c712fc019,fd744398-9b1d-46b1-aa42-b2d3661a4715,e5e45b0f-f809-4669-a86a-68a0bae089f0,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,86abca50-a32d-4903-ac35-16e99fb7b469,6e49f94b-34e9-45e5-980f-f8216aefbc66,ffc56b03-799d-4203-b369-750e7cf560b4,5a6303a1-ed9f-4320-a15c-470453b5d884}'::uuid[]))
+  Rows Removed by Filter: 4
+  Buffers: shared hit=1
+Planning Time: 0.086 ms
+Execution Time: 0.034 ms
+
+-- SELECT bookings.id, bookings.request_id, bookings.user_id, bookings.driver_id, bookings.service_code, bookings.booking_type, bookings.seat_count, bookings.ride_plan_id, bookings.scheduled_trip_id, bookings.ride_status, bookings.price_status, bookings.escrow_status, bookings.pool_quote_price_vnd, bookings.quoted_price_cap_vnd, bookings.current_estimated_price_vnd, bookings.final_price_vnd, bookings.cancellation_fee_vnd, bookings.pool_lock_at, bookings.unmatched_cause, bookings.escrow_tx_deposit, 
+Seq Scan on bookings  (cost=0.00..11.79 rows=5 width=704) (actual time=0.010..0.014 rows=5 loops=1)
+  Filter: (id = ANY ('{c3bbded7-418b-44a6-85a8-c95ab4322d50,31001990-b3bb-4dd0-8204-1746c8ab2fce,3294707c-4e50-47ab-a0c0-1b97527229e6,9ed74a57-da30-45bb-b936-aeba7acc9443,dad8d46c-8e1c-4188-8483-82bbb673f440}'::uuid[]))
+  Rows Removed by Filter: 15
+  Buffers: shared hit=1
+Planning Time: 0.092 ms
+Execution Time: 0.030 ms
+
+-- SELECT trip_requests.id, trip_requests.user_id, trip_requests.mode, trip_requests.vehicle_preference, trip_requests.ride_preference, trip_requests.allowed_service_codes, trip_requests.rejection_reasons_json, trip_requests.booking_type, trip_requests.passenger_count, trip_requests.has_luggage, ST_AsEWKB(trip_requests.pickup_geom) AS pickup_geom, ST_AsEWKB(trip_requests.dropoff_geom) AS dropoff_geom, trip_requests.pickup_zone_id, trip_requests.dropoff_zone_id, trip_requests.preferred_departure, tr
+Seq Scan on trip_requests  (cost=0.00..13.25 rows=5 width=647) (actual time=0.019..0.027 rows=5 loops=1)
+  Filter: (id = ANY ('{6423c98b-61fc-4eb0-8e18-89971ba375dc,cfbb985b-edff-4ded-a10f-3edf28c926e7,b8ecdcc1-e268-41bb-902e-34bba376b37e,e7cf8e71-fcbf-47f2-acaa-bcf99be384a1,7d0c3f8b-a086-4501-81ec-89726a02b1b0}'::uuid[]))
+  Rows Removed by Filter: 18
+  Buffers: shared hit=1
+Planning Time: 0.174 ms
+Execution Time: 0.055 ms
+
+-- SELECT users.id, users.gender, users.gender_verification_status FROM users WHERE users.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID)
+Seq Scan on users  (cost=0.00..16.31 rows=6 width=116) (actual time=0.156..0.162 rows=6 loops=1)
+  Filter: (id = ANY ('{ca1fe05d-6a14-4aa2-b8a7-0c0bacda881c,6bef0263-b400-43d9-be22-c5f69cd7ac3e,27870a51-f2ce-4f2f-96d7-f8c598513953,45c48808-fa5f-45a8-a35e-ad8c299fe80c,a696cdf9-a0f7-4d81-a149-c51833cd2d36,7146d0da-68e3-4ab1-85e5-e3a581da39df}'::uuid[]))
+  Rows Removed by Filter: 1037
+  Buffers: shared hit=15
+Planning Time: 0.136 ms
+Execution Time: 0.177 ms
+
+-- SELECT ride_plans.id, ride_plans.plan_version, ride_plans.driver_id, ride_plans.completed_stop_index FROM ride_plans WHERE ride_plans.id IN (%(id_1_1)s::UUID, %(id_1_2)s::UUID, %(id_1_3)s::UUID, %(id_1_4)s::UUID, %(id_1_5)s::UUID, %(id_1_6)s::UUID, %(id_1_7)s::UUID, %(id_1_8)s::UUID, %(id_1_9)s::UUID)
+Seq Scan on ride_plans  (cost=0.02..14.22 rows=9 width=40) (actual time=0.062..0.068 rows=9 loops=1)
+  Filter: (id = ANY ('{fd744398-9b1d-46b1-aa42-b2d3661a4715,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,6e49f94b-34e9-45e5-980f-f8216aefbc66,a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,26da6d8b-79a6-4dd9-b9a7-837c712fc019}'::uuid[]))
+  Rows Removed by Filter: 11
+  Buffers: shared hit=1
+Planning Time: 0.337 ms
+Execution Time: 0.094 ms
+
+-- SELECT ride_stops.id, ride_stops.ride_plan_id, ride_stops.seq, ride_stops.kind, ride_stops.booking_id, ST_AsEWKB(ride_stops.geom) AS geom, ride_stops.status, ride_stops.planned_eta, ride_stops.completed_at, ST_X(ride_stops.geom) AS "ST_X_1", ST_Y(ride_stops.geom) AS "ST_Y_1" FROM ride_stops WHERE ride_stops.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride
+Sort  (cost=18.28..18.32 rows=17 width=200) (actual time=0.069..0.072 rows=18 loops=1)
+  Sort Key: ride_plan_id, seq
+  Sort Method: quicksort  Memory: 27kB
+  Buffers: shared hit=1
+  ->  Seq Scan on ride_stops  (cost=0.02..17.93 rows=17 width=200) (actual time=0.024..0.046 rows=18 loops=1)
+        Filter: (ride_plan_id = ANY ('{fd744398-9b1d-46b1-aa42-b2d3661a4715,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,6e49f94b-34e9-45e5-980f-f8216aefbc66,a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,26da6d8b-79a6-4dd9-b9a7-837c712fc019}'::uuid[]))
+        Rows Removed by Filter: 22
+        Buffers: shared hit=1
+Planning Time: 0.168 ms
+Execution Time: 0.101 ms
+
+-- SELECT ride_participants.ride_plan_id, ride_participants.booking_id, ride_participants.traveled_km_before_last_replan, ride_participants.direct_distance_m, ride_participants.direct_duration_s FROM ride_participants WHERE ride_participants.ride_plan_id IN (%(ride_plan_id_1_1)s::UUID, %(ride_plan_id_1_2)s::UUID, %(ride_plan_id_1_3)s::UUID, %(ride_plan_id_1_4)s::UUID, %(ride_plan_id_1_5)s::UUID, %(ride_plan_id_1_6)s::UUID, %(ride_plan_id_1_7)s::UUID, %(ride_plan_id_1_8)s::UUID, %(ride_plan_id_1_9)s
+Seq Scan on ride_participants  (cost=0.02..15.87 rows=18 width=56) (actual time=0.014..0.018 rows=9 loops=1)
+  Filter: (ride_plan_id = ANY ('{fd744398-9b1d-46b1-aa42-b2d3661a4715,071cd3e2-fc69-4beb-bbf5-729dc2fcbbc0,89ebaef9-1f74-47c9-aab6-84d68c31f2d4,a7bc2728-1526-435b-a4e5-c08ca2ebd6ce,b5a9c2e9-c857-4e60-a325-3fe9fe0991c5,6e49f94b-34e9-45e5-980f-f8216aefbc66,a39b301c-40fc-4310-bf76-23a9cd8629c7,709c921a-ecf7-4108-9c5e-f258a0c7aa1b,26da6d8b-79a6-4dd9-b9a7-837c712fc019}'::uuid[]))
+  Rows Removed by Filter: 11
+  Buffers: shared hit=1
+Planning Time: 0.093 ms
+Execution Time: 0.034 ms
+

@@ -1,0 +1,38 @@
+===== 200x0: radius check =====
+{
+  "requests": 200,
+  "requests_with_case_a": 87,
+  "requests_with_case_b": 164,
+  "drivers_beyond_5km_in_time": 14971,
+  "by_profile": {
+    "motorbike": {
+      "beyond_5km_in_time": 4298,
+      "case_a": 87,
+      "case_b": 130
+    },
+    "car": {
+      "beyond_5km_in_time": 10673,
+      "case_a": 9,
+      "case_b": 154
+    }
+  }
+}
+===== 1000x0: radius check =====
+{
+  "requests": 200,
+  "requests_with_case_a": 31,
+  "requests_with_case_b": 73,
+  "drivers_beyond_5km_in_time": 73373,
+  "by_profile": {
+    "motorbike": {
+      "beyond_5km_in_time": 23520,
+      "case_a": 27,
+      "case_b": 47
+    },
+    "car": {
+      "beyond_5km_in_time": 49853,
+      "case_a": 10,
+      "case_b": 65
+    }
+  }
+}

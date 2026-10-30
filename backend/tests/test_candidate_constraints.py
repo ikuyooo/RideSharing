@@ -100,3 +100,10 @@ def test_same_gender_only_on_overlapping_segments() -> None:
     assert codes(_ev(riders=(a, after), segment_loads=(1, 1, 1))) == set()
     assert codes(_ev(riders=(a, replace(overlapping, verified_gender=None)), segment_loads=(1, 2, 1))) == {"HC11"}
     assert codes(_ev(riders=(a, replace(overlapping, verified_gender="F")), segment_loads=(1, 2, 1))) == set()
+
+
+def test_pending_p3_candidates_are_never_offerable() -> None:
+    """OD-P2-04: an insertion whose Section 36 pricing steps 4-5 are not done is not offerable."""
+    from app.modules.candidate.service import offerable
+
+    assert offerable("COMPLETE") and not offerable("PENDING_P3") and not offerable(None)

@@ -81,6 +81,10 @@ class RunResult:
     rejections: dict[str, dict[str, int]] = field(default_factory=dict)
     osrm_requests: int = 0
     error: str | None = None
+    # Instrumentation only (not stored): what was evaluated, so an independent checker can
+    # confirm that every rejection was right.
+    evaluated_drivers: list[tuple[str, uuid.UUID]] = field(default_factory=list)
+    evaluated_plans: list[uuid.UUID] = field(default_factory=list)
 
 
 def _state(d: driver_service.DriverCandidate) -> DriverState:
@@ -171,18 +175,17 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
     t0 = time.perf_counter()
     lon, lat = p_pt
     stale = settings.location_stale_s
-    bikes = (driver_service.nearby_idle_drivers(session, lon, lat, R_URBAN_M, "BIKE", N_SINGLE, now, stale)
-             if "BIKE_URBAN" in services else [])
+    near = driver_service.nearby_idle_drivers(session, lon, lat, R_URBAN_M, N_SINGLE, now, stale)
+    bikes = near["BIKE"] if "BIKE_URBAN" in services else []
     cars: dict[uuid.UUID, driver_service.DriverCandidate] = {}
     if "CAR_URBAN_PRIVATE" in services:
-        cars |= {d.driver_id: d for d in driver_service.nearby_idle_drivers(session, lon, lat, R_URBAN_M, "CAR4",
-                                                                            N_SINGLE, now, stale)}
+        cars |= {d.driver_id: d for d in near["CAR4"]}
     pool_b: set[uuid.UUID] = set()
     if "CAR_URBAN_POOL" in services:
-        found = driver_service.nearby_idle_drivers(session, lon, lat, R_URBAN_M, "CAR4", N_SINGLE, now, stale,
-                                                   pool_only=True)
-        cars |= {d.driver_id: d for d in found}
-        pool_b = {d.driver_id for d in found}
+        cars |= {d.driver_id: d for d in near["CAR4_POOL"]}
+        pool_b = {d.driver_id for d in near["CAR4_POOL"]}
+    result.timings_ms["postgis_drivers"] = (time.perf_counter() - t0) * 1000
+    t0 = time.perf_counter()
     plan_recs: list[tuple[plans.PlanRecord, driver_service.DriverCandidate]] = []
     if "CAR_URBAN_POOL" in services:
         by_driver = plans.open_plan_drivers(session)
@@ -198,7 +201,7 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
             plan_recs.append((rec, s))
             if len(plan_recs) == n_pool:
                 break
-    result.timings_ms["postgis"] = (time.perf_counter() - t0) * 1000
+    result.timings_ms["plan_lookup"] = (time.perf_counter() - t0) * 1000
     result.counts |= {"bike_drivers": len(bikes), "car_drivers": len(cars), "pool_b_drivers": len(pool_b),
                       "pool_plans": len(plan_recs)}
 
@@ -229,18 +232,34 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
         m = provider.matrix(Profile.MOTORBIKE, [bike_nodes.points[i] for i in src],
                             [bike_nodes.points[i] for i in (bp, bq)])
         result.timings_ms["osrm_motorbike"] = m.stats.get("osrm_ms", 0.0)
-        return _square(m, src, [bp, bq], len(bike_nodes.points))
+        result.counts["motorbike_matrix"] = [m.stats.get("sources"), m.stats.get("destinations")]
+        t_sq = time.perf_counter()
+        out = _square(m, src, [bp, bq], len(bike_nodes.points))
+        result.timings_ms["convert_motorbike"] = m.stats.get("convert_ms", 0.0) + (time.perf_counter() - t_sq) * 1000
+        return out
 
     def car_table() -> tuple[list, list] | None:
         if not cars and not plan_recs:
             return None
         if not plan_recs:  # Section 35.1 step 4: [drivers, P] x [P, Q]
             src, dst = list(car_drv.values()) + [cp], [cp, cq]
-        else:              # Section 34 / 35.2 step 4: every car node x every car node
-            src = dst = list(range(len(car_nodes.points)))
+        else:
+            # Section 34 / 35.2 step 4: one table over every car node as origin. Destinations are
+            # the nodes a vehicle is ever routed TO - the stops ahead of each plan, P and Q; idle
+            # drivers and plan vehicles (S_curr) are origins only. Every cell the insertion reads
+            # has its destination in this set (test_insertion_reads_only_stop_destinations), so
+            # the answer is the same as the full square, with fewer cells for OSRM to compute.
+            src = list(range(len(car_nodes.points)))
+            dst = [node for _, stops in plan_nodes.values() for _, node in stops] + [cp, cq]
         m = provider.matrix(Profile.CAR, [car_nodes.points[i] for i in src], [car_nodes.points[i] for i in dst])
         result.timings_ms["osrm_car"] = m.stats.get("osrm_ms", 0.0)
-        return _square(m, src, dst, len(car_nodes.points))
+        result.timings_ms["osrm_car_http"] = m.stats.get("http_ms", 0.0)
+        result.timings_ms["osrm_car_json"] = m.stats.get("json_ms", 0.0)
+        result.counts["car_matrix"] = [m.stats.get("sources"), m.stats.get("destinations"), m.stats.get("coordinates")]
+        t_sq = time.perf_counter()
+        out = _square(m, src, dst, len(car_nodes.points))
+        result.timings_ms["convert_car"] = m.stats.get("convert_ms", 0.0) + (time.perf_counter() - t_sq) * 1000
+        return out
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         bike_future, car_future = pool.submit(bike_table), pool.submit(car_table)
@@ -253,9 +272,22 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
     version = baseline["pricing_version"]
     car_section = pricing_service.active_sections(session, "CAR_URBAN_PRIVATE", version)["car_urban"]
     bike_section = pricing_service.active_sections(session, "BIKE_URBAN", version)["bike_urban"] if bike_m else None
+    result.timings_ms["pricing_params"] = (time.perf_counter() - t0) * 1000
+    t0 = time.perf_counter()
+    ins_stats: dict[str, float] = {}
+    t_record = 0.0
     rej: dict[str, Counter] = {s: Counter() for s in services}
+    # Depend on the trip and the service only - computed once per service, not once per driver.
+    booking_time = {s: booking_time_ok(trip, s, baseline) for s in services}
+    riders_by_service: dict[tuple[str, int], RiderSpec] = {}
 
     def new_rider(service: str, D: list, T: list, p: int, q: int, private_fare: int | None) -> RiderSpec:
+        key = (service, id(D))
+        if key not in riders_by_service:
+            riders_by_service[key] = _new_rider(service, D, T, p, q, private_fare)
+        return riders_by_service[key]
+
+    def _new_rider(service: str, D: list, T: list, p: int, q: int, private_fare: int | None) -> RiderSpec:
         d_m, d_s = D[p][q], T[p][q]
         direct_m, direct_s = (d_m or 0.0), (d_s or 0.0)
         if service == "BIKE_URBAN":
@@ -278,6 +310,8 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
     def record(service: str, source: str, d: driver_service.DriverCandidate, rep: InsertionReport,
                D: list, T: list, start: int, p: int, q: int, private_fare: int | None,
                plan: plans.PlanRecord | None) -> None:
+        nonlocal t_record
+        t_rec = time.perf_counter()
         rej[service].update(rep.rejections)
         best = rep.best
         if best is None:
@@ -308,6 +342,7 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
                  if r.direct_distance_m else 0.0, "max_detour": r.max_detour_ratio,
                  "max_price_vnd": r.max_price_vnd, "budget_max_vnd": r.budget_max_vnd}
                 for r in best.evaluation.riders]}))
+        t_record += time.perf_counter() - t_rec
 
     if bike_m is not None:
         D, T = bike_m
@@ -315,8 +350,9 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
             start = bike_drv[d.driver_id]
             state = PlanState(None, None, _state(d), start, now, 0, (), ())
             rider = new_rider("BIKE_URBAN", D, T, bp, bq, None)
+            result.evaluated_drivers.append(("BIKE_URBAN", d.driver_id))
             rep = insert(state, rider, bp, bq, D, T, "BIKE_URBAN", NEW_SINGLE_VEHICLE,
-                         booking_time_ok(trip, "BIKE_URBAN", baseline), params)
+                         booking_time["BIKE_URBAN"], params, stats=ins_stats)
             record("BIKE_URBAN", NEW_SINGLE_VEHICLE, d, rep, D, T, start, bp, bq, None, None)
     if car_m is not None:
         D, T = car_m
@@ -329,19 +365,29 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
                 if service not in services or (service == "CAR_URBAN_POOL" and d.driver_id not in pool_b):
                     continue
                 state = PlanState(None, None, _state(d), start, now, 0, (), ())
+                result.evaluated_drivers.append((service, d.driver_id))
                 rep = insert(state, new_rider(service, D, T, cp, cq, private), cp, cq, D, T, service,
-                             NEW_SINGLE_VEHICLE, booking_time_ok(trip, service, baseline), params)
+                             NEW_SINGLE_VEHICLE, booking_time[service], params, stats=ins_stats)
                 record(service, NEW_SINGLE_VEHICLE, d, rep, D, T, start, cp, cq, private, None)
+        t_pool = time.perf_counter()
         for rec, s in plan_recs:
             curr, ahead = plan_nodes[rec.plan_id]
             state = _plan_state(rec, s, curr, ahead, views, trips, genders, baseline, now)
             if state is None:
                 rej["CAR_URBAN_POOL"]["PLAN_DATA_INCOMPLETE"] += 1
                 continue
+            result.evaluated_plans.append(rec.plan_id)
             rep = insert(state, new_rider("CAR_URBAN_POOL", D, T, cp, cq, private), cp, cq, D, T, "CAR_URBAN_POOL",
-                         EXISTING_POOL_PLAN, booking_time_ok(trip, "CAR_URBAN_POOL", baseline), params)
+                         EXISTING_POOL_PLAN, booking_time["CAR_URBAN_POOL"], params,
+                         stats=ins_stats)
             record("CAR_URBAN_POOL", EXISTING_POOL_PLAN, s, rep, D, T, curr, cp, cq, private, rec)
+        result.timings_ms["insertion_pool_plans"] = (time.perf_counter() - t_pool) * 1000
+    # "constraints" = everything of step 3 (insertion + hard constraints + candidate records), kept
+    # under its old name for the before / after comparison; its parts are listed beside it.
     result.timings_ms["constraints"] = (time.perf_counter() - t0) * 1000
+    result.timings_ms["check_all"] = ins_stats.get("check_all_s", 0.0) * 1000
+    result.timings_ms["candidate_records"] = t_record * 1000
+    result.counts["options_checked"] = int(ins_stats.get("options_checked", 0))
     result.rejections = {s: dict(c) for s, c in rej.items()}
     result.counts["feasible"] = dict(Counter(c.service_code for c in result.candidates))
     result.timings_ms["total"] = (time.perf_counter() - t_start) * 1000

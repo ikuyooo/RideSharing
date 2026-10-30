@@ -11,7 +11,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
@@ -19,11 +19,25 @@ from app.core.settings import Settings
 from app.modules.candidate.generator import RunResult, generate
 from app.modules.candidate.models import CandidateRun, RideCandidate
 from app.modules.routing.factory import osrm_provider, policy_for
-from app.modules.routing.provider import MatrixTooLarge, RouteNotFound, RoutingProvider, RoutingUnavailable
+from app.modules.routing.provider import (
+    MatrixTooLarge,
+    RouteNotFound,
+    RoutingPolicy,
+    RoutingProvider,
+    RoutingUnavailable,
+)
 from app.modules.trip.service import active_service_areas, trip_snapshots
 
 ERRORS = {RoutingUnavailable: ("ROUTING_UNAVAILABLE", 503), MatrixTooLarge: ("MATRIX_TOO_LARGE", 503),
           RouteNotFound: ("ROUTE_NOT_FOUND", 422)}
+# OD-P2-04 (APPROVED): only candidates whose pricing is complete may ever be offered or booked;
+# branch-A insertions stay PENDING_P3 until the Phase 3 allocation exists. Phase 4 (offer /
+# booking) must call `offerable` before showing or holding a candidate.
+OFFERABLE_PRICING_CHECKS = frozenset({"COMPLETE"})
+
+
+def offerable(pricing_check: str | None) -> bool:
+    return pricing_check in OFFERABLE_PRICING_CHECKS
 
 
 def run(session: Session, settings: Settings, request_id: uuid.UUID, provider: RoutingProvider | None = None,
@@ -40,28 +54,36 @@ def run(session: Session, settings: Settings, request_id: uuid.UUID, provider: R
     except (RoutingUnavailable, MatrixTooLarge, RouteNotFound) as exc:
         status = next(code for cls, (code, _) in ERRORS.items() if isinstance(exc, cls))
         result = RunResult(status=status, error=str(exc))
+    stored = persist(session, request_id, policy, areas.version, result)
+    if result.status != "OK":
+        code, http = next(v for cls, v in ERRORS.items() if v[0] == result.status)
+        raise ApiError(http, code, result.error or code, {"run_id": str(stored.id)})
+    return stored, result
+
+
+def persist(session: Session, request_id: uuid.UUID, policy: RoutingPolicy, service_area_version: str,
+            result: RunResult) -> CandidateRun:
+    """Store one run and its feasible candidates (the audit / event log), one commit."""
     stored = CandidateRun(request_id=request_id, status=result.status,
                           routing_policy_json={"exclude": list(policy.exclude), "routing_version": policy.routing_version,
-                                               "service_area_version": areas.version},
+                                               "service_area_version": service_area_version},
                           osrm_requests=result.osrm_requests, timings_json=result.timings_ms,
                           counts_json=result.counts | ({"error": result.error} if result.error else {}),
                           rejections_json=result.rejections)
     session.add(stored)
     session.flush()
-    for c in result.candidates:
-        session.add(RideCandidate(
+    if result.candidates:  # one multi-row INSERT instead of one ORM object per candidate
+        session.execute(insert(RideCandidate), [dict(
             request_id=request_id, run_id=stored.id, service_code=c.service_code, candidate_source_type=c.source_type,
             target_plan_id=c.plan_id, source_plan_version=c.plan_version, seat_count=c.seat_count, walk_m=0,
             private_fare_ref_vnd=c.private_fare_vnd, pool_quote_price_vnd=c.pool_quote_vnd,
             pool_unmatched_price_vnd=c.pool_unmatched_vnd, expected_price_vnd=c.expected_price_vnd,
             driver_id=c.driver_id, vehicle_id=c.vehicle_id, pickup_eta_s=round(c.pickup_eta_s),
             direct_distance_m=c.direct_distance_m, direct_duration_s=c.direct_duration_s,
-            pricing_check=c.pricing_check, insertion_json=c.insertion, constraint_audit_json=c.audit))
+            pricing_check=c.pricing_check, insertion_json=c.insertion, constraint_audit_json=c.audit)
+            for c in result.candidates])
     session.commit()
-    if result.status != "OK":
-        code, http = next(v for cls, v in ERRORS.items() if v[0] == result.status)
-        raise ApiError(http, code, result.error or code, {"run_id": str(stored.id)})
-    return stored, result
+    return stored
 
 
 def run_out(session: Session, run_id: uuid.UUID) -> dict[str, Any]:

@@ -131,6 +131,8 @@ def test_branch_a_inserts_into_a_running_vehicle(world: Session, provider: OsrmR
     s.commit()
     stored, result = _run(s, provider, b_trip)
     assert result.counts["pool_plans"] == 1 and result.osrm_requests == 1
+    # One car table: origins = vehicle (S_curr), stop ahead, P, Q; destinations = stop ahead, P, Q only.
+    assert result.counts["car_matrix"][:2] == [4, 3]
     a = [c for c in result.candidates if c.source_type == "EXISTING_POOL_PLAN"]
     assert len(a) == 1 and a[0].plan_id == plan and a[0].plan_version == 3
     assert a[0].pricing_check == "PENDING_P3"  # steps 4-5 of Section 36 belong to Phase 3
@@ -193,3 +195,37 @@ def test_admin_api_and_driver_availability(world: Session, client: TestClient,  
     assert body["status"] == "OK" and [c["driver_id"] for c in body["candidates"]] == [profile["user_id"]]
     again = client.get(f"/api/admin/candidates/runs/{body['run_id']}", headers=admin).json()
     assert again["candidates"][0]["constraint_audit"]["checked"] == "HC01-HC11"
+
+
+def test_one_spatial_query_returns_the_same_lists_as_one_query_per_list(world: Session) -> None:
+    """PostGIS optimisation P1: the merged query (one scan, row_number per list) returns exactly
+    the lists of three separate `WHERE ... ORDER BY distance LIMIT 15` queries (old behaviour)."""
+    import random
+
+    from app.modules.driver.service import nearby_idle_drivers
+
+    s, rng = world, random.Random(7)
+    for i in range(300):
+        lon, lat = 105.80 + rng.uniform(-0.06, 0.06), 21.02 + rng.uniform(-0.05, 0.05)
+        kind = i % 4
+        fx.driver(s, lon, lat, NOW, vehicle_type="BIKE" if kind == 0 else "CAR4", pool=kind == 1,
+                  availability="OFFLINE" if i % 17 == 0 else "IDLE", age_s=600 if i % 23 == 0 else 5,
+                  accepts_urban=i % 29 != 0)
+    s.commit()
+    p = (105.80, 21.02)
+    got = nearby_idle_drivers(s, p[0], p[1], 5000, 15, NOW, 120)
+
+    def old(where: str) -> list:
+        return list(s.execute(text(
+            "SELECT dl.driver_id FROM driver_locations dl JOIN driver_profiles dp ON dp.user_id = dl.driver_id "
+            "JOIN vehicles v ON v.id = dl.active_vehicle_id WHERE dl.availability = 'IDLE' "
+            "AND dl.updated_at >= :now - interval '120 seconds' AND v.is_active AND dp.accepts_urban AND " + where +
+            " AND ST_DWithin(dl.geom::geography, ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography, 5000) "
+            "ORDER BY ST_Distance(dl.geom::geography, ST_SetSRID(ST_MakePoint(:x, :y), 4326)::geography) LIMIT 15"),
+            {"now": NOW, "x": p[0], "y": p[1]}).scalars())
+
+    assert [d.driver_id for d in got["BIKE"]] == old("v.vehicle_type = 'BIKE'")
+    assert [d.driver_id for d in got["CAR4"]] == old("v.vehicle_type = 'CAR4'")
+    assert [d.driver_id for d in got["CAR4_POOL"]] == old(
+        "v.vehicle_type = 'CAR4' AND dp.pool_enabled AND dp.kyc_status = 'VERIFIED'")
+    assert all(len(v) == 15 for v in got.values())  # enough drivers: every list is full

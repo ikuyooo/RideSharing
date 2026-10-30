@@ -107,3 +107,38 @@ def onboard_plan(session: Session, driver_id: uuid.UUID, vehicle_id: uuid.UUID, 
                         {"p": plan, "s": seq, "k": kind, "b": booking, "lon": pt[0], "lat": pt[1], "st": status, "c": done})
     session.execute(text("UPDATE driver_locations SET availability = 'BUSY' WHERE driver_id = :d"), {"d": driver_id})
     return plan
+
+
+def plan(session: Session, driver_id: uuid.UUID, vehicle_id: uuid.UUID, riders: list[dict],
+         ahead: list[tuple[int, str]]) -> uuid.UUID:
+    """A general open plan. riders[i]: user, trip, pickup, dropoff, onboard, boarded (onboard only),
+    direct_m, direct_s, traveled_km, cap_vnd, seats. Completed stops = pickups of the onboard
+    riders; `ahead` = the stops still to serve, as (rider index, PICKUP | DROPOFF) in driving order."""
+    plan_id = uuid.uuid4()
+    done = [i for i, r in enumerate(riders) if r["onboard"]]
+    session.execute(text("INSERT INTO ride_plans (id, driver_id, vehicle_id, service_code, status, completed_stop_index, "
+                         "plan_version) VALUES (:p, :d, :v, 'CAR_URBAN_POOL', 'PLAN_OPEN_SEARCHING', :r, 1)"),
+                    {"p": plan_id, "d": driver_id, "v": vehicle_id, "r": len(done) - 1})
+    bookings = []
+    for r in riders:
+        booking = uuid.uuid4()
+        bookings.append(booking)
+        session.execute(text("INSERT INTO bookings (id, request_id, user_id, driver_id, service_code, booking_type, "
+                             "seat_count, ride_plan_id, ride_status, price_status, quoted_price_cap_vnd) VALUES "
+                             "(:b, :t, :u, :d, 'CAR_URBAN_POOL', 'NOW', :s, :p, :st, 'POOL_SEARCHING', :cap)"),
+                        {"b": booking, "t": r["trip"], "u": r["user"], "d": driver_id, "s": r.get("seats", 1), "p": plan_id,
+                         "st": "RIDE_STARTED" if r["onboard"] else "CONFIRMED", "cap": r["cap_vnd"]})
+        session.execute(text("INSERT INTO ride_participants (ride_plan_id, booking_id, seat_count, "
+                             "traveled_km_before_last_replan, direct_distance_m, direct_duration_s) "
+                             "VALUES (:p, :b, :s, :km, :dm, :ds)"),
+                        {"p": plan_id, "b": booking, "s": r.get("seats", 1), "km": r.get("traveled_km", 0.0),
+                         "dm": r["direct_m"], "ds": r["direct_s"]})
+    stops = [(i, "PICKUP", "COMPLETED", riders[i]["boarded"]) for i in done] + [(i, k, "PLANNED", None) for i, k in ahead]
+    for seq, (i, kind, status, at) in enumerate(stops):
+        pt = riders[i]["pickup" if kind == "PICKUP" else "dropoff"]
+        session.execute(text("INSERT INTO ride_stops (ride_plan_id, seq, kind, booking_id, geom, status, completed_at) "
+                             "VALUES (:p, :s, :k, :b, ST_SetSRID(ST_MakePoint(:lon, :lat), 4326), :st, :c)"),
+                        {"p": plan_id, "s": seq, "k": kind, "b": bookings[i], "lon": pt[0], "lat": pt[1], "st": status,
+                         "c": at})
+    session.execute(text("UPDATE driver_locations SET availability = 'BUSY' WHERE driver_id = :d"), {"d": driver_id})
+    return plan_id

@@ -1,0 +1,16 @@
+ Container ridesharing-backend-run-6630ae0f780e Creating 
+ Container ridesharing-backend-run-6630ae0f780e Created 
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, p1 core schema
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, p1 survey s1 draft storage
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, p1 service area excluded layer
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, p1 survey s1 duration
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, p2 routing candidate pooling
+50x0 | total p50/p95/p99 52.7 138.05 180.63 | postgis p95 20.48 | osrm_car p95 71.4 | step3 p95 20.68 | errors {} 
+200x0 | total p50/p95/p99 73.15 192.55 285.41 | postgis p95 42.41 | osrm_car p95 87.91 | step3 p95 56.19 | errors {} 
+1000x0 | total p50/p95/p99 74.74 158.25 258.7 | postgis p95 50.18 | osrm_car p95 81.27 | step3 p95 34.05 | errors {} 
+200x10 | total p50/p95/p99 94.65 205.02 309.63 | postgis p95 42.71 | osrm_car p95 108.12 | step3 p95 39.18 | errors {} 
+200x20 | total p50/p95/p99 104.05 241.28 344.36 | postgis p95 45.08 | osrm_car p95 114.63 | step3 p95 43.33 | errors {} 
+1000x20 | total p50/p95/p99 118.65 256.2 350.96 | postgis p95 72.77 | osrm_car p95 121.98 | step3 p95 45.33 | errors {} 
+written /repo/docs/implementation/evidence/p2_runs/20261030T150816Z-before-s2/result.json

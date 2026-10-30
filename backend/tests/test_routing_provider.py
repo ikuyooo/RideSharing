@@ -36,6 +36,7 @@ def _fake(monkeypatch: pytest.MonkeyPatch, status: int, body: object, seen: list
         return httpx.Response(status, content=json.dumps(body).encode())
 
     monkeypatch.setattr(httpx, "get", fake_get)
+    monkeypatch.setattr(httpx.Client, "get", lambda self, url, params=None, **kw: fake_get(url, params, **kw))
 
 
 def test_matrix_is_one_table_request_with_distinct_coordinates(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -100,6 +101,7 @@ def test_timeout_and_network_errors(monkeypatch: pytest.MonkeyPatch) -> None:
         raise httpx.ReadTimeout("slow")
 
     monkeypatch.setattr(httpx, "get", timeout)
+    monkeypatch.setattr(httpx.Client, "get", timeout)
     with pytest.raises(RoutingTimeout):
         _provider().matrix(Profile.CAR, [HOAN_KIEM], [PHENIKAA])
     monkeypatch.undo()
@@ -219,3 +221,24 @@ def test_real_matrix_matches_pairwise_routes(profile: Profile) -> None:
             r = p.route(profile, a, b)
             assert m.distance_m[i][j] == pytest.approx(r.distance_m, abs=1.0)
             assert m.duration_s[i][j] == pytest.approx(r.duration_s, abs=1.0)
+
+
+def test_provider_reuses_one_client_without_keep_alive(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Optimisation O2: one httpx.Client per provider (no SSL context per request), still a new
+    connection per request (Connection: close, no keep-alive pool - Phase 0 finding)."""
+    clients: set[int] = set()
+    headers: list = []
+
+    def fake(self, url, params=None, **kw):  # type: ignore[no-untyped-def]
+        clients.add(id(self))
+        headers.append(kw.get("headers"))
+        body = {"code": "Ok", "routes": [{"distance": 1.0, "duration": 1.0}],
+                "waypoints": [{"distance": 0.0}, {"distance": 0.0}]}
+        return httpx.Response(200, content=json.dumps(body).encode())
+
+    monkeypatch.setattr(httpx.Client, "get", fake)
+    p = _provider()
+    p.route(Profile.CAR, HOAN_KIEM, PHENIKAA)
+    p.route(Profile.MOTORBIKE, HOAN_KIEM, PHENIKAA)
+    assert len(clients) == 1 and all(h == {"Connection": "close"} for h in headers)
+    assert p._client._transport._pool._max_keepalive_connections == 0  # noqa: SLF001
