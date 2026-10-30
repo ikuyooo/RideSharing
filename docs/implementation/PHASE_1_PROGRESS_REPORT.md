@@ -1,8 +1,12 @@
 # PHASE 1 — BÁO CÁO TIẾN ĐỘ (chưa phải báo cáo hoàn thành)
 
-- **Cập nhật:** 2026-10-28 (sau "P1 OWNER APPROVAL & FINAL CLOSURE GATES").
-- **Trạng thái P1: `PHASE_1_IN_PROGRESS__APPROVAL_REQUIRED`.** `PHASE_1_COMPLETION_REPORT.md` **không được tạo**: khảo sát S1 chưa phát hành, chưa thu dữ liệu thật (mục 8).
-- Giữ nguyên: `PHASE_0_CONDITIONAL__REVIEW_REQUIRED`; SF-06 = OPEN; Revision 9 và Baseline v1 không bị sửa; không chuyển sang P2.
+- **Cập nhật 2026-10-29 ("DEVELOPMENT FIRST, DEPLOYMENT LATER"):** lập trình P1 = `IMPLEMENTATION_COMPLETE` + `LOCAL_VERIFIED`;
+  phát hành S1 / HTTPS công khai / dữ liệu thật = `EXTERNAL_VALIDATION_DEFERRED`; `FORMAL_PHASE_ACCEPTANCE` theo R9 §79 **không đạt**
+  (S1 chưa thu dữ liệu) → P1 không được gán COMPLETE. P2 bắt đầu theo ngoại lệ tiến độ do Chủ dự án phê duyệt.
+  Chi tiết và bằng chứng: **`P1_LOCAL_HANDOFF_REPORT.md`** (thay thế các mục 3, 5, 6 dưới đây). D2 đang dùng, R1–R4 ACCEPTED, 139 test pass.
+- Cập nhật trước: 2026-10-28 (sau "P1 OWNER APPROVAL & FINAL CLOSURE GATES").
+- **Trạng thái P1: `PHASE_1_IN_PROGRESS__EXTERNAL_VALIDATION_DEFERRED`.** `PHASE_1_COMPLETION_REPORT.md` **không được tạo**: khảo sát S1 chưa phát hành, chưa thu dữ liệu thật (mục 7).
+- Giữ nguyên: `PHASE_0_CONDITIONAL__REVIEW_REQUIRED`; SF-06 = OPEN; Revision 9 và Baseline v1 không bị sửa.
 - Lịch sử các vòng trước: `P1_DESIGN_DECISIONS.md` §1–6, `SPEC_FINDINGS_P1.md`, `service_area/GEOMETRY_REVIEW_P1_FINAL_CLOSURE.md`, `service_area/GEOMETRY_REVIEW_P1_HARDENING.md`.
 
 ## 1. Hình học vùng phục vụ — `GEOMETRY_APPROVED_FOR_MVP`

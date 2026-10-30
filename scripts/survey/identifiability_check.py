@@ -5,13 +5,15 @@ alternatives of the same task. For each design this builds those differences
 (versus CAR_URBAN_PRIVATE) over all 6 blocks x 8 tasks and reports the rank, the
 pairwise correlations and the variance inflation factors (VIF) of the attribute
 columns. Designs:
-  A  current active design (draft 3): prices / times change only with distance
+  A  base levels (variation design off): prices / times change only with distance
   B  proposal: pool discount d in {0.20, 0.25, 0.35} and private / bike price
      multipliers {0.90, 1.00, 1.10}, rotated independently of distance
   C  proposal B + one travel-time multiplier {0.85, 1.00, 1.15} for all modes
   D  proposal B + independent time multipliers per mode {0.80, 1.00, 1.20}
      (car and motorbike times vary separately, e.g. traffic / parking)
-Proposal levels are NOT active (EXPERIMENT_REVIEW_REQUIRED). Pool prices in B / C
+  generator_inactive / generator_active  the real generator with the questionnaire's
+     variation design off / on (on = the file's design, D2 since draft 5)
+B / C / D here are hand-built comparison designs. Pool prices in B / C
 are recomputed from the displayed private price P with the Baseline rules
 (expected = floor((1 - d) P), Quote = floor(0.80 P), Unmatched = floor(Quote +
 0.5 (P - Quote))), and every level is checked against the Baseline bounds.
@@ -161,7 +163,7 @@ def inverse(m: list[list[float]]) -> list[list[float]] | None:
 def analyse(design: str) -> dict:
     if design == "generator_inactive":
         rows, checks = rows_generated(False)
-    elif design == "generator_D_active":
+    elif design == "generator_active":
         rows, checks = rows_generated(True)
     else:
         rows, checks = rows_for(design)
@@ -181,7 +183,7 @@ def analyse(design: str) -> dict:
 
 
 def main() -> None:
-    results = [analyse(d) for d in ("A", "B", "C", "D", "generator_inactive", "generator_D_active")]
+    results = [analyse(d) for d in ("A", "B", "C", "D", "generator_inactive", "generator_active")]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")

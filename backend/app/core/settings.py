@@ -38,6 +38,18 @@ class Settings(BaseSettings):
     allow_candidate_service_area: bool = False
     routing_timeout_s: float = 5.0
 
+    # --- routing provider (Section 34; Phase 2) -------------------------------
+    # Technical values, not Baseline parameters. max table size must match the
+    # osrm-routed --max-table-size of docker-compose (OSRM_MAX_TABLE_SIZE).
+    osrm_max_table_size: int = 200
+    # Names the road graph inside cache keys; change it whenever the OSRM graphs are rebuilt.
+    routing_version: str = "osrm-v5.27.1-vn-north"
+    routing_cache_ttl_s: int = 24 * 3600
+
+    # --- candidate generation (Phase 2) -----------------------------------------
+    # P2 plan OD-P2-07: a driver location older than this is not 'online' (constraint 1).
+    location_stale_s: float = 120.0
+
     # --- survey S1 (P1-D5; draft, not released) -------------------------------
     survey_s1_questionnaire_path: Path = Path("/app/survey/s1/questionnaire.draft.yaml")
     # Fixed per deployment, never chosen by a request. RESEARCH also needs the
@@ -45,8 +57,8 @@ class Settings(BaseSettings):
     survey_dataset: Literal["TEST", "RESEARCH"] = "TEST"
     survey_s1_released: bool = False
     # Anti-spam per client address (hashed, never stored); technical defaults.
-    survey_rate_limit_starts_per_hour: int = 10
-    survey_rate_limit_submits_per_hour: int = 20
+    survey_rate_limit_starts_per_hour: int = 60  # rule R2: shared campus Wi-Fi / NAT
+    survey_rate_limit_submits_per_hour: int = 60
 
     @field_validator("service_area_version", mode="before")
     @classmethod

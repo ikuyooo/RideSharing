@@ -1,0 +1,140 @@
+{
+  "label": "SYNTHETIC TEST DATA - pipeline check only, NOT survey results",
+  "design": "D2 (active local TEST design)",
+  "dataset": "TEST",
+  "respondents_submitted": 150,
+  "sessions_abandoned": 16,
+  "choice_sets": 1200,
+  "simulation_priors_assumption": {
+    "asc_bike": 0.5,
+    "asc_pool": -0.2,
+    "price_k": -0.03,
+    "time_min": -0.025,
+    "detour_min": -0.03,
+    "unmatched_gap_k": -0.01,
+    "like_medium": -0.3,
+    "like_low": -0.8,
+    "walk_200": -0.2,
+    "rain_x_bike": -0.8,
+    "urgent_x_time": -0.02
+  },
+  "quota": {
+    "started_by_group": {
+      "STUDENT": 83,
+      "WORKER": 83
+    },
+    "by_group": {
+      "STUDENT": 75,
+      "WORKER": 75
+    },
+    "completion_rate_by_group": {
+      "STUDENT": 0.9036,
+      "WORKER": 0.9036
+    }
+  },
+  "rejections_total_by_code": {
+    "INVALID_START_TOKEN": 2,
+    "REQUEST_VALIDATION": 2
+  },
+  "full_spec": {
+    "asc_bike": {
+      "estimate": 0.2476,
+      "se": 0.3022,
+      "t": 0.82
+    },
+    "asc_pool": {
+      "estimate": -0.3381,
+      "se": 0.2986,
+      "t": -1.13
+    },
+    "price_k": {
+      "estimate": -0.0347,
+      "se": 0.0042,
+      "t": -8.21
+    },
+    "time_min": {
+      "estimate": -0.0355,
+      "se": 0.0142,
+      "t": -2.51
+    },
+    "detour_min": {
+      "estimate": -0.0355,
+      "se": 0.0428,
+      "t": -0.83
+    },
+    "unmatched_gap_k": {
+      "estimate": 0.0028,
+      "se": 0.0165,
+      "t": 0.17
+    },
+    "like_medium": {
+      "estimate": -0.6394,
+      "se": 0.2597,
+      "t": -2.46
+    },
+    "like_low": {
+      "estimate": -0.9529,
+      "se": 0.3099,
+      "t": -3.07
+    },
+    "walk_200": {
+      "estimate": -0.2431,
+      "se": 0.2263,
+      "t": -1.07
+    },
+    "rain_x_bike": {
+      "estimate": -0.9187,
+      "se": 0.1724,
+      "t": -5.33
+    },
+    "urgent_x_time": {
+      "estimate": -0.0181,
+      "se": 0.0212,
+      "t": -0.85
+    },
+    "z_vs_simulation_prior_max_abs": 1.31
+  },
+  "lean_primary_spec": {
+    "asc_bike": {
+      "estimate": 0.2353,
+      "se": 0.3018,
+      "t": 0.78
+    },
+    "asc_pool": {
+      "estimate": -0.5282,
+      "se": 0.2255,
+      "t": -2.34
+    },
+    "price_k": {
+      "estimate": -0.035,
+      "se": 0.0042,
+      "t": -8.28
+    },
+    "time_min": {
+      "estimate": -0.042,
+      "se": 0.0102,
+      "t": -4.12
+    },
+    "like_medium": {
+      "estimate": -0.7347,
+      "se": 0.2502,
+      "t": -2.94
+    },
+    "like_low": {
+      "estimate": -1.0092,
+      "se": 0.3056,
+      "t": -3.3
+    },
+    "walk_200": {
+      "estimate": -0.2406,
+      "se": 0.2241,
+      "t": -1.07
+    },
+    "rain_x_bike": {
+      "estimate": -0.9231,
+      "se": 0.172,
+      "t": -5.37
+    }
+  },
+  "note": "the lean model omits terms present in the simulation, so its estimates are not compared with the priors"
+}

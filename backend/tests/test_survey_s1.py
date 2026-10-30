@@ -83,6 +83,18 @@ def test_design_follows_section_65_and_is_deterministic(client: TestClient) -> N
     assert [f["display_label"] for f in d["fairness"]] == ["X", "Y", "Z"]
     assert {f["method"] for f in d["fairness"]} == {"A_proportional", "B_shapley_equal_split", "C_inconvenience_weighted"}
     # Values come from the draft questionnaire; TBD is never replaced by a number.
+    # The base levels are checked with the variation design switched off (in memory);
+    # the served design (D2 active, local TEST) is checked in the variation test below.
+    import copy
+
+    from app.modules.ml_models.survey_service import load_questionnaire
+
+    q = load_questionnaire(Path(get_settings().survey_s1_questionnaire_path))
+    rid = uuid.UUID(s["respondent_id"])
+    assert build_design(q, rid, d["block"]) == d
+    off = copy.deepcopy(q)
+    off["part_1a"]["variation_design"]["active"] = False
+    t1a = [t for t in build_design(off, rid, d["block"])["tasks"] if t["part"] == "1A"]
     fourteen = next(t for t in t1a if t["context"]["distance_km"] == 14)
     prices = {c["alternative"]: c["price_vnd"] for c in fourteen["cards"]}
     # Survey decision 2: the generic 14 km card shows Fare_matched_est (R9 Section 20.2);
@@ -101,9 +113,6 @@ def test_design_follows_section_65_and_is_deterministic(client: TestClient) -> N
     assert len({c["fill_likelihood"] for c in fills}) == 2 and {c["fill_likelihood"] for c in fills} <= {"LOW", "MEDIUM", "HIGH"}
     assert all(c["fill_likelihood_text"] for c in fills)
     assert not any(v == "TBD" for t in d["tasks"] for c in t["cards"] for v in c.values())
-    q = load_questionnaire(Path(get_settings().survey_s1_questionnaire_path))
-    rid = uuid.UUID(s["respondent_id"])
-    assert build_design(q, rid, d["block"]) == d
 
 
 def test_block_rotation_covers_all_pool_combinations() -> None:
@@ -220,6 +229,60 @@ def test_rate_limit_rejects_bursts(client: TestClient, limiter: FakeLimiter) -> 
     assert resp.status_code == 429 and resp.json()["error"]["code"] == "RATE_LIMITED"
 
 
+def test_rejections_are_counted_by_code_without_content(client: TestClient, db_session: Session) -> None:
+    """Rule R3 adjustment: every 422 of the public endpoints is counted per error code; the
+    counter receives the code only (no address, no body); admin reads the aggregate."""
+    from app.modules.ml_models.survey_api import get_rejection_counter
+
+    class FakeCounter:
+        def __init__(self) -> None:
+            self.codes: list[str] = []
+
+        def record(self, code: str) -> None:
+            self.codes.append(code)
+
+        def counts(self, days: int) -> dict[str, dict[str, int]]:
+            out: dict[str, int] = {}
+            for c in self.codes:
+                out[c] = out.get(c, 0) + 1
+            return {"2026-10-29": out}
+
+    fake = FakeCounter()
+    client.app.dependency_overrides[get_rejection_counter] = lambda: fake
+    try:
+        s = _start(client)
+        url = f"/api/survey/s1/sessions/{s['respondent_id']}/submit"
+        assert client.post(url, json=_answer(s) | {"unknown": 1}).status_code == 422
+        assert client.post(url, json=_answer(s) | {"start_token": "1.forged"}).status_code == 422
+        assert client.post(url, json=_answer(s)).status_code == 201
+        assert client.post(url, json=_answer(s)).status_code == 409  # not a 422: not counted
+        assert fake.codes == ["REQUEST_VALIDATION", "INVALID_START_TOKEN"]
+        _, admin = new_admin(client, db_session)
+        _, passenger = new_user(client)
+        assert client.get("/api/admin/survey/s1/rejections", headers=passenger).status_code == 403
+        body = client.get("/api/admin/survey/s1/rejections?days=7", headers=admin).json()
+        assert body["total_by_code"] == {"INVALID_START_TOKEN": 1, "REQUEST_VALIDATION": 1}
+    finally:
+        client.app.dependency_overrides.pop(get_rejection_counter, None)
+
+
+def test_rate_limits_allow_shared_campus_networks() -> None:
+    """Rule R2 adjustment: 60 session starts per hour per hashed address."""
+    from app.core.settings import Settings
+
+    assert Settings.model_fields["survey_rate_limit_starts_per_hour"].default == 60
+    assert Settings.model_fields["survey_rate_limit_submits_per_hour"].default == 60
+
+
+def test_form_keeps_only_a_completed_mark() -> None:
+    """Rule R2 adjustment: the browser keeps a non-PII 'completed' mark, never the session id."""
+    from app.modules.ml_models.survey_api import FORM
+
+    html = FORM.read_text(encoding="utf-8")
+    assert 'localStorage.setItem(DONE_KEY, "1")' in html
+    assert "localStorage.setItem(\"s1_respondent_id" not in html
+
+
 def test_rate_limit_key_never_contains_the_address() -> None:
     from datetime import UTC, datetime
 
@@ -286,7 +349,11 @@ def test_export_formats_groupkfold_and_h4(client: TestClient, db_session: Sessio
     assert len(ids) == 3
     assert all(r["group"] == "STUDENT" for r in respondents)
     assert all(r["usual_trip_distance"] == "3-LT6" and r["duration_s"] != "" for r in respondents)
-    assert {r["quote_cap_vnd"] for r in choices if r["alternative"] == "CAR_URBAN_POOL"} == {"155000", "76000"}
+    # Quote_i = floor(0.80 P) of the private price shown in the same task (Baseline d_min).
+    private = {(r["respondent_id"], r["task_id"]): int(r["price_vnd"]) for r in choices
+               if r["alternative"] == "CAR_URBAN_PRIVATE"}
+    assert all(int(r["quote_cap_vnd"]) == int(private[(r["respondent_id"], r["task_id"])] * 0.80 // 1000) * 1000
+               for r in choices if r["alternative"] == "CAR_URBAN_POOL")
     # Long format: 10 tasks x 3 alternatives per respondent, exactly one chosen per task.
     assert len(choices) == 3 * 10 * 3
     per_task: dict[tuple[str, str], int] = {}
@@ -307,6 +374,9 @@ def test_export_formats_groupkfold_and_h4(client: TestClient, db_session: Sessio
     assert research.status_code == 200 and len(list(csv.DictReader(io.StringIO(research.text)))) == 0
     quota = client.get("/api/admin/survey/s1/quota?dataset=TEST", headers=admin).json()
     assert quota["completed"] == 3 and quota["by_group"] == {"STUDENT": 3}
+    # Rule R1 adjustment: started sessions and the completion rate are reported, not hidden.
+    assert quota["started"] == 4 and quota["started_by_group"] == {"STUDENT": 4}
+    assert quota["completion_rate_by_group"] == {"STUDENT": 0.75}
     # Timestamps are stored truncated to the minute.
     secs = db_session.execute(text("SELECT DISTINCT extract(second FROM started_at) FROM survey_respondents")).scalars().all()
     assert set(secs) == {0}
@@ -339,37 +409,41 @@ def test_research_parameters_stay_out_of_pricing_configs() -> None:
     from app.modules.pricing import seed
 
     q = yaml.safe_load(Path(QUESTIONNAIRE).read_text(encoding="utf-8"))
-    assert q["draft_version"] == 4
+    assert q["draft_version"] == 5
     source = Path(seed.__file__).read_text(encoding="utf-8")
     for marker in ("questionnaire", "price_variation", "survey"):
         assert marker not in source
     six = q["part_1a"]["levels_by_distance"]["6"]
     assert six["CAR_URBAN_POOL"]["expected_price_vnd"]["experimental_status"] == "DERIVED_LOCKED_FORMULA"
-    # Non-base levels are never research-active: at most approved for the TEST pilot, and the
-    # variation switch in the questionnaire file stays off.
+    # Non-base levels are experiment values of the LOCAL TEST design only (owner DEVELOPMENT
+    # FIRST); research collection stays closed by SURVEY_S1_RELEASED, not by this file.
     assert all(v["experimental_status"] == "SOURCED_R9"
-               or v["approval_status"] in ("NOT_ACTIVE_PROPOSAL",)
-               or v["approval_status"].startswith("APPROVED_FOR_TEST_PILOT_ONLY")
+               or v["approval_status"] == "OWNER_DECIDED (DEVELOPMENT FIRST: local TEST design D2)"
                for v in q["part_1a"]["price_variation_proposal"]["levels"].values())
-    assert q["part_1a"]["variation_design"]["active"] is False
+    from app.core.settings import Settings
+
+    assert Settings.model_fields["survey_s1_released"].default is False
+    assert Settings.model_fields["survey_dataset"].default == "TEST"
 
 
-def test_variation_design_is_off_and_valid_when_switched_on() -> None:
-    """SURVEY-06: design D is implemented but inactive; switched on (in memory only), every
-    card respects the Baseline bounds and prices / times no longer follow distance alone."""
-    import copy
-
+def test_variation_design_d2_is_active_and_valid() -> None:
+    """SURVEY-06 / owner DEVELOPMENT FIRST: matrix D2 is the active local design; every card
+    respects the Baseline bounds and prices / times / detour no longer follow distance alone."""
     from app.modules.ml_models.survey_design import build_design
     from app.modules.ml_models.survey_service import load_questionnaire
 
     q = load_questionnaire(Path(QUESTIONNAIRE))
     vd = q["part_1a"]["variation_design"]
-    assert vd["active"] is False and vd["approval_status"].startswith("APPROVED_FOR_TEST_PILOT_ONLY")
-    on = copy.deepcopy(q)
-    on["part_1a"]["variation_design"]["active"] = True
+    assert vd["active"] is True and vd["design"] == "D2"
+    assert vd["approval_status"].startswith("OWNER_DECIDED (DEVELOPMENT FIRST")
+    assert vd["primary_mnl_spec"]["exploratory"] == ["detour", "unmatched_gap"]
+    assert {r["approval_status"] for r in q["analysis_rules"].values()} == {
+        "OWNER_DECIDED (DEVELOPMENT FIRST: accepted with adjustment)", "OWNER_DECIDED (DEVELOPMENT FIRST: accepted)",
+        "OWNER_DECIDED (SURVEY-07)"}
     private_prices: dict[int, set[int]] = {6: set(), 14: set()}
+    times: dict[int, set[tuple[int, int, int]]] = {6: set(), 14: set()}
     for block in range(6):
-        for t in build_design(on, uuid.UUID(int=block + 1), block)["tasks"]:
+        for t in build_design(q, uuid.UUID(int=block + 1), block)["tasks"]:
             if t["part"] != "1A":
                 continue
             c = {x["alternative"]: x for x in t["cards"]}
@@ -378,4 +452,10 @@ def test_variation_design_is_off_and_valid_when_switched_on() -> None:
             assert pool["quote_cap_vnd"] == int(priv["price_vnd"] * 0.80 // 1000) * 1000  # Quote_i, Baseline d_min
             assert pool["price_vnd"] >= int(priv["price_vnd"] * 0.40 // 1000) * 1000      # d <= d_max
             private_prices[t["context"]["distance_km"]].add(priv["price_vnd"])
+            times[t["context"]["distance_km"]].add((priv["travel_min"], c["BIKE_URBAN"]["travel_min"],
+                                                    pool["max_detour_min"]))
     assert all(len(v) == 3 for v in private_prices.values())  # three price levels within each distance
+    # D2 levels: time x0.70 / x1.00 / x1.30 per mode, detour x0.50 / x1.00 / x1.50
+    assert {x[0] for x in times[6]} == {13, 19, 25} and {x[0] for x in times[14]} == {28, 40, 52}
+    assert {x[1] for x in times[6]} == {11, 16, 21} and {x[1] for x in times[14]} == {24, 35, 46}
+    assert {x[2] for x in times[6]} == {3, 6, 9} and {x[2] for x in times[14]} == {6, 12, 18}

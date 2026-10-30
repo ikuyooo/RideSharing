@@ -41,3 +41,13 @@ def test_every_table_is_owned_by_exactly_one_module() -> None:
                 assert table.name not in owners, f"{table.name} declared twice"
                 owners[table.name] = path.parent.name
     assert set(owners) == set(metadata.tables)
+
+
+def test_ai_modules_cannot_reach_the_hard_constraints() -> None:
+    """Section 43 principle 1: AI / ranking code receives feasible candidates only and never
+    the feasibility thresholds - it must not import candidate.constraints or the insertion."""
+    forbidden = ("app.modules.candidate.constraints", "app.modules.pooling.insertion")
+    offenders = [f"{path.relative_to(MODULES_ROOT)} imports {name}"
+                 for path in (MODULES_ROOT / "ml_models").rglob("*.py")
+                 for name in _imports(path) if name.startswith(forbidden)]
+    assert offenders == []

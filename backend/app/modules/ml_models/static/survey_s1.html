@@ -35,6 +35,8 @@
   <div id="app"><div class="q"><b>Bạn hiện là:</b><br>
       <label><input type="radio" name="g" value="STUDENT"> Sinh viên</label>
       <label><input type="radio" name="g" value="WORKER"> Người đã đi làm</label></div>
+    <p id="done" class="ctx" hidden>Trình duyệt này đã gửi một bài khảo sát. Nếu bạn đã tham gia, xin không làm lại —
+      mỗi người chỉ trả lời một lần.</p>
     <button id="start">Đồng ý tham gia</button> <span id="smsg"></span></div>
 </main>
 <script>
@@ -116,8 +118,14 @@ async function submit(ev) {
   const body = await r.json();
   document.getElementById("msg").innerHTML = r.ok ? `<span class="ok">Cảm ơn bạn! (dữ liệu ${session.dataset}) — mã phiên: ${session.respondent_id}</span>`
     : `<span class="err">${body.error?.message || "Lỗi"}</span>`;
-  if (r.ok) ev.target.querySelector("button").disabled = true;
+  if (r.ok) {
+    ev.target.querySelector("button").disabled = true;
+    // Rule R2: a "completed" mark only (no id, no answers) to remind a returning browser.
+    try { localStorage.setItem(DONE_KEY, "1"); } catch (e) {}
+  }
 }
+const DONE_KEY = "s1_completed";
+try { if (localStorage.getItem(DONE_KEY) === "1") document.getElementById("done").hidden = false; } catch (e) {}
 document.getElementById("start").addEventListener("click", start);
 </script>
 </body>

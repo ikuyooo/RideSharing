@@ -2,7 +2,8 @@
 conditional logit sees it (columns: app.modules.ml_models.survey_stats.COLUMNS).
 
 For the designs the REAL generator produces (6 blocks x 8 tasks = 48 choice sets) with
-the variation design off (current) and on (matrix D, in memory only):
+the variation design off (base levels) and on: matrix D2 (active local design) and the
+superseded matrix D (in memory only):
   rank of the within-task difference matrix (ASCs + attributes + context interactions)
   VIF of the attribute columns, condition number of the scaled information matrix,
   D0-error (zero priors) and Dp-error (illustrative priors, an assumption)
@@ -133,20 +134,19 @@ def expected_t(q: dict, n_respondents: int = 150) -> dict:
     return out
 
 
-def with_proposal(q: dict, name: str) -> dict:
+def with_superseded(q: dict, name: str) -> dict:
     q = copy.deepcopy(q)
-    factors = q["part_1a"]["variation_design"]["factors"]
-    for f, change in q["part_1a"]["variation_design_proposals"][name]["factor_overrides"].items():
-        factors[f] = factors.get(f, {}) | change
+    q["part_1a"]["variation_design"]["factors"] = copy.deepcopy(q["part_1a"]["superseded_designs"][name]["factors"])
     return q
 
 
 def main() -> None:
     q = yaml.safe_load((ROOT / "survey" / "s1" / "questionnaire.draft.yaml").read_text(encoding="utf-8"))
-    d2 = with_proposal(q, "D2")
-    res = [analyse(q, False), analyse(q, True) | {"design": "D (approved)", "expected_abs_t_n150": expected_t(q)},
-           analyse(d2, True) | {"design": "D2 (proposed)", "expected_abs_t_n150": expected_t(d2),
-                                "expected_abs_t_n300": expected_t(d2, 300)}]
+    d = with_superseded(q, "D")
+    active = q["part_1a"]["variation_design"]["design"]
+    res = [analyse(q, False), analyse(d, True) | {"design": "D (superseded)", "expected_abs_t_n150": expected_t(d)},
+           analyse(q, True) | {"design": f"{active} (active, local TEST design)", "expected_abs_t_n150": expected_t(q),
+                               "expected_abs_t_n300": expected_t(q, 300)}]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(res, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")

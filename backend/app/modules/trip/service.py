@@ -261,3 +261,51 @@ def to_out(trip: TripRequest) -> TripRequestOut:
 
 def get_trip_request(session: Session, trip_id: uuid.UUID) -> TripRequest | None:
     return session.get(TripRequest, trip_id)
+
+
+# --- Phase 2: read-only snapshot for candidate generation (Section 6 Trip Intent) ---
+
+@dataclass(frozen=True)
+class TripSnapshot:
+    request_id: uuid.UUID
+    user_id: uuid.UUID
+    mode: str
+    booking_type: str
+    allowed_service_codes: tuple[str, ...]
+    passenger_count: int
+    has_luggage: bool
+    pickup: Lonlat
+    dropoff: Lonlat
+    preferred_departure: datetime
+    earliest_departure: datetime | None
+    latest_departure: datetime | None
+    latest_arrival: datetime | None
+    budget_max: int | None
+    max_passenger_detour_ratio: float | None
+    max_in_vehicle_time_s: int | None
+    max_walk_m: int | None
+    same_gender_coride: bool
+    created_at: datetime
+    service_area_version: str
+
+
+def trip_snapshots(session: Session, request_ids: list[uuid.UUID]) -> dict[uuid.UUID, TripSnapshot]:
+    if not request_ids:
+        return {}
+    rows = session.execute(select(
+        TripRequest, func.ST_X(TripRequest.pickup_geom), func.ST_Y(TripRequest.pickup_geom),
+        func.ST_X(TripRequest.dropoff_geom), func.ST_Y(TripRequest.dropoff_geom),
+    ).where(TripRequest.id.in_(request_ids))).all()
+    out = {}
+    for t, plon, plat, dlon, dlat in rows:
+        prefs = t.categorical_preferences_json or {}
+        out[t.id] = TripSnapshot(
+            request_id=t.id, user_id=t.user_id, mode=t.mode, booking_type=t.booking_type,
+            allowed_service_codes=tuple(t.allowed_service_codes), passenger_count=t.passenger_count,
+            has_luggage=t.has_luggage, pickup=(plon, plat), dropoff=(dlon, dlat),
+            preferred_departure=t.preferred_departure, earliest_departure=t.earliest_departure,
+            latest_departure=t.latest_departure, latest_arrival=t.latest_arrival, budget_max=t.budget_max,
+            max_passenger_detour_ratio=t.max_passenger_detour_ratio, max_in_vehicle_time_s=t.max_in_vehicle_time_s,
+            max_walk_m=t.max_walk_m, same_gender_coride=bool(prefs.get("same_gender_coride", False)),
+            created_at=t.created_at, service_area_version=t.service_area_version)
+    return out

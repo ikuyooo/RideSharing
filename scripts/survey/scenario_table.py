@@ -37,6 +37,10 @@ def fmt(v: object) -> str:
 def rows(q: dict) -> list[dict]:
     out = []
     p1a = q["part_1a"]
+    vd = p1a.get("variation_design", {})
+    active = bool(vd.get("active"))
+    base_note = (f"base level (x1.00) of variation design {vd['design']}; other levels in the 1A-PV rows" if active
+                 else "fixed per distance")
     for name, spec in p1a["context_factors"].items():
         out.append(meta(spec, scenario_id=f"1A-CTX-{name}", attributes=f"context: {name}", options=fmt(spec["levels"]),
                         displayed_values=fmt(spec["levels"])))
@@ -44,13 +48,15 @@ def rows(q: dict) -> list[dict]:
         for alt, attrs in cards.items():
             for attr, spec in attrs.items():
                 out.append(meta(spec, scenario_id=f"1A-D{dist}-{alt}-{attr}", attributes=f"{alt}.{attr} @ {dist} km",
-                                options="fixed per distance", displayed_values=fmt(spec["value"])))
+                                options=base_note, displayed_values=fmt(spec["value"])))
     for name, spec in p1a["rotated_attributes"].items():
         out.append(meta(spec, scenario_id=f"1A-ROT-{name}", attributes=f"CAR_URBAN_POOL.{name}",
                         options=fmt(spec["levels"]), displayed_values=fmt(spec["levels"])))
+    shown = (f"SHOWN (variation design {vd['design']}, rotated per block)" if active
+             else "NOT SHOWN (variation design off)")
     for pid, spec in p1a["price_variation_proposal"]["levels"].items():
         out.append(meta(spec, scenario_id=f"1A-PV-{pid}", attributes=spec["applies_to"], options=spec["rule"],
-                        displayed_values=f"NOT SHOWN (proposal) — 14 km: {fmt(spec['example_14km_vnd'])}; "
+                        displayed_values=f"{shown} — 14 km: {fmt(spec['example_14km_vnd'])}; "
                                          f"6 km: {fmt(spec['example_6km_vnd'])}"))
     p1b = q["part_1b"]
     pool = p1b["alternatives"]["CAR_INTERCITY_POOL"]

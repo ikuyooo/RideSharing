@@ -1,8 +1,9 @@
-"""OWNER APPROVAL s.4 item 7: internal TEST pilot of the Part-1A experiment with matrix D.
+"""OWNER APPROVAL s.4 item 7: internal TEST pilot of the Part-1A experiment (matrix D2 active;
+the superseded matrix D and D_bal for comparison).
 
 150 synthetic respondents (75 students / 75 workers) go through the real API and the
-TEST dataset of the throwaway test database: session start (quota), design D switched
-on IN MEMORY ONLY, choices simulated from the illustrative priors of survey_stats (an
+TEST dataset of the throwaway test database: session start (quota), variant's factors set
+IN MEMORY ONLY, choices simulated from the illustrative priors of survey_stats (an
 assumption), submit, admin CSV export. The conditional logit is then estimated from
 the EXPORTED rows, so the whole chain design -> API -> storage -> export -> estimation
 is exercised. Research collection stays closed; pricing_configs is not touched.
@@ -28,9 +29,9 @@ from tests.conftest import QUESTIONNAIRE
 pytestmark = pytest.mark.db
 N_PER_GROUP = 75
 VARIANTS = {
-    "D": {},  # owner-approved matrix D as in the questionnaire
-    "D_bal": {"bike_time_mult": {"a": 1, "b": 1, "c": 1, "block_div": 2}},  # balance fix only
-    "D2": "from questionnaire",  # proposed adjustment (variation_design_proposals.D2)
+    "D": {},  # superseded matrix D (superseded_designs.D)
+    "D_bal": {"bike_time_mult": {"a": 1, "b": 1, "c": 1, "block_div": 2}},  # D + balance fix only
+    "D2": None,  # active local design, exactly as in the questionnaire
 }
 
 
@@ -63,13 +64,12 @@ def test_pilot_matrix_d_is_estimable_from_exported_test_data(client: TestClient,
 
     real = survey_service.load_questionnaire
     base = copy.deepcopy(real(Path(QUESTIONNAIRE)))
-    assert base["part_1a"]["variation_design"]["active"] is False  # the file itself stays off
-    base["part_1a"]["variation_design"]["active"] = True
-    changes = (base["part_1a"]["variation_design_proposals"]["D2"]["factor_overrides"] if variant == "D2"
-               else VARIANTS[variant])
-    factors = base["part_1a"]["variation_design"]["factors"]
-    for name, change in changes.items():
-        factors[name] = factors.get(name, {}) | change
+    vd = base["part_1a"]["variation_design"]
+    assert vd["active"] is True and vd["design"] == "D2"
+    if VARIANTS[variant] is not None:
+        vd["factors"] = copy.deepcopy(base["part_1a"]["superseded_designs"]["D"]["factors"])
+        for name, change in VARIANTS[variant].items():
+            vd["factors"][name] = vd["factors"][name] | change
     monkeypatch.setattr(survey_service, "load_questionnaire", lambda path: base)
     client.app.dependency_overrides[get_rate_limiter] = lambda: AllowAll()
     pricing_before = db_session.execute(text("SELECT count(*), md5(coalesce(string_agg(params_json::text, '' "

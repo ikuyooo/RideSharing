@@ -105,3 +105,17 @@ Bảng gốc ở trên được giữ nguyên. Phiên bản ứng viên mới: *
 | SF-P1-24 | Với β giả định, hệ số đi vòng, chênh "tối đa nếu không ghép" và đi bộ 200 m có |t| kỳ vọng < 1 ở N = 150 kể cả với D2 | `evidence/s1_design_diagnostics.json` | Công bố là phân tích thăm dò, hoặc tăng N / số câu |
 | SF-P1-25 | Giới hạn 10 phiên/giờ theo IP băm có thể chặn nhầm nhiều sinh viên dùng chung IP (Wi-Fi trường, NAT) → thiếu mẫu có hệ thống | `SURVEY_S1_DESIGN_REVIEW.md` §14 (R2) | Nâng giới hạn trước khi phát hành |
 | SF-P1-26 | Một lần mô phỏng pilot dao động mạnh (t thời gian của D: −1,8 rồi −2,7 với hạt giống khác) → đánh giá phải dựa trên sai số chuẩn kỳ vọng, không dựa trên một lần chạy | `evidence/s1_pilot_*.json` | Không |
+
+## Cập nhật sau "DEVELOPMENT FIRST, DEPLOYMENT LATER" (2026-10-29)
+
+| Mã | Trạng thái |
+|---|---|
+| SF-P1-21 Thiết kế S1 | **Đóng cho local**: D2 là thiết kế đang dùng (rank 11/11, condition number 98 / 115, |t| kỳ vọng của thời gian 2,7 với đặc tả gọn ở N = 150). Chạy E2E local synthetic: t(thời gian) đặc tả gọn −4,12 — số liệu mô phỏng từ prior giả định, **không** phải kết quả khảo sát |
+| SF-P1-25 Giới hạn IP | **Đã xử lý**: 60 phiên/giờ/khóa IP băm (R2) |
+
+### Phát hiện mới
+
+| Mã | Phát hiện | Bằng chứng | Cần quyết định |
+|---|---|---|---|
+| SF-P1-27 | Tiêu chí P1 của R9 §79 "link Khảo sát S1 bắt đầu thu thập dữ liệu" **chưa đạt** do Chủ dự án hoãn triển khai công khai (ngoại lệ tiến độ). R9 không bị sửa; P1 **không** được gán COMPLETE theo §79; lập trình P2 bắt đầu theo ngoại lệ | `P1_LOCAL_HANDOFF_REPORT.md` | Đóng P1 chính thức khi phát hành S1 (kế hoạch `DEPLOYMENT_AND_EXTERNAL_VALIDATION_PLAN.md`, lập sau khi hoàn tất local) |
+| SF-P1-28 | Dữ liệu S1 thật sẽ đến **sau** P7 (simulator dùng MNL từ S1) theo lịch mới; P7 phải chạy được với tham số θ giả định có nhãn rõ và được ước lượng lại khi có dữ liệu thật | R9 §79 P7; `P1_LOCAL_HANDOFF_REPORT.md` §5 | Khi lập kế hoạch P7 |

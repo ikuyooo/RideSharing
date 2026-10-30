@@ -2,7 +2,9 @@
 `POST /api/admin/drivers/{id}/kyc-review` are listed in Revision 9 Section 57.
 `GET /api/driver/profile`, `POST /api/driver/vehicles` and
 `POST /api/driver/kyc/submit` are TECHNICAL ADDITIONS needed by the Section 81
-flow ("tài xế ... gửi thông tin giấy phép lái xe / đăng ký xe giả lập")."""
+flow ("tài xế ... gửi thông tin giấy phép lái xe / đăng ký xe giả lập").
+`PUT /api/driver/availability` is a Phase 2 TECHNICAL ADDITION (hard constraint 1:
+"online, IDLE, right vehicle type")."""
 
 import uuid
 
@@ -13,6 +15,7 @@ from app.db.session import get_db
 from app.modules.driver import service
 from app.modules.driver.models import DriverProfile, Vehicle
 from app.modules.driver.schemas import (
+    AvailabilityIn,
     DriverProfileOut,
     DriverSettingsIn,
     KycReviewIn,
@@ -59,6 +62,13 @@ def update_settings(
 @router.put("/api/driver/location", status_code=status.HTTP_204_NO_CONTENT)
 def update_location(body: LocationIn, user: User = Depends(driver_only), session: Session = Depends(get_db)) -> Response:
     service.update_location(session, user.id, body.lat, body.lon)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put("/api/driver/availability", status_code=status.HTTP_204_NO_CONTENT)
+def update_availability(body: AvailabilityIn, user: User = Depends(driver_only),
+                        session: Session = Depends(get_db)) -> Response:
+    service.set_availability(session, user.id, body.availability, body.vehicle_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

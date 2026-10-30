@@ -45,6 +45,15 @@ class LocationIn(BaseModel):
     lon: float = Field(ge=-180, le=180)
 
 
+class AvailabilityIn(BaseModel):
+    """TECHNICAL ADDITION (Phase 2, hard constraint 1): go online with one vehicle or offline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    availability: Literal["OFFLINE", "IDLE"]
+    vehicle_id: uuid.UUID | None = None
+
+
 class DriverProfileOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

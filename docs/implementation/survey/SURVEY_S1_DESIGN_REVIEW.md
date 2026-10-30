@@ -220,3 +220,16 @@ Ghi chú: các điều chỉnh đề xuất ở R1–R3 **chưa được thực 
 | Giá biến thiên ±10% là giá giả định của thí nghiệm, không phải phiên bản giá thương mại | Ghi chú trong `variation_design`; không có gì ghi vào `pricing_configs` (test pilot so sánh `md5` của `pricing_configs` trước/sau) |
 | Khả năng đủ khách liên tỉnh: 3 mức giả định Thấp / Trung bình / Cao, **không gắn cứng theo giá ghế** | `fill_likelihood` 3 mức chữ; xoay `(câu + khối) mod 3` → qua 6 khối mỗi giá ghế gặp mỗi mức đúng 2 lần (trực giao); test `test_block_rotation_covers_all_pool_combinations` |
 | FAST_RESPONSE_REVIEW không tự loại; mục tiêu 150 hợp lệ, 40–60% mỗi nhóm | Giữ nguyên (cờ; quota trần 90/nhóm); pilot 75/75 kiểm chứng quota |
+
+## 16. Quyết định "DEVELOPMENT FIRST, DEPLOYMENT LATER" (2026-10-29) — draft 5
+
+- R1–R3 **ACCEPTED có điều chỉnh**, R4 **ACCEPTED** (`analysis_rules.*.approval_status`, trường `adjustment`). Điều chỉnh §14 đã hiện thực:
+  R1 — `/quota` báo cáo phiên bắt đầu / hoàn thành / tỷ lệ hoàn thành theo nhóm; R2 — 60 phiên/giờ/khóa IP băm, dấu `s1_completed`
+  trong `localStorage` (không PII); R3 — bộ đếm 422 theo ngày × mã lỗi (`/api/admin/survey/s1/rejections`).
+  Giới hạn còn lại được công bố: không phát hiện được một người làm lại bằng trình duyệt khác (R2).
+- Ma trận **D2** là thiết kế của khảo sát local (`variation_design.active: true`); đặc tả MNL gọn là mô hình chính.
+- Kiểm thử end-to-end local (`scripts/survey/local_e2e.sh`): 150 người trả lời **synthetic** (75/75) + 16 phiên bỏ dở + 4 lần 422 →
+  quota (tỷ lệ hoàn thành 0,9036 / 0,9036), bộ đếm 422 {INVALID_START_TOKEN: 2, REQUEST_VALIDATION: 2}, export 3 bảng, RESEARCH rỗng,
+  CSDL chính không đổi; MNL từ export: |z| lớn nhất so với prior mô phỏng 1,31; t(giá) −8,21; t(thời gian) −2,51 (đầy đủ) / −4,12 (gọn).
+  Đây là **dữ liệu TEST synthetic để kiểm pipeline, không phải kết quả khảo sát** (`evidence/s1_local_e2e.json`).
+- Vẫn hoãn: phát hành công khai, HTTPS trên domain thật, thông báo đồng ý chính thức + đầu mối liên hệ, thu dữ liệu RESEARCH.

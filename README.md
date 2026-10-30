@@ -159,6 +159,16 @@ phiên bản chưa được phê duyệt (`ALLOW_CANDIDATE_SERVICE_AREA=true` ch
 API P1: `/api/auth/{register,login,refresh,logout}`, `/api/users/me`, `/api/driver/{profile,vehicles,
 kyc/submit,settings,location}`, `/api/admin/drivers/{id}/kyc-review`, `/api/trip-requests`.
 
+API P2 (bổ sung kỹ thuật, xem `docs/implementation/P2_IMPLEMENTATION_PLAN.md`): `PUT /api/driver/availability`
+(OFFLINE / IDLE kèm `vehicle_id`), `POST /api/admin/candidates/runs` `{request_id}` và
+`GET /api/admin/candidates/runs/{run_id}` (ADMIN: sinh ứng viên 3 dịch vụ nội đô, 11 ràng buộc cứng, nhật ký lượt chạy).
+API gợi ý cho hành khách (`/recommendations`) thuộc P6.
+
+Khảo sát S1 chạy trọn vẹn ở local với dữ liệu TEST synthetic (CSDL tạm, xóa khi xong):
+`MSYS_NO_PATHCONV=1 sh scripts/survey/local_e2e.sh <python có httpx>`.
+Benchmark sinh ứng viên P2 (CSDL tạm `p2_bench`, OSRM thật):
+`python -I scripts/p2_benchmark.py --requests 200`.
+
 ## Phát triển backend
 
 ```bash

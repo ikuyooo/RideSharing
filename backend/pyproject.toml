@@ -40,5 +40,6 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "db: needs the compose PostgreSQL/PostGIS server (uses a throwaway test database)",
-    "osrm: needs the compose OSRM car service",
+    "osrm: needs the compose OSRM services",
+    "redis: needs the compose Redis server (uses database 14)",
 ]

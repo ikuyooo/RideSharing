@@ -118,3 +118,11 @@ def set_own_gender(session: Session, user: User, gender: str | None) -> User:
     user.gender_verification_status = "UNVERIFIED"
     session.commit()
     return user
+
+
+def verified_genders(session: Session, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, str | None]:
+    """Hard constraint 11 reads only a VERIFIED gender; self-declared gender never counts
+    (P1-D6). With no verification method approved yet every value is None."""
+    rows = session.execute(select(User.id, User.gender, User.gender_verification_status)
+                           .where(User.id.in_(user_ids))).tuples().all() if user_ids else []
+    return {uid: (gender if status == "VERIFIED" else None) for uid, gender, status in rows}

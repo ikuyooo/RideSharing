@@ -2,21 +2,27 @@
 pooling logic is Phase 2 (Section 79).
 
 `ride_plans`: Section 56.1 item 4. `ride_participants`: Section 56.1 item 7.
-`ride_stops`: not created (no columns specified, no dependency yet).
+`ride_stops`: listed in Section 54 without columns - Phase 2 TECHNICAL ADDITION,
+the stop chain S_0..S_k that the Section 36 insertion works on.
 """
 
 import uuid
+from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
+from geoalchemy2 import Geometry
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    DateTime,
     Float,
     ForeignKey,
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
     text,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -88,6 +94,10 @@ class RideParticipant(Base):
     fare_charged_vnd: Mapped[int | None] = mapped_column(BigInteger)
     rounding_absorbed_vnd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     is_price_frozen: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    # TECHNICAL ADDITION (Phase 2): the rider's direct trip (OSRM car) fixed at booking -
+    # the reference of constraint 5 (detour) and of the default of constraint 6.
+    direct_distance_m: Mapped[float | None] = mapped_column(Float)
+    direct_duration_s: Mapped[float | None] = mapped_column(Float)
 
     __table_args__ = (
         # Section 56.2 (verbatim).
@@ -99,4 +109,39 @@ class RideParticipant(Base):
             "fare_charged_vnd >= 0 AND fare_charged_vnd <= cap_fare_vnd",
             name="fare_charged_within_cap",
         ),
+    )
+
+
+STOP_KINDS = ("PICKUP", "DROPOFF")
+STOP_STATUSES = ("PLANNED", "COMPLETED")
+
+
+class RideStop(Base):
+    """TECHNICAL ADDITION (Phase 2): one stop of a plan; seq 0..k in driving order.
+    Stops with seq <= ride_plans.completed_stop_index are COMPLETED and frozen."""
+
+    __tablename__ = "ride_stops"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    ride_plan_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ride_plans.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    seq: Mapped[int] = mapped_column(Integer, nullable=False)
+    kind: Mapped[str] = mapped_column(String(8), nullable=False)
+    booking_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=False)
+    geom: Mapped[Any] = mapped_column(Geometry("POINT", srid=4326, spatial_index=False), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="PLANNED")
+    planned_eta: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        # Deferred so a re-plan can renumber the chain inside one transaction.
+        UniqueConstraint("ride_plan_id", "seq", deferrable=True, initially="DEFERRED"),
+        UniqueConstraint("booking_id", "kind"),
+        in_check("kind", STOP_KINDS, "kind"),
+        in_check("status", STOP_STATUSES, "status"),
+        CheckConstraint("seq >= 0", name="seq_non_negative"),
+        CheckConstraint("(status = 'COMPLETED') = (completed_at IS NOT NULL)", name="completed_has_time"),
     )

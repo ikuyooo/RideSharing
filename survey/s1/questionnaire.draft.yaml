@@ -1,7 +1,8 @@
 # =============================================================================
-# Survey S1 - questionnaire DRAFT 3 (Revision 9 Section 65; owner decisions P1-D5,
-# "PHASE 1 FINAL CLOSURE" survey items 1-8 and "P1 FINAL HARDENING" SURVEY-01..07)
-# STATUS: DRAFT - not released. Rows with approval_status PENDING_OWNER_APPROVAL or
+# Survey S1 - questionnaire DRAFT 5 (Revision 9 Section 65; owner decisions P1-D5,
+# "PHASE 1 FINAL CLOSURE" survey items 1-8, "P1 FINAL HARDENING" SURVEY-01..07,
+# "OWNER APPROVAL & FINAL CLOSURE GATES" and "DEVELOPMENT FIRST, DEPLOYMENT LATER")
+# STATUS: DRAFT - not released (public release deferred). Rows with approval_status PENDING_OWNER_APPROVAL or
 # experimental_status EXPERIMENT_REVIEW_REQUIRED are not approved.
 #
 # Every value carries:
@@ -15,7 +16,7 @@
 # Scenario table: python -I scripts/survey/scenario_table.py
 # =============================================================================
 survey_id: s1
-draft_version: 4
+draft_version: 5
 language: vi
 estimated_minutes: "4-5"            # R9:65.2
 
@@ -104,15 +105,15 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
     walk_m: {levels: [0, 200], source: "R9:65.2",
              derivation: "separate attribute; price NOT adjusted (C9 / R9:23.3 mu acts on allocation weights)",
              experimental_status: SOURCED_R9, approval_status: "OWNER_DECIDED (survey item 4)"}
-  # Survey item 3: proposal only - NOT shown to respondents until approved.
-  # Feasible pool range under the locked bounds: Fare_matched in [(1 - d_max) P, (1 - d_min) P]
+  # Survey item 3 levels. Shown in the LOCAL TEST design through variation_design (D2,
+  # owner DEVELOPMENT FIRST); never a commercial price version. Feasible pool range under the locked bounds: Fare_matched in [(1 - d_max) P, (1 - d_min) P]
   # = [0.40 P, 0.80 P]; unmatched cap 0.90 P.  14 km: [77600, 155200]; 6 km: [38000, 76000].
   price_variation_proposal:
     levels:
       POOL_D020: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.20 (= d_min, the cap)",
                   example_14km_vnd: 155000, example_6km_vnd: 76000, source: "Baseline car_urban d_min",
                   derivation: "floor(0.80 x P)", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                  approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
+                  approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: local TEST design D2)"}
       POOL_D025: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.25 (d_matched_typical, current level)",
                   example_14km_vnd: 145000, example_6km_vnd: 71000, source: "Baseline d_matched_typical; R9:20.2",
                   derivation: "floor(0.75 x P)", experimental_status: SOURCED_R9,
@@ -120,52 +121,59 @@ part_1a:                            # R9:65.2 - urban multimodal choice, 6-8 tas
       POOL_D035: {applies_to: "CAR_URBAN_POOL expected price", rule: "d = 0.35 (inside [d_min, d_max]; realism unproven)",
                   example_14km_vnd: 126000, example_6km_vnd: 61000, source: "Baseline d_min / d_max bounds",
                   derivation: "floor(0.65 x P)", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                  approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
+                  approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: local TEST design D2)"}
       PRIVATE_BIKE_PM10: {applies_to: "BIKE_URBAN and CAR_URBAN_PRIVATE price", rule: "x0.90 / x1.10 (market calibration)",
                           example_14km_vnd: "private 174600 / 213400; bike 72900 / 89100",
                           example_6km_vnd: "private 85500 / 104500; bike 36900 / 45100",
                           source: "R9 preamble: tariffs may be calibrated to market prices - no level given",
                           derivation: "not derivable from the locked formulas", experimental_status: EXPERIMENT_REVIEW_REQUIRED,
-                          approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
+                          approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: local TEST design D2)"}
 
-      TIME_MODE_PM20: {applies_to: "travel_min of car (private, pool detour) and motorbike, varied independently per mode",
-                       rule: "x0.80 / x1.00 / x1.20 per mode, rotated independently of distance (design D)",
-                       example_14km_vnd: "times: car 32 / 40 / 48 min; motorbike 28 / 35 / 42 min",
-                       example_6km_vnd: "times: car 15 / 19 / 23 min; motorbike 13 / 16 / 19 min",
-                       source: "SURVEY-06 identifiability check (scripts/survey/identifiability_check.py)",
-                       derivation: "with POOL_D0xx + PRIVATE_BIKE_PM10: rank 9/9, max VIF 5.3; current design: rank 7/9 (not identified)",
-                       experimental_status: EXPERIMENT_REVIEW_REQUIRED, approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4)"}
+      TIME_MODE_PM30: {applies_to: "travel_min of car (private) and motorbike, varied independently per mode; pool detour separately",
+                       rule: "x0.70 / x1.00 / x1.30 per mode, detour x0.50 / x1.00 / x1.50, rotated independently of distance (design D2)",
+                       example_14km_vnd: "times: car 28 / 40 / 52 min; motorbike 24 / 35 / 46 min (round half to even); detour +6 / +12 / +18 min",
+                       example_6km_vnd: "times: car 13 / 19 / 25 min; motorbike 11 / 16 / 21 min; detour +3 / +6 / +9 min",
+                       source: "SURVEY-06 identifiability check; TEST pilot (SURVEY_S1_PRICE_VARIATION_DESIGN.md §5)",
+                       derivation: "D2: rank 11/11, condition number 98 / 115, expected |t| of time 2.7 at N = 150 (lean spec); D (x0.80/x1.20): |t| 1.1",
+                       experimental_status: EXPERIMENT_REVIEW_REQUIRED, approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: local TEST design D2)"}
 
-  # SURVEY-06 design D, implemented but SWITCHED OFF until the owner approves it.
-  # Rotation: level index = (a * i + b * (block // block_div) + c) mod 3, i = context index.
-  # Identifiability of the generated designs: scripts/survey/identifiability_check.py.
+  # SURVEY-06 variation design. Rotation: level index = (a * i + b * (block // block_div) + c) mod 3,
+  # i = context index. Identifiability: scripts/survey/identifiability_check.py,
+  # scripts/survey/design_diagnostics.py.
   variation_design:
-    # Owner OWNER APPROVAL s.4: approved for the TEST pilot only - prices are HYPOTHETICAL
-    # experiment values, never a commercial price version; research collection stays closed.
-    active: false
-    design: D
-    approval_status: "APPROVED_FOR_TEST_PILOT_ONLY (OWNER APPROVAL s.4) - not for research collection"
+    # Owner "DEVELOPMENT FIRST, DEPLOYMENT LATER" (2026-10-29): matrix D2 is the design of the
+    # LOCAL survey. Prices / times are HYPOTHETICAL experiment values, never a commercial price
+    # version. Research collection stays closed (SURVEY_S1_RELEASED = false) - local data is TEST.
+    active: true
+    design: D2
+    approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: D2 for the local TEST design; public release deferred)"
     experimental_status: EXPERIMENT_REVIEW_REQUIRED
     baseline_bounds: {d_min: 0.20, d_max: 0.60, alpha: 0.50}   # Baseline car_urban (locked)
     factors:
       pool_discount_d:    {levels: [0.20, 0.25, 0.35], a: 1, b: 1, c: 0}
       private_price_mult: {levels: [0.90, 1.00, 1.10], a: 1, b: 2, c: 1}
       bike_price_mult:    {levels: [0.90, 1.00, 1.10], a: 2, b: 1, c: 2}
-      car_time_mult:      {levels: [0.80, 1.00, 1.20], a: 1, b: 1, c: 0, block_div: 2}
-      bike_time_mult:     {levels: [0.80, 1.00, 1.20], a: 2, b: 1, c: 1, block_div: 3}
+      car_time_mult:      {levels: [0.70, 1.00, 1.30], a: 1, b: 1, c: 0, block_div: 2}
+      bike_time_mult:     {levels: [0.70, 1.00, 1.30], a: 1, b: 1, c: 1, block_div: 2}
+      detour_mult:        {levels: [0.50, 1.00, 1.50], a: 2, b: 2, c: 1}
+    # Owner decision (same directive): the lean specification is the PRIMARY model; any other
+    # variable is EXPLORATORY and reported as such (survey_stats.COLUMNS documents the encoding).
+    primary_mnl_spec:
+      terms: [ASC_bike, ASC_pool, price, time, likelihood_MEDIUM, likelihood_LOW, walk_200, rain_x_ASC_bike]
+      exploratory: [detour, unmatched_gap]
+      approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: lean primary MNL)"
 
-  # Statistical adjustment PROPOSED after the TEST pilot (not active, owner decision pending):
-  # with D the time effect is not estimable at N = 150 (expected |t| 1.1); D2 below gives
-  # |t| 2.7 for time with the lean primary specification. Overrides of variation_design.factors.
-  variation_design_proposals:
-    D2:
-      approval_status: PROPOSED
-      experimental_status: EXPERIMENT_REVIEW_REQUIRED
-      factor_overrides:
-        car_time_mult:  {levels: [0.70, 1.00, 1.30]}
-        bike_time_mult: {levels: [0.70, 1.00, 1.30], a: 1, b: 1, c: 1, block_div: 2}
-        detour_mult:    {levels: [0.50, 1.00, 1.50], a: 2, b: 2, c: 1}
-      primary_mnl_spec: "ASC_bike, ASC_pool, price, time, likelihood (MEDIUM, LOW), walk_200, rain x ASC_bike; detour and unmatched gap reported as exploratory"
+  # Superseded design, kept for the comparison in tests/test_survey_pilot.py and the
+  # diagnostics: with D the time effect is not estimable at N = 150 (expected |t| 1.1).
+  superseded_designs:
+    D:
+      approval_status: "SUPERSEDED by D2 (was APPROVED_FOR_TEST_PILOT_ONLY, OWNER APPROVAL s.4)"
+      factors:
+        pool_discount_d:    {levels: [0.20, 0.25, 0.35], a: 1, b: 1, c: 0}
+        private_price_mult: {levels: [0.90, 1.00, 1.10], a: 1, b: 2, c: 1}
+        bike_price_mult:    {levels: [0.90, 1.00, 1.10], a: 2, b: 1, c: 2}
+        car_time_mult:      {levels: [0.80, 1.00, 1.20], a: 1, b: 1, c: 0, block_div: 2}
+        bike_time_mult:     {levels: [0.80, 1.00, 1.20], a: 2, b: 1, c: 1, block_div: 3}
 
 part_1b:                            # R9:65.2 - intercity, 2 tasks
   tasks_per_respondent: 2
@@ -267,19 +275,24 @@ quality_rules:                      # survey item 7: flags only, published befor
         approval_status: "OWNER_DECIDED (SURVEY-05: not used)"}
 
 # SURVEY-05: data rules fixed BEFORE collection (published with the release).
+# Owner "DEVELOPMENT FIRST" (2026-10-29): R1-R3 accepted with the adjustments of
+# SURVEY_S1_DESIGN_REVIEW §14, R4 accepted as written.
 analysis_rules:
   R1_incomplete: {rule: "sessions without a submission are not exported (no partial answers exist: the API accepts only complete submissions)",
-                  action: EXCLUDE_BY_CONSTRUCTION, source: "survey_service.submit / export_table", derivation: "",
-                  experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+                  adjustment: "started / completed sessions and the completion rate per group and dataset are reported (GET /api/admin/survey/s1/quota)",
+                  action: EXCLUDE_BY_CONSTRUCTION, source: "survey_service.submit / export_table / quota", derivation: "",
+                  experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: accepted with adjustment)"}
   R2_duplicate: {rule: "one submission per session (409 ALREADY_SUBMITTED); repeated sessions by one person cannot be linked (anonymous) - limited by rate limits; no identity matching is attempted",
-                 action: PREVENTED_AT_COLLECTION, source: "survey_service / survey_guard", derivation: "",
-                 experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+                 adjustment: "session starts limited to 60 per hour per hashed address (shared campus Wi-Fi / NAT); the form keeps a non-PII 'completed' mark in localStorage and reminds a returning browser; the residual 'repeat respondent not detectable' limitation is reported",
+                 action: PREVENTED_AT_COLLECTION, source: "survey_service / survey_guard / survey_s1.html", derivation: "",
+                 experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: accepted with adjustment)"}
   R3_invalid: {rule: "answers outside the shown options, unknown fields or a forged start token are rejected by the API (422) and never stored",
-               action: REJECTED_AT_COLLECTION, source: "survey_schemas (extra=forbid)", derivation: "",
-               experimental_status: DESIGN_PARAMETER, approval_status: PENDING_OWNER_APPROVAL}
+               adjustment: "422 rejections are counted per day and error code in aggregate (no address, no content) and reviewed daily during collection (GET /api/admin/survey/s1/rejections)",
+               action: REJECTED_AT_COLLECTION, source: "survey_schemas (extra=forbid) / survey_guard.RejectionCounter", derivation: "",
+               experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: accepted with adjustment)"}
   R4_flags: {rule: "primary analysis keeps every stored response; a sensitivity analysis drops FAST_RESPONSE_REVIEW, QC3 and QC4 flagged responses; both are reported",
              action: REPORT_BOTH, source: "owner SURVEY-05", derivation: "", experimental_status: DESIGN_PARAMETER,
-             approval_status: PENDING_OWNER_APPROVAL}
+             approval_status: "OWNER_DECIDED (DEVELOPMENT FIRST: accepted)"}
   R5_test_data: {rule: "only dataset RESEARCH from the release server is analysed; TEST rows are never merged",
                  action: SEPARATED, source: "SURVEY_DATASET / SURVEY_S1_RELEASED", derivation: "",
                  experimental_status: DESIGN_PARAMETER, approval_status: "OWNER_DECIDED (SURVEY-07)"}

@@ -120,3 +120,28 @@ Revision 9, Baseline v1 hay Decision Register.
 | §4 Ma trận D | Duyệt cho pilot TEST; kiểm định thống kê trước khi phát hành | `survey_stats` (mã hóa MNL, hạng, VIF, condition number, D-error, ước lượng logit), `design_diagnostics.py`, pilot `test_survey_pilot.py`; phát hiện vấn đề (thời gian không ước lượng được ở N = 150, mức thời gian xe máy lệch) → đề xuất **D2** (chưa kích hoạt); `detour_mult` là yếu tố tùy chọn (không có thì đi vòng theo thời gian ô tô như D) | D: pilot TEST; D2: chờ duyệt |
 | §5 Câu hỏi | 3 mức "khả năng đủ khách" không gắn giá ghế; các ghi chú giả định | Draft 4: xoay `(câu + khối) mod 3`, trực giao với giá ghế; R1–R4 đánh giá, chưa ACCEPTED | R1–R4 chờ duyệt |
 | §6 HTTPS & quyền riêng tư | Chuẩn bị; lưu trữ đề xuất 12 tháng | Kiểm thử phát hành cục bộ qua HTTPS (`staging_e2e.sh`, CA nội bộ Caddy, CSDL tạm) PASS; `purge_survey.sh` (xác nhận bằng từ khóa, giao dịch); chính sách lưu trữ 12 tháng + backup 30 ngày + quy trình gia hạn ghi trong kế hoạch triển khai | Chờ domain / máy chủ / phê duyệt |
+
+## 7. Quyết định "DEVELOPMENT FIRST, DEPLOYMENT LATER" (2026-10-29) — cách hiện thực
+
+Ngoại lệ tiến độ do Chủ dự án phê duyệt: hoàn thiện toàn bộ dự án trên môi trường local trước; hoãn domain,
+VPS, HTTPS công khai, phát hành S1 công khai và thu dữ liệu thật. Revision 9 và Baseline v1 **không bị sửa**;
+ngoại lệ được ghi ở `P1_LOCAL_HANDOFF_REPORT.md` và `SPEC_FINDINGS_P1.md` (SF-P1-27).
+
+| Mã | Quyết định | Hiện thực | Trạng thái |
+|---|---|---|---|
+| Ma trận | D2 là thiết kế local | `variation_design: {active: true, design: D2}` (draft 5); D giữ ở `superseded_designs.D` để so sánh; thu thập RESEARCH vẫn khóa bằng `SURVEY_S1_RELEASED = false`, không bằng tệp câu hỏi | LOCAL_VERIFIED |
+| MNL | Đặc tả gọn là mô hình chính; biến khác là thăm dò | `variation_design.primary_mnl_spec` (8 hệ số chính; `detour`, `unmatched_gap` thăm dò) | LOCAL_VERIFIED |
+| R1 | Chấp nhận có điều chỉnh | `/quota` trả thêm `started`, `started_by_group`, `completion_rate_by_group` | LOCAL_VERIFIED |
+| R2 | Chấp nhận có điều chỉnh | Giới hạn bắt đầu phiên 60/giờ/khóa IP băm (nộp 60/giờ cho khớp); biểu mẫu lưu dấu `s1_completed` trong `localStorage` (không mã phiên, không câu trả lời) và nhắc trình duyệt đã nộp | LOCAL_VERIFIED |
+| R3 | Chấp nhận có điều chỉnh | `CountRejectionsRoute`: mọi 422 của endpoint công khai được đếm theo ngày UTC × mã lỗi trong Redis (`s1:rej:<ngày>`, hết hạn 90 ngày), không địa chỉ, không nội dung; lỗi Redis không đổi phản hồi; ADMIN đọc `/api/admin/survey/s1/rejections` | LOCAL_VERIFIED |
+| R4 | Chấp nhận | Giữ nguyên | — |
+| E2E local | Khảo sát chạy trọn vẹn ở local; dữ liệu synthetic chỉ để kiểm pipeline | `scripts/survey/local_e2e.sh` (CSDL tạm, uvicorn + Redis thật, 150 người trả lời synthetic + 16 phiên bỏ dở + 4 lần 422, export ADMIN, MNL từ export); bằng chứng `survey/evidence/s1_local_e2e.json` ghi rõ **SYNTHETIC TEST DATA** | LOCAL_VERIFIED |
+| Phát hành / HTTPS công khai / dữ liệu thật | Hoãn | Không làm gì; xem `P1_LOCAL_HANDOFF_REPORT.md` §4 | EXTERNAL_VALIDATION_DEFERRED |
+
+### Bổ sung kỹ thuật mới (không có trong Revision 9)
+
+| Hạng mục | Nội dung |
+|---|---|
+| `RejectionCounter` (`survey_guard`) + `GET /api/admin/survey/s1/rejections` | Bộ đếm tổng hợp 422 cho quy tắc R3 |
+| Trường `started*` / `completion_rate_by_group` của `/quota` | Báo cáo tỷ lệ hoàn thành cho R1 |
+| `scripts/survey/local_e2e.sh` + `local_e2e_client.py` | Kiểm thử end-to-end local của toàn bộ chuỗi khảo sát |

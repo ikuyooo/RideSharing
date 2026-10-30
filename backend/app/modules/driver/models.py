@@ -2,7 +2,9 @@
 
 `driver_profiles`, `vehicles`: columns per Section 56.1 (items 1-2).
 `driver_locations`: not specified in 56.1; minimal structure because 56.2
-requires `idx_driver_locations_geom` (GIST).
+requires `idx_driver_locations_geom` (GIST). Phase 2 TECHNICAL ADDITION:
+`availability` and `active_vehicle_id` - hard constraint 1 needs "online, IDLE,
+right vehicle type" and Section 56.1 has no column for it.
 `driver_reliability_stats`: not created yet (no columns specified, no dependency).
 """
 
@@ -31,6 +33,7 @@ from app.db.types import in_check
 
 KYC_STATUSES = ("NONE", "PENDING", "VERIFIED", "REJECTED")  # Section 81
 VEHICLE_TYPES = ("BIKE", "CAR4")
+AVAILABILITY = ("OFFLINE", "IDLE", "BUSY")  # TECHNICAL ADDITION (P2 plan OD-P2-07)
 
 
 class DriverProfile(Base):
@@ -103,5 +106,14 @@ class DriverLocation(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+    # --- TECHNICAL ADDITION (Phase 2, hard constraint 1) ---------------------
+    availability: Mapped[str] = mapped_column(String(8), nullable=False, server_default="OFFLINE")
+    active_vehicle_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("vehicles.id", ondelete="SET NULL")
+    )
 
-    __table_args__ = (Index("idx_driver_locations_geom", geom, postgresql_using="gist"),)
+    __table_args__ = (
+        Index("idx_driver_locations_geom", geom, postgresql_using="gist"),
+        in_check("availability", AVAILABILITY, "availability"),
+        CheckConstraint("availability = 'OFFLINE' OR active_vehicle_id IS NOT NULL", name="online_needs_vehicle"),
+    )

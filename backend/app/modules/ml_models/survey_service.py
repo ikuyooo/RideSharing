@@ -217,17 +217,24 @@ def export_table(session: Session, dataset: str, table: str) -> str:
 
 
 def quota(session: Session, dataset: str, settings: Settings) -> dict[str, Any]:
-    rows = dict(session.execute(select(SurveyRespondent.respondent_group, func.count())
-                                .where(SurveyRespondent.dataset == dataset, SurveyRespondent.completed_at.is_not(None))
-                                .group_by(SurveyRespondent.respondent_group)).tuples().all())
+    """Completed answers per group against the quota, plus (rule R1 adjustment) started
+    sessions and the completion rate per group, so drop-out is reported, not hidden."""
+    counts = session.execute(
+        select(SurveyRespondent.respondent_group, func.count(),
+               func.count().filter(SurveyRespondent.completed_at.is_not(None)))
+        .where(SurveyRespondent.dataset == dataset).group_by(SurveyRespondent.respondent_group)).all()
+    started = {g: n for g, n, _ in counts}
+    rows = {g: c for g, _, c in counts if c}
     total = sum(rows.values())
-    q = load_questionnaire(Path(settings.survey_s1_questionnaire_path))["quotas"]
     questionnaire = load_questionnaire(Path(settings.survey_s1_questionnaire_path))
+    q = questionnaire["quotas"]
     cap = group_cap(questionnaire)
     return {"dataset": dataset, "completed": total, "by_group": rows,
             "share_by_group": {g: round(n / total, 4) for g, n in rows.items()} if total else {},
             "group_share_band": q["group_share"], "target_valid_respondents": q["target_valid_respondents"],
-            "group_cap": cap, "closed_groups": sorted(g for g, n in rows.items() if n >= cap)}
+            "group_cap": cap, "closed_groups": sorted(g for g, n in rows.items() if n >= cap),
+            "started": sum(started.values()), "started_by_group": started,
+            "completion_rate_by_group": {g: round(rows.get(g, 0) / n, 4) for g, n in started.items()}}
 
 
 def demographics_options(settings: Settings) -> dict[str, Any]:

@@ -3,13 +3,13 @@
 Target consumers: MNL / mixed-logit estimation and 5-fold GroupKFold CV by `respondent_id`
 (Phase 7–8, Revision 9 Section 65.3), Wilcoxon / Friedman tests for H4.
 Format: one CSV per table (UTF-8, header row); Parquet export is added in Phase 7 when the
-data stack (Polars/Pandas) is introduced. Status: DRAFT 3 (questionnaire `draft_version` 3), not released.
+data stack (Polars/Pandas) is introduced. Status: DRAFT 5 (questionnaire `draft_version` 5, design D2 active for the local TEST survey), not released.
 
 ## `respondents.csv` — one row per completed response
 | Column | Type | Notes |
 |---|---|---|
 | respondent_id | UUID | random v4, server-generated; no link to any identity |
-| questionnaire_version | text | e.g. `s1-draft-3` |
+| questionnaire_version | text | e.g. `s1-draft-5` |
 | design_block | int | rotation block assigned at start (Part 1A design) |
 | group | enum | `STUDENT` \| `WORKER` |
 | ride_hailing_trips_per_week | enum / empty | `0`, `1`, `2-3`, `4-6`, `7+` (optional, SURVEY-04) |
@@ -48,3 +48,9 @@ data stack (Polars/Pandas) is introduced. Status: DRAFT 3 (questionnaire `draft_
 | preferred | 0/1 | exactly one 1 per respondent |
 
 No column may contain names, e-mail, phone, student id, IP address, precise location or free text.
+
+## Monitoring (ADMIN, not export tables) — rules R1 / R3
+- `GET /api/admin/survey/s1/quota?dataset=` — completed per group (quota), plus `started`, `started_by_group`
+  and `completion_rate_by_group` (R1: drop-out is reported, sessions without a submission are still never exported).
+- `GET /api/admin/survey/s1/rejections?days=` — 422 counts per UTC day and error code (R3), aggregate only:
+  no address, no request content; Redis keys expire after 90 days.

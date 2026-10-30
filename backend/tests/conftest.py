@@ -26,7 +26,8 @@ CONFIG_BASELINE = REPO_ROOT / "config" / "mvp_config_baseline_v1.yaml"
 # Tables the tests may wipe between cases. pricing_configs is excluded: it is
 # immutable by design (TRUNCATE is blocked by a trigger).
 MUTABLE_TABLES = (
-    "seat_bookings", "ride_participants", "fund_ledger", "driver_payouts", "ride_candidates",
+    "seat_bookings", "ride_stops", "ride_participants", "fund_ledger", "driver_payouts", "ride_candidates",
+    "candidate_runs",
     "bookings", "seat_holds", "scheduled_trips", "ride_plans", "vehicles", "driver_locations",
     "trip_requests", "idempotency_records", "refresh_tokens", "driver_profiles", "users",
     "scheduled_jobs", "service_areas", "pickup_points", "survey_responses", "survey_respondents",

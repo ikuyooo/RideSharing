@@ -232,7 +232,7 @@
       27.7,
       30.0
     ],
-    "design": "D (approved)",
+    "design": "D (superseded)",
     "expected_abs_t_n150": {
       "full": {
         "asc_bike": 1.51,
@@ -410,7 +410,7 @@
       32.7,
       35.0
     ],
-    "design": "D2 (proposed)",
+    "design": "D2 (active, local TEST design)",
     "expected_abs_t_n150": {
       "full": {
         "asc_bike": 1.68,

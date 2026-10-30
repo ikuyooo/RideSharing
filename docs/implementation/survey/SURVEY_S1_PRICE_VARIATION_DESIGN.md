@@ -91,3 +91,13 @@ Thay đổi so với D: thời gian ô tô ×0,70 / 1,00 / 1,30; thời gian xe 
 Hạn chế còn lại kể cả với D2: hệ số đi vòng, chênh giá tối đa, đi bộ 200 m có |t| kỳ vọng < 1 với N = 150 nếu tác động thật nhỏ như giả định → nên công bố là phân tích **thăm dò**; muốn kiểm định chúng cần N lớn hơn (N = 300: thời gian 3,8, đi vòng 1,0) hoặc thêm câu hỏi. Các β dùng ở đây là **giả định minh họa** — pilot với người thật (dữ liệu TEST) sẽ cho β thực để tính lại trước khi phát hành.
 
 **Cần Chủ dự án:** chọn D (giữ) hoặc D2 cho pilot tiếp theo, và chốt đặc tả MNL chính. Không mở thu thập dữ liệu thật.
+
+## 6. D2 kích hoạt cho khảo sát local (quyết định "DEVELOPMENT FIRST", 2026-10-29)
+
+`part_1a.variation_design` (draft 5) = D2: `active: true`, `design: D2`; các nhân tố giá như D; thời gian ô tô ×0,70/1,00/1,30
+(`a=1, b=1, c=0, block_div=2`), thời gian xe máy ×0,70/1,00/1,30 (`a=1, b=1, c=1, block_div=2`), đi vòng ×0,50/1,00/1,50
+(`a=2, b=2, c=1`). D chuyển sang `superseded_designs.D` (chỉ để so sánh trong pilot và diagnostics). Chạy lại
+`design_diagnostics.py` cho cùng số liệu (D: VIF 5,42, κ 151 / 241; D2: VIF 6,28, κ 98 / 115) — chỉ nhãn đổi.
+Mức hiển thị (làm tròn chuẩn Python): 6 km ô tô 13/19/25, xe máy 11/16/21, đi vòng +3/+6/+9 phút; 14 km ô tô 28/40/52,
+xe máy 24/35/46, đi vòng +6/+12/+18 phút (test `test_variation_design_d2_is_active_and_valid`). Mọi giá vẫn là giá giả định
+của thí nghiệm, không ghi vào `pricing_configs`; RESEARCH vẫn khóa đến khi phát hành.

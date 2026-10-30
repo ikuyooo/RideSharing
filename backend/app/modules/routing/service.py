@@ -1,24 +1,19 @@
-"""routing service - Phase 1 minimal interface (owner decision P1-D2).
-
-Only what Trip Intent classification needs: the shortest road distance of the
-OSRM car profile between two points, and the per-point reachability used by the
-service-area serviceability layer (GEO-03). The full RoutingProvider (route/matrix,
-Redis cache, motorbike) is Phase 2 (Revision 9 Sections 34, 79).
+"""routing service - Phase 1 interface used by Trip Intent classification (owner
+decision P1-D2): the shortest road distance of the OSRM car profile between two
+points, and the per-point reachability of the service-area serviceability layer
+(GEO-03). The full RoutingProvider (route / matrix, both profiles, Redis cache) is
+`routing.provider` / `routing.osrm` / `routing.cache` (Phase 2, Sections 34, 79).
 
 Errors are explicit; there is NO fallback to a straight-line distance.
 """
 
 from dataclasses import dataclass
 
-import httpx
+from app.modules.routing.osrm import osrm_get
+from app.modules.routing.provider import RouteNotFound, RoutingTimeout, RoutingUnavailable
 
-
-class RouteNotFound(Exception):
-    """OSRM answered but has no route (NoRoute / NoSegment)."""
-
-
-class RoutingUnavailable(Exception):
-    """OSRM could not be reached or answered with an unexpected error."""
+__all__ = ["OsrmCarDistance", "PointReach", "Reachability", "RoadDistance", "RouteNotFound", "RoutingTimeout",
+           "RoutingUnavailable"]
 
 
 @dataclass(frozen=True)
@@ -50,25 +45,7 @@ class OsrmCarDistance:
         self._timeout_s = timeout_s
 
     def _get(self, service: str, coords: list[Lonlat], params: dict[str, str]) -> dict:
-        path = ";".join(f"{lon:.6f},{lat:.6f}" for lon, lat in coords)
-        try:
-            # A fresh connection per request: osrm-routed v5.27.1 answers small
-            # keep-alive requests ~40 ms late (Phase 0 finding).
-            resp = httpx.get(
-                f"{self._base_url}/{service}/v1/driving/{path}",
-                params=params,
-                headers={"Connection": "close"},
-                timeout=self._timeout_s,
-            )
-            body = resp.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            raise RoutingUnavailable(f"OSRM request failed: {type(exc).__name__}") from exc
-        code = body.get("code")
-        if code in ("NoRoute", "NoSegment"):
-            raise RouteNotFound(code)
-        if resp.status_code != 200 or code != "Ok":
-            raise RoutingUnavailable(f"OSRM answered HTTP {resp.status_code} code={code}")
-        return body
+        return osrm_get(self._base_url, self._timeout_s, service, coords, params)
 
     def reachability(self, anchor: Lonlat, pickup: Lonlat, dropoff: Lonlat,
                      exclude: tuple[str, ...] = ()) -> Reachability:
