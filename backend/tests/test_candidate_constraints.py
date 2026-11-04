@@ -107,3 +107,17 @@ def test_pending_p3_candidates_are_never_offerable() -> None:
     from app.modules.candidate.service import offerable
 
     assert offerable("COMPLETE") and not offerable("PENDING_P3") and not offerable(None)
+
+
+def test_null_detour_limit_is_not_zero() -> None:
+    """OD-P2-06 (APPROVED_WITH_SAFEGUARDS): NULL = the driver declared no detour limit of their own,
+    it is NOT a limit of 0; every other constraint still applies."""
+    free = _driver(max_driver_detour_km=None, max_driver_detour_min=None)
+    zero = _driver(max_driver_detour_km=0.0, max_driver_detour_min=0.0)
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=free)) == set()
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=zero)) == {"HC07"}
+    # with NULL limits the other parts of HC07 and the rider constraints are still enforced
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=free, total_stops=9)) == {"HC07"}
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=replace(free, availability="BUSY"), added_pickups=3)) == {"HC07"}
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=free, segment_loads=(4, 5))) == {"HC04"}
+    assert codes(_ev(source=EXISTING_POOL_PLAN, driver=free, riders=(_rider(ride_distance_m=13001.0),))) == {"HC05"}

@@ -205,17 +205,29 @@ Routing không có API công khai. Benchmark chạy bằng CLI `scripts/p2_bench
 | P2 cần trước từ P4 | Không bắt buộc. Kế hoạch đang chạy trong test được dựng bằng fixture trực tiếp vào bảng. Khi P4 xong, chạy lại bộ test chèn với trạng thái do P4 tạo |
 | P2 → P6 / P8 | `candidate_runs` + `ride_candidates` (đặc trưng, ETA, giá, nhãn dịch vụ) là nguồn sự kiện cho xếp hạng và `P(match)` / `P(fulfill)`. Không có AI sản xuất trước khi có pipeline dữ liệu (P7) |
 
-## 10. Quyết định OD-P2 (cập nhật theo "P2 PERFORMANCE HARDENING & OWNER DECISION", 2026-10-30)
+## 10. Quyết định OD-P2 (cập nhật lần cuối theo "OWNER ACCEPTANCE OF P2 LOCAL & PHASE 3 KICKOFF", 2026-11-04)
 
 | Mã | Vấn đề | Cách hiện thực | Trạng thái |
 |---|---|---|---|
 | OD-P2-01 | "1 lệnh OSRM Table duy nhất" (§34, §79) với 2 profile | 1 lệnh **cho mỗi profile** mỗi lượt (tối đa 2, chạy song song); bao xe và ghép dùng chung lệnh `car`. Tối ưu 2026-10-30 giữ nguyên 1 request: chỉ thu hẹp `destinations` về các nút thật sự là đích (§ hồ sơ tối ưu), có chứng minh bằng test | **APPROVED** |
 | OD-P2-02 | Cache xấp xỉ (geohash-7) cho RB | Không cache ma trận phục vụ kiểm RB; chỉ cache `route()` | **APPROVED** |
-| OD-P2-03 | Khung `[T_earliest, T_latest]` mặc định | NOW: cửa sổ §2.2 giao khung khách nhập. Hẹn giờ không nhập: `[T_preferred, + độ rộng cửa sổ NOW]` (12 / 15 phút); chỉ có `T_earliest`: độ rộng mặc định tính từ đó. Kiểm bằng `tests/test_candidate_windows.py` | **LOCAL_PROVISIONAL** — còn chờ Chủ dự án xác nhận quy tắc hẹn giờ |
+| OD-P2-03 | Khung `[T_earliest, T_latest]` mặc định | NOW: cửa sổ §2.2 giao khung khách nhập. Hẹn giờ không nhập: `[T_preferred, + độ rộng cửa sổ NOW]` (12 / 15 phút); chỉ có `T_earliest`: độ rộng mặc định tính từ đó. Kiểm bằng `tests/test_candidate_windows.py` | **APPROVED_FOR_MVP** (2026-11-04). Điều kiện kèm theo: cửa sổ phân biệt theo dịch vụ (`bike_urban` / `car_urban`); luật đặt trước kiểm bởi RB 9 (`booking_time_ok`); không đón trước thời điểm khách chọn — xe đến sớm phải chờ tới đầu cửa sổ (`simulate`, `test_single_vehicle_is_insertion_into_an_empty_plan`, `test_scheduled_pickup_never_before_the_chosen_time`) |
 | OD-P2-04 | Ứng viên nhánh A trước định giá P3 | `pricing_check = PENDING_P3`; cổng `candidate.service.offerable()` chỉ nhận `COMPLETE` — P4 bắt buộc gọi trước khi chào / giữ chỗ | **APPROVED** |
-| OD-P2-05 | `R_pool` / `R_urban` = 5 km | Giữ 5 km. Phân tích false negative trên dữ liệu synthetic: `P2_PROGRESS_REPORT.md` §6 | **LOCAL_PROVISIONAL** — cần Chủ dự án xem kết quả phân tích |
-| OD-P2-06 | Ngữ nghĩa NULL của `max_driver_detour_km/min` | Hiện tại: NULL = tài xế không khai báo ngưỡng (không giới hạn đi vòng; vẫn áp `k_max_stops`, `max_additional_pickups`). Phương án thay thế: NULL = 0 (không nhận đi vòng) hoặc NULL = giá trị mặc định do Chủ dự án đặt | **LOCAL_PROVISIONAL** — chờ làm rõ |
+| OD-P2-05 | `R_pool` / `R_urban` = 5 km | Giữ 5 km. Phân tích false negative trên dữ liệu synthetic: `P2_PROGRESS_REPORT.md` §6 | **APPROVED_AS_P2_BASELINE** (2026-11-04). False negative và phương án mở rộng theo ETA chuyển sang cổng đánh giá chất lượng gợi ý P6 |
+| OD-P2-06 | Ngữ nghĩa NULL của `max_driver_detour_km/min` | Hiện tại: NULL = tài xế không khai báo ngưỡng (không giới hạn đi vòng; vẫn áp `k_max_stops`, `max_additional_pickups`). Phương án thay thế: NULL = 0 (không nhận đi vòng) hoặc NULL = giá trị mặc định do Chủ dự án đặt | **APPROVED_WITH_SAFEGUARDS** (2026-11-04). NULL = tài xế không khai báo giới hạn đi vòng riêng; mọi ràng buộc khác vẫn bắt buộc (`k_max_stops`, `max_additional_pickups`, sức chứa, RB 1–11 của mọi khách). NULL **không** đồng nhất với 0 (`test_null_detour_limit_is_not_zero`) |
 | OD-P2-07 | Độ tươi vị trí tài xế | `location_stale_s = 120` (tham số kỹ thuật) | **APPROVED_FOR_LOCAL** |
+
+### 10a. Quyết định về các phát hiện (2026-11-04)
+
+| Phát hiện | Quyết định Chủ dự án | Trạng thái trong `SPEC_FINDINGS_P2.md` |
+|---|---|---|
+| SF-P2-02 | Giữ ma trận OSRM chữ nhật, có kiểm chứng tương đương với ma trận vuông | `APPROVED` |
+| SF-P2-15 | Phương án (2) cho P4: dùng `/route` xác minh chuỗi điểm dừng cuối trước khi chào; kiểm lại mọi ràng buộc cứng bị ảnh hưởng; không bỏ qua lỗi định tuyến | `APPROVED_MITIGATION_FOR_P4` — chưa `RESOLVED` (chưa hiện thực) |
+| SF-P2-09 | `T_plan` phải được phân tích và thống nhất với công thức `PlanFare` ở P3 (di chuyển, dừng, chờ theo đúng đặc tả) | Chuyển P3 — xem `SPEC_FINDINGS_P3.md` |
+| SF-P2-10 | Giữ fail-closed cho giới tính chưa xác thực; chưa mở xác thực thật | `OPEN` — fail-closed giữ nguyên |
+| SF-P2-18 | Giữ unit test RB 10; kiểm thử tích hợp đầy đủ khi triển khai C9 | `OPEN` — chuyển C9 |
+
+Không phát hiện nào được ghi `RESOLVED` chỉ vì đã có phương án xử lý ở phase sau.
 
 ## 10b. Hồ sơ tối ưu hiệu năng (2026-10-30 / 31)
 
@@ -239,3 +251,5 @@ Tối ưu chỉ dựa trên profiling. Workload, `N_single`, `N_pool`, `k_max`, 
 5. P2.4 Benchmark + báo cáo `P2_PROGRESS_REPORT.md`.
 
 Mỗi bước: chạy toàn bộ test. Không commit / push khi chưa có yêu cầu.
+
+**Trạng thái phase (2026-11-04):** `PHASE_2_LOCAL_ACCEPTED__KNOWN_LIMITATIONS` — hồ sơ: `P2_LOCAL_ACCEPTANCE_RECORD.md`.

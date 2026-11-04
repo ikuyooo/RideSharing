@@ -265,6 +265,11 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
         bike_future, car_future = pool.submit(bike_table), pool.submit(car_table)
         bike_m, car_m = bike_future.result(), car_future.result()
     result.timings_ms["osrm_wall"] = (time.perf_counter() - t0) * 1000
+    # Scope 1 of the three P2 acceptance scopes (owner directive "P2 local acceptance", III): ONE
+    # wall-clock span from the start of generation to the end of the OSRM tables - PostGIS driver
+    # and plan queries, the rider look-up of the plans, and the table requests. Scope 2 is "total"
+    # (whole generation before persist); scope 3 (generation + persist) is measured by the caller.
+    result.timings_ms["scope_postgis_osrm_table"] = (time.perf_counter() - t_start) * 1000
     result.osrm_requests = int(bike_m is not None) + int(car_m is not None)
 
     # ---- 3. constraints / insertion ----------------------------------------

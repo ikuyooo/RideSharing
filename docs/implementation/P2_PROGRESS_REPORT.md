@@ -1,11 +1,13 @@
 # PHASE 2 — BÁO CÁO TIẾN ĐỘ
 
-- **Cập nhật:** 2026-10-31, sau "P2 PERFORMANCE HARDENING & OWNER DECISION". Bản trước: 2026-10-29.
-- **Trạng thái P2: `PHASE_2_READY_FOR_OWNER_ACCEPTANCE` (local).**
-  - Cả hai tiêu chí kỹ thuật của R9 §79 P2 đạt trên stack local (`LOCAL_VERIFIED`): 0 vi phạm ràng buộc cứng và độ trễ sinh ứng viên p95 < 300 ms ở toàn bộ 6 cấu hình.
-  - Việc nghiệm thu thuộc Chủ dự án. Còn 3 quyết định `LOCAL_PROVISIONAL` (OD-P2-03, 05, 06) và 4 phát hiện `OPEN` (SF-P2-09, 10, 15, 18) — xem §8.
-  - Hiệu năng trên máy chủ thật: `EXTERNAL_VALIDATION_DEFERRED`. SF-06 vẫn **OPEN**.
-  - **P3 chưa bắt đầu.**
+- **Cập nhật:** 2026-11-04, sau "OWNER ACCEPTANCE OF P2 LOCAL & PHASE 3 KICKOFF". Trước đó: 2026-10-31 (hardening), 2026-10-29.
+- **Trạng thái P2: `PHASE_2_LOCAL_ACCEPTED__KNOWN_LIMITATIONS`** (quyết định Chủ dự án, 2026-11-04). Hồ sơ: `P2_LOCAL_ACCEPTANCE_RECORD.md`.
+  - Phạm vi: nghiệm thu kỹ thuật **local** trong phạm vi kiểm chứng đã mô tả. **Không** đồng nhất với production readiness.
+  - **Không** tuyên bố HC10, nhánh xác thực của HC11 hay mọi rủi ro định tuyến (SF-P2-15) đã được chứng minh đầy đủ.
+  - Quyết định OD-P2 đã chốt: `P2_IMPLEMENTATION_PLAN.md` §10 / §10a. Phát hiện còn `OPEN`: SF-P2-09 (chuyển P3), SF-P2-10, SF-P2-18; SF-P2-15 ở trạng thái `APPROVED_MITIGATION_FOR_P4`.
+  - Hiệu năng trên máy chủ thật: `EXTERNAL_VALIDATION_DEFERRED`. SF-06 vẫn **OPEN**. P0 giữ `PHASE_0_CONDITIONAL__REVIEW_REQUIRED`.
+  - Đo ba phạm vi riêng biệt (PostGIS + OSRM Table / sinh ứng viên trước persist / sinh ứng viên + persist): §9.
+  - P3 bắt đầu sau khi khóa hồ sơ này.
 - Revision 9, Baseline v1, SLA, `N_single = 15`, `N_pool = 20`, `k_max = 8`, `R_urban = 5 km` và workload benchmark **không đổi**.
 - Hồ sơ liên quan:
   - Kế hoạch: `P2_IMPLEMENTATION_PLAN.md` (§10: quyết định OD-P2).
@@ -164,3 +166,13 @@ Kết luận: bán kính 5 km và cách chọn top-N theo đường chim bay (§
 | Bằng chứng và báo cáo lưu đủ | **ĐẠT** — `evidence/p2_runs/` |
 
 **Phán quyết:** P2 đạt các tiêu chí kỹ thuật ở mức `LOCAL_VERIFIED` và được **đề xuất** Chủ dự án nghiệm thu (`PHASE_2_READY_FOR_OWNER_ACCEPTANCE`). Báo cáo này **không** tự gán P2 COMPLETE: các quyết định ở §8 thuộc Chủ dự án. Chưa bắt đầu P3.
+
+## 9. Ba phạm vi đo (bổ sung 2026-11-04)
+
+Xem `P2_LOCAL_ACCEPTANCE_RECORD.md` §3. Mỗi phạm vi là một phép đo đồng hồ tường riêng, không suy ra từ phạm vi khác:
+
+| Phạm vi | Khóa trong `result.json` | Điểm đầu → điểm cuối |
+|---|---|---|
+| PostGIS + OSRM Table | `scopes_ms.postgis_plus_osrm_table` (từ `timings_ms.scope_postgis_osrm_table`) | Bắt đầu `generate()` → hết hai lệnh `/table`; gồm truy vấn tài xế, kế hoạch và dữ liệu khách của kế hoạch |
+| Sinh ứng viên trước persist | `scopes_ms.generation_before_persist` | Bắt đầu → `generate()` trả về |
+| Sinh ứng viên + persist | `scopes_ms.generation_plus_persist` | Bắt đầu → `persist()` commit xong (một span, không cộng hai số) |

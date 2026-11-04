@@ -42,6 +42,18 @@ def main() -> None:
             errors = sum(sum(c["errors"].values()) for c in rows)
             print(f"| {cfg} | {' / '.join(map(str, p50))} | {' / '.join(map(str, p95))} | {' / '.join(map(str, p99))} "
                   f"| {max(p95)} | {calls} | {errors} |")
+        scoped = [c for _, r in runs for c in r["configs"] if "scopes_ms" in c]
+        if scoped:
+            print()
+            print("Three scopes, each measured separately - p95 per run (ms):")
+            print("| Workload | PostGIS + OSRM Table | Generation before persist | Generation + persist |")
+            print("|---|---|---|---|")
+            for cfg in CONFIGS:
+                rows = [c for c in scoped if c["config"] == cfg]
+                if rows:
+                    cols = [" / ".join(str(c["scopes_ms"][k]["p95"]) for c in rows)
+                            for k in ("postgis_plus_osrm_table", "generation_before_persist", "generation_plus_persist")]
+                    print(f"| {cfg} | " + " | ".join(cols) + " |")
         print()
         print("Stage p95 (median over runs), 200x20 and 1000x20:")
         for cfg in ("200x20", "1000x20"):

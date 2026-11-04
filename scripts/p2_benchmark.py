@@ -380,11 +380,14 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                     bump(errors, type(exc).__name__)
                     session.rollback()
                     continue
-                totals.append((time.perf_counter() - started) * 1000)
-                t_persist = time.perf_counter()
+                generated = time.perf_counter()
+                totals.append((generated - started) * 1000)
                 persist(session, trip_id, policy, fx.VERSION, result)
-                persist_ms = (time.perf_counter() - t_persist) * 1000
-                with_persist.append(totals[-1] + persist_ms)
+                done = time.perf_counter()
+                persist_ms = (done - generated) * 1000
+                # Scope 3: its own wall-clock span (start of generation -> commit of persist), not a
+                # sum of the other two measurements.
+                with_persist.append((done - started) * 1000)
                 timings = dict(result.timings_ms) | {"persist": persist_ms}
                 timings["postgis"] = timings.get("postgis_drivers", 0) + timings.get("plan_lookup", 0)
                 timings["postgis_plus_osrm"] = timings["postgis"] + timings.get("osrm_wall", 0)
@@ -438,6 +441,10 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
             entry = {"config": name, "drivers": n_drivers, "open_plans": n_plans, "requests": len(requests),
                      "errors": errors, "generation_total_ms": summary(totals),
                      "generation_plus_persist_ms": summary(with_persist),
+                     # The three acceptance scopes, each its own measurement (owner directive III).
+                     "scopes_ms": {"postgis_plus_osrm_table": summary(stages.get("scope_postgis_osrm_table", [])),
+                                   "generation_before_persist": summary(totals),
+                                   "generation_plus_persist": summary(with_persist)},
                      "stages_ms": {k: summary(v) for k, v in sorted(stages.items())},
                      "osrm_requests_per_run": sorted(set(osrm_requests)), "rejections_by_code": rejected,
                      "meets_300ms_p95_total": (pct(totals, 95) or 0) < 300}

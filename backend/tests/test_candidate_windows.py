@@ -63,3 +63,32 @@ def test_booking_time_rule_hc09(baseline: dict) -> None:
     assert booking_time_ok(trip("SCHEDULED", m(12 * 60)), "CAR_URBAN_PRIVATE", baseline)[0]
     assert not booking_time_ok(trip("SCHEDULED", m(12 * 60 + 1)), "CAR_URBAN_PRIVATE", baseline)[0]
     assert not booking_time_ok(trip("NOW", m(-1)), "BIKE_URBAN", baseline)[0]
+
+
+@pytest.mark.parametrize("service", ["BIKE_URBAN", "CAR_URBAN_PRIVATE", "CAR_URBAN_POOL"])
+def test_scheduled_pickup_never_before_the_chosen_time(baseline: dict, service: str) -> None:
+    """OD-P2-03 (APPROVED_FOR_MVP): per service; a vehicle that can arrive early waits for the
+    start of the window, which is never before the time the rider chose."""
+    from app.modules.candidate.constraints import NEW_SINGLE_VEHICLE, DriverState
+    from app.modules.pooling.insertion import Params, PlanState, RiderSpec, insert
+
+    pref = m(180)
+    for t in (trip("SCHEDULED", pref), trip("SCHEDULED", pref, earliest=m(170), latest=m(200))):
+        lo, hi = pickup_window(t, service, baseline)
+        assert lo == (t.earliest_departure or t.preferred_departure)
+        bike = service == "BIKE_URBAN"
+        drv = DriverState(driver_id=uuid.uuid4(), availability="IDLE", location_age_s=5, kyc_status="VERIFIED",
+                          accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2,
+                          max_driver_detour_km=None, max_driver_detour_min=None, vehicle_id=uuid.uuid4(),
+                          vehicle_type="BIKE" if bike else "CAR4", capacity=1 if bike else 4, vehicle_active=True)
+        D = [[0, 500, 6500], [500, 0, 6000], [6500, 6000, 0]]
+        T = [[d / 10 for d in row] for row in D]  # the driver is 50 s from P
+        rider = RiderSpec(ref="new", seats=1, onboard=False, pickup_window=(lo, hi), actual_pickup=None,
+                          traveled_m=0.0, direct_distance_m=6000, direct_duration_s=600, max_detour_ratio=0.3,
+                          max_in_vehicle_s=1500, latest_arrival=None, max_price_vnd=None, budget_max_vnd=None)
+        params = Params(dwell_s=60, k_max_stops=8, location_stale_s=120, per_km_vnd=11000, per_min_vnd=500,
+                        stop_fee_vnd=5000)
+        rep = insert(PlanState(None, None, drv, 0, T0, 0, (), ()), rider, 1, 2, D, T, service, NEW_SINGLE_VEHICLE,
+                     booking_time_ok(t, service, baseline), params)
+        assert rep.best is not None
+        assert rep.best.evaluation.riders[0].planned_pickup == lo
