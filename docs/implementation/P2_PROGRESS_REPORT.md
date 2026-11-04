@@ -167,9 +167,9 @@ Kết luận: bán kính 5 km và cách chọn top-N theo đường chim bay (§
 
 **Phán quyết:** P2 đạt các tiêu chí kỹ thuật ở mức `LOCAL_VERIFIED` và được **đề xuất** Chủ dự án nghiệm thu (`PHASE_2_READY_FOR_OWNER_ACCEPTANCE`). Báo cáo này **không** tự gán P2 COMPLETE: các quyết định ở §8 thuộc Chủ dự án. Chưa bắt đầu P3.
 
-## 9. Ba phạm vi đo (bổ sung 2026-11-04)
+## 10. Ba phạm vi đo (bổ sung 2026-11-04)
 
-Xem `P2_LOCAL_ACCEPTANCE_RECORD.md` §3. Mỗi phạm vi là một phép đo đồng hồ tường riêng, không suy ra từ phạm vi khác:
+Kết quả 3 lượt sạch (`acceptance-final-a1..a3`, worktree tại `a1927de`): `P2_LOCAL_ACCEPTANCE_RECORD.md` §3. Phạm vi (2) p95 < 300 ms mọi lượt, nhưng cao nhất 297,9 ms (200 × 20, lượt a1) — biên SLA là rủi ro. Mỗi phạm vi là một phép đo đồng hồ tường riêng, không suy ra từ phạm vi khác:
 
 | Phạm vi | Khóa trong `result.json` | Điểm đầu → điểm cuối |
 |---|---|---|
