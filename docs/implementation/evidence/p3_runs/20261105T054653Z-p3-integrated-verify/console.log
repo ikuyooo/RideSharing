@@ -1,0 +1,18 @@
+ Container ridesharing-backend-run-c61f9c08b754 Creating 
+ Container ridesharing-backend-run-c61f9c08b754 Created 
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, p1 core schema
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, p1 survey s1 draft storage
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, p1 service area excluded layer
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, p1 survey s1 duration
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, p2 routing candidate pooling
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, p3 pricing and fund
+50x0 | total p50/p95/p99 24.3 49.21 74.44 | postgis p95 10.26 | osrm_car p95 21.47 | step3 p95 11.03 | errors {} | viol {} plans {} singles {'correct': 388}
+200x0 | total p50/p95/p99 34.52 66.22 111.78 | postgis p95 12.53 | osrm_car p95 27.98 | step3 p95 17.21 | errors {} | viol {} plans {} singles {'correct': 440}
+1000x0 | total p50/p95/p99 38.67 58.84 80.0 | postgis p95 18.25 | osrm_car p95 22.25 | step3 p95 15.21 | errors {} | viol {} plans {} singles {'correct': 218}
+200x10 | total p50/p95/p99 60.59 91.92 121.36 | postgis p95 30.13 | osrm_car p95 31.51 | step3 p95 15.61 | errors {} | viol {} plans {'rejected_by_pricing_gates': 67, 'correct': 567} singles {'correct': 493}
+200x20 | total p50/p95/p99 66.29 99.74 122.97 | postgis p95 27.52 | osrm_car p95 35.59 | step3 p95 19.32 | errors {} | viol {} plans {'correct': 997, 'rejected_by_pricing_gates': 263} singles {'correct': 491}
+1000x20 | total p50/p95/p99 70.09 111.1 133.02 | postgis p95 37.17 | osrm_car p95 32.83 | step3 p95 16.87 | errors {} | viol {} plans {'correct': 1068, 'rejected_by_pricing_gates': 245} singles {'correct': 333}
+200x20-hc | total p50/p95/p99 59.44 100.13 149.49 | postgis p95 27.6 | osrm_car p95 32.48 | step3 p95 19.19 | errors {} | viol {} plans {'correct': 413, 'rejected_by_pricing_gates': 247} singles {'correct': 1352}
+written /repo/docs/implementation/evidence/p2_runs/20261105T054653Z-p3-integrated-verify/result.json

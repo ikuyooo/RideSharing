@@ -17,9 +17,10 @@ caller with ONE matrix request (Section 34, P2-04) - no routing call happens her
     step 6  keep the option with the smallest incremental cost.
 
 A vehicle that reaches a pickup before T_earliest waits there (planned pickup =
-T_earliest). The incremental cost is PlanFare_new - PlanFare_old with PlanFare of
-Section 13 (BASE cancels; PER_KM x extra distance + PER_MIN x extra elapsed time +
-STOP_FEE x 2 new stops).
+T_earliest). The incremental cost (step 6) is PlanFare_new - PlanFare_old with PlanFare of
+Section 13: BASE cancels, PER_KM x extra D_plan + PER_MIN x extra T_plan + STOP_FEE x 2 new
+stops, where D_plan / T_plan are measured exactly as the pricing measures them
+(`plan_extent`, P3 decision DD-P3-04 / SF-P2-09).
 
 A new single vehicle (Section 35.1) and a new pool plan from an idle driver (Section
 35.2 branch B) are the same computation on an empty plan: chain [P, Q].
@@ -114,6 +115,7 @@ class InsertionResult:
     added_duration_s: float
     delta_cost_vnd: float
     pricing_check: str                # COMPLETE | PENDING_P3
+    simulation: Simulation | None = None
 
 
 @dataclass
@@ -146,6 +148,22 @@ def simulate(chain: Sequence[Stop], start: int, D: Sequence[Sequence[Cell]], T: 
         t += dwell_s
         node = stop.node
     return Simulation(tuple(events), tuple(cum), dist, t, tuple(unroutable))
+
+
+def plan_extent(sim: Simulation, started: bool) -> tuple[float, float]:
+    """(metres, seconds) of the plan that this chain contributes to D_plan / T_plan (Section 13).
+
+    T_plan runs from the moment the vehicle is ready at S_0 (after any wait for T_earliest there)
+    to its arrival at S_k: driving, the dwell at S_0..S_{k-1} and the waits at later pickups, not
+    the dwell after the last drop-off. Not started (S_0 is the first stop of the chain): measured
+    from that stop, so the approach of the vehicle to S_0 is not part of the plan. Started: measured
+    from the current position; the part already driven since S_0 is the same for every option and
+    is added by the pricing from ride_plans.driven_m_since_start / started_at."""
+    if not sim.events_s:
+        return 0.0, 0.0
+    if started:
+        return sim.cum_m[-1], sim.events_s[-1]
+    return sim.cum_m[-1] - sim.cum_m[0], sim.events_s[-1] - sim.events_s[0]
 
 
 def _loads(chain: Sequence[Stop], riders: dict[str, RiderSpec]) -> tuple[int, ...]:
@@ -208,6 +226,8 @@ def insert(state: PlanState, new: RiderSpec, p_node: int, q_node: int, D: Sequen
     report = InsertionReport(best=None)
     remaining = list(state.remaining)
     base = simulate(remaining, state.current_node, D, T, windows, params.dwell_s) if remaining else None
+    started = state.completed_stops > 0
+    base_m, base_s = plan_extent(base, started) if base else (0.0, 0.0)
     m_f = len(remaining) + 1
     driver = state.driver
     # Step 1 does not depend on the position: evaluated once, reported per option.
@@ -244,9 +264,12 @@ def insert(state: PlanState, new: RiderSpec, p_node: int, q_node: int, D: Sequen
                 continue
             extra_m = sim.total_m - (base.total_m if base else 0.0)
             extra_s = sim.elapsed_s - (base.elapsed_s if base else 0.0)
-            delta = params.per_km_vnd * extra_m / 1000 + params.per_min_vnd * extra_s / 60 + params.stop_fee_vnd * 2
+            plan_m, plan_s = plan_extent(sim, started)
+            delta = (params.per_km_vnd * (plan_m - base_m) / 1000 + params.per_min_vnd * (plan_s - base_s) / 60
+                     + params.stop_fee_vnd * 2)
             result = InsertionResult(p_idx=p_idx, q_idx=q_idx, chain=chain, evaluation=ev, added_distance_m=extra_m,
-                                     added_duration_s=extra_s, delta_cost_vnd=delta, pricing_check="PENDING_P3")
+                                     added_duration_s=extra_s, delta_cost_vnd=delta, pricing_check="PENDING_P3",
+                                     simulation=sim)
             if pricing_check is not None:
                 rejected = pricing_check(result)
                 if rejected is not None:

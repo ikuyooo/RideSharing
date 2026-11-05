@@ -5,6 +5,7 @@ Drivers, trips and plans are SYNTHETIC (tests/p2_fixtures.py)."""
 
 import socket
 from datetime import UTC, datetime, timedelta
+from fractions import Fraction
 
 import pytest
 from fastapi.testclient import TestClient
@@ -133,17 +134,105 @@ def test_branch_a_inserts_into_a_running_vehicle(world: Session, provider: OsrmR
     assert result.counts["pool_plans"] == 1 and result.osrm_requests == 1
     # One car table: origins = vehicle (S_curr), stop ahead, P, Q; destinations = stop ahead, P, Q only.
     assert result.counts["car_matrix"][:2] == [4, 3]
+    # Every option was evaluated by the 11 hard constraints and then by the Phase 3 pricing. On real
+    # OSRM (free-flow speeds, no traffic) this plan fails gate 2B: the co-rider's single-ride hourly rate
+    # beats the plan's (SF-P3-16) - an exact reason code, no candidate, nothing priced from guesses.
+    assert not [c for c in result.candidates if c.source_type == "EXISTING_POOL_PLAN"]
+    rej = result.rejections["CAR_URBAN_POOL"]
+    assert set(rej) <= {"HC03", "HC05", "P3_D1_NO_CO_RIDING_OVERLAP", "P3_GATE1_PASSENGER_SHAREABILITY",
+                        "P3_GATE2B_DRIVER_HOURLY_RATE"}, rej
+    assert any(code.startswith("P3_") for code in rej), rej        # pricing ran on HC-feasible options
+
+
+class TrafficSpeedRouter:
+    """Deterministic SYNTHETIC router: road distance = 1,3 x great-circle distance, 20 km/h (urban
+    traffic, like the 21 km/h of the Section 16.1 example). Only for the pricing path of branch A."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    @staticmethod
+    def _leg(a, b):  # type: ignore[no-untyped-def]
+        import math
+        lat = math.radians((a[1] + b[1]) / 2)
+        dx = (b[0] - a[0]) * 111320 * math.cos(lat)
+        dy = (b[1] - a[1]) * 110540
+        d = 1.3 * math.hypot(dx, dy)
+        return d, d / (20 / 3.6)
+
+    def route(self, profile, origin, destination, **_):  # type: ignore[no-untyped-def]
+        from app.modules.routing.provider import Route
+        d, t = self._leg(origin, destination)
+        return Route(d, t, (0.0, 0.0))
+
+    def matrix(self, profile, sources, destinations):  # type: ignore[no-untyped-def]
+        from app.modules.routing.provider import Matrix
+        self.calls += 1
+        legs = [[self._leg(a, b) for b in destinations] for a in sources]
+        return Matrix(tuple(tuple(x[0] for x in row) for row in legs), tuple(tuple(x[1] for x in row) for row in legs),
+                      tuple(0.0 for _ in sources), tuple(0.0 for _ in destinations), {"sources": len(sources),
+                                                                                       "destinations": len(destinations)})
+
+
+def test_branch_a_with_traffic_speeds_is_priced_complete(world: Session) -> None:
+    """Branch A end to end through PoolPricingCheck (Phase 3): gate 1, D1-D6, allocation, rounding, gate 2."""
+    s = world
+    router = TrafficSpeedRouter()
+    car_pos = (105.7700, 20.9600)
+    car, vehicle = fx.driver(s, *car_pos, NOW, pool=True, max_additional_pickups=2)
+    a_user = fx.user(s)
+    a_trip = fx.trip(s, a_user, PHENIKAA, HOAN_KIEM, NOW - timedelta(minutes=40), allowed=["CAR_URBAN_POOL"])
+    direct = router.route(Profile.CAR, PHENIKAA, HOAN_KIEM)
+    driven = router.route(Profile.CAR, PHENIKAA, car_pos)
+    plan = fx.onboard_plan(s, car, vehicle, a_trip, a_user, PHENIKAA, HOAN_KIEM,
+                           NOW - timedelta(seconds=driven.duration_s + 60), direct_m=direct.distance_m,
+                           direct_s=direct.duration_s, traveled_km=driven.distance_m / 1000, cap_vnd=400000)
+    b_user = fx.user(s)
+    # B booked 5 min ago (its NOW window is open: no wait) and shares most of A's remaining route
+    b_trip = fx.trip(s, b_user, (105.7720, 20.9620), HOAN_KIEM, NOW - timedelta(minutes=5), allowed=["CAR_URBAN_POOL"])
+    s.commit()
+    _, result = _run(s, router, b_trip)  # type: ignore[arg-type]
     a = [c for c in result.candidates if c.source_type == "EXISTING_POOL_PLAN"]
-    assert len(a) == 1 and a[0].plan_id == plan and a[0].plan_version == 3
-    assert a[0].pricing_check == "PENDING_P3"  # steps 4-5 of Section 36 belong to Phase 3
-    riders = {r["ref"]: r for r in a[0].audit["riders"]}
+    assert len(a) == 1, result.rejections["CAR_URBAN_POOL"]
+    c = a[0]
+    assert c.plan_id == plan and c.pricing_check == "COMPLETE"
+    riders = {r["ref"]: r for r in c.audit["riders"]}
     assert len(riders) == 2 and any(r["onboard"] for r in riders.values())  # rider A was re-checked
     for r in riders.values():
         assert r["detour"] <= r["max_detour"] and r["in_vehicle_s"] <= r["max_in_vehicle_s"]
-    onboard_ref = next(k for k, r in riders.items() if r["onboard"])
-    chain = a[0].insertion["chain"]
-    assert ["new", "PICKUP"] in chain and ["new", "DROPOFF"] in chain and [onboard_ref, "DROPOFF"] in chain
+    chain = c.insertion["chain"]
     assert chain.index(["new", "PICKUP"]) < chain.index(["new", "DROPOFF"])
+    from app.modules.candidate.service import offerable
+    assert offerable(c.pricing_check)
+    pricing = c.insertion["pricing"]
+    exact = {ref: Fraction(x["fare_exact"]) for ref, x in pricing["riders"].items()}
+    assert sum(exact.values()) == Fraction(pricing["plan_fare"])            # N1, exactly
+    assert c.fare_matched_est_vnd == pricing["riders"]["new"]["fare_charged"] <= c.pool_quote_vnd
+    old_ref = next(r for r in pricing["riders"] if r != "new")
+    assert pricing["riders"][old_ref]["group"] == "U"                        # first match: allocated on Cap
+    charged = sum(x["fare_charged"] for x in pricing["riders"].values())
+    assert Fraction(pricing["driver_payout"]) == Fraction(85, 100) * charged
+    stored = s.execute(text("SELECT pricing_check, fare_matched_est_vnd FROM ride_candidates "
+                            "WHERE target_plan_id = :p"), {"p": plan}).one()
+    assert tuple(stored) == ("COMPLETE", c.fare_matched_est_vnd)
+
+
+def test_branch_a_plan_without_pricing_state_is_never_priced_from_guesses(world: Session,
+                                                                         provider: OsrmRoutingProvider) -> None:
+    s = world
+    car, vehicle = fx.driver(s, 105.8195, 21.0035, NOW, pool=True, max_additional_pickups=2)
+    a_user = fx.user(s)
+    a_trip = fx.trip(s, a_user, PHENIKAA, HOAN_KIEM, NOW - timedelta(minutes=20), allowed=["CAR_URBAN_POOL"])
+    direct = provider.route(Profile.CAR, PHENIKAA, HOAN_KIEM)
+    plan = fx.onboard_plan(s, car, vehicle, a_trip, a_user, PHENIKAA, HOAN_KIEM, NOW - timedelta(minutes=10),
+                           direct_m=direct.distance_m, direct_s=direct.duration_s, traveled_km=7.0, cap_vnd=174000)
+    s.execute(text("UPDATE ride_plans SET pricing_version = NULL WHERE id = :p"), {"p": plan})
+    b_user = fx.user(s)
+    b_trip = fx.trip(s, b_user, (105.8230, 21.0060), (105.8470, 21.0250), NOW, allowed=["CAR_URBAN_POOL"])
+    s.commit()
+    _, result = _run(s, provider, b_trip)
+    assert not [c for c in result.candidates if c.source_type == "EXISTING_POOL_PLAN"]
+    assert result.rejections["CAR_URBAN_POOL"]["P3_PLAN_PRICING_STATE"] >= 1
 
 
 def test_routing_unavailable_is_explicit_and_logged(world: Session) -> None:

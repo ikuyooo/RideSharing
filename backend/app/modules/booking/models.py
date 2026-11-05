@@ -106,6 +106,8 @@ class Booking(Base):
     escrow_tx_deposit: Mapped[str | None] = mapped_column(String)
     escrow_tx_lock_or_topup: Mapped[str | None] = mapped_column(String)
     escrow_tx_settle: Mapped[str | None] = mapped_column(String)
+    # TECHNICAL ADDITION (Phase 3): Baseline 5.2 - the pricing_version the booking was priced with.
+    pricing_version: Mapped[str | None] = mapped_column(String(64))
 
     __table_args__ = (
         in_check("service_code", SERVICE_CODES, "service_code"),

@@ -130,11 +130,12 @@ def make_world(session, rng: random.Random, n_drivers: int, n_plans: int, now: d
     session.commit()
 
 
-def make_world_hc(session, rng: random.Random, n_drivers: int, n_plans: int, now: datetime, osrm: Osrm) -> None:  # noqa: ANN001
+def make_world_hc(session, rng: random.Random, n_drivers: int, n_plans: int, now: datetime, osrm: Osrm) -> dict:  # noqa: ANN001
     """Constraint-stress workload: plans with 1-3 riders (first rider onboard, others onboard or
     waiting, up to 5 stops ahead), driver detour limits (HC07), same-gender riders (HC11 - never
     satisfiable while no gender verification exists, P1-D6) and budgets on new trips (HC08)."""
     make_world(session, rng, n_drivers, 0, now, osrm)
+    stats: dict[str, int] = {}
     for _ in range(n_plans):
         pos = disk(rng, CENTER, 4)
         limit = rng.choice([None, None, (3.0, 10.0), (6.0, 15.0)])
@@ -164,8 +165,55 @@ def make_world_hc(session, rng: random.Random, n_drivers: int, n_plans: int, now
                 ahead.insert(j, (i, "PICKUP"))
                 ahead.insert(rng.randint(j + 1, len(ahead)), (i, "DROPOFF"))
         if riders and riders[0]["onboard"]:
-            fx.plan(session, car, vehicle, riders, ahead)
+            priced = price_fixture_plan(riders, ahead, osrm, rng) if len(riders) > 1 else {}
+            if priced is None:
+                stats["plans_skipped_unpriceable"] = stats.get("plans_skipped_unpriceable", 0) + 1
+                continue
+            fx.plan(session, car, vehicle, riders, ahead, driven_m=riders[0]["traveled_km"] * 1000, **priced)
+            stats["plans"] = stats.get("plans", 0) + 1
+            stats["plans_with_lock"] = stats.get("plans_with_lock", 0) + int(any(r.get("locked") for r in riders))
     session.commit()
+    return stats
+
+
+def price_fixture_plan(riders: list[dict], ahead: list[tuple[int, str]], osrm: Osrm,  # noqa: ANN001
+                       rng: random.Random) -> dict | None:
+    """Phase 3: a plan with >= 2 bookings carries an allocation (accepted when its 2nd booking joined).
+    Priced on the plan's own chain S_0..S_k (completed pickups, then the stops ahead) with the same
+    PlanFare / T_plan definition as the generator (DD-P3-04); None when the riders could not share."""
+    from fractions import Fraction
+
+    from app.modules.pricing import pool
+    from app.modules.pricing.money import to_rational_text
+    from app.modules.pricing.params import CarUrbanParams
+
+    car = CarUrbanParams.from_section(fx._baseline()["car_urban"])
+    stops = [(i, "PICKUP") for i, r in enumerate(riders) if r["onboard"]] + list(ahead)
+    pts = [riders[i]["pickup" if k == "PICKUP" else "dropoff"] for i, k in stops]
+    legs = osrm.legs("car", pts)
+    if legs is None:
+        return None
+    cum = [0.0]
+    for m, _ in legs:
+        cum.append(cum[-1] + m)
+    pos = {(i, k): n for n, (i, k) in enumerate(stops)}
+    priced_riders = []
+    for i, r in enumerate(riders):
+        ride = cum[pos[(i, "DROPOFF")]] - cum[pos[(i, "PICKUP")]]
+        detour = max(Fraction(0), (Fraction(ride) - Fraction(r["direct_m"])) / Fraction(r["direct_m"]))
+        P = fx.private_fare_of(r["direct_m"], r["direct_s"])
+        r["private_fare"] = P
+        priced_riders.append(pool.PoolRider(str(i), P, r.get("seats", 1), Fraction(r["direct_s"]), detour))
+    t_plan = Fraction(sum(sec for _, sec in legs)) + 60 * len(legs)
+    res = pool.price_new_plan(car, priced_riders, Fraction(cum[-1]), t_plan, len(stops))
+    if not res.ok:
+        return None
+    for i, r in enumerate(riders):
+        x = res.prices[str(i)]
+        r["fare_exact"], r["fare_charged"] = to_rational_text(x.fare_exact), x.fare_charged
+    if rng.random() < 0.3:
+        riders[0]["locked"] = True  # rider 0 reached its pool_lock_point: group L
+    return {"plan_fare_exact": to_rational_text(res.plan_fare)}
 
 
 def capture_sql(engine):  # noqa: ANN001, ANN201
@@ -304,7 +352,7 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
         for kind, n_drivers, n_plans in workloads:
             rng = random.Random(f"{args.seed}-{n_drivers}-{n_plans}" + ("-hc" if kind == "hc" else ""))
             now = datetime.now(UTC).replace(microsecond=0)
-            (make_world_hc if kind == "hc" else make_world)(session, rng, n_drivers, n_plans, now, osrm)
+            world_stats = (make_world_hc if kind == "hc" else make_world)(session, rng, n_drivers, n_plans, now, osrm)
             if args.analyze:
                 session.execute(text("ANALYZE"))
                 session.commit()
@@ -433,12 +481,22 @@ def main() -> None:  # noqa: C901, PLR0912, PLR0915
                         bump(ver["single_rejections"], check_single_reject(session, osrm, service, driver_id, trip_id, now))
                 deltas = {c.plan_id: c.insertion["delta_cost_vnd"] for c in result.candidates if c.plan_id}
                 for plan_id in result.evaluated_plans:
-                    bump(ver["plan_checks"], check_plan(session, osrm, plan_id, trip_id, now, deltas.get(plan_id)))
+                    verdict = check_plan(session, osrm, plan_id, trip_id, now, deltas.get(plan_id))
+                    # Phase 3: the reference checks the hard constraints only; an insertion the reference finds
+                    # but the pricing gates (P3_*) refused, or a costlier option kept because the cheapest one
+                    # failed a gate, is reported as such - never folded into "optimal" or "missed".
+                    priced_out = any(code.startswith("P3_") for code in result.plan_rejections.get(plan_id, {}))
+                    if priced_out and verdict == "missed":
+                        verdict = "rejected_by_pricing_gates"
+                    elif priced_out and verdict == "cost_mismatch":
+                        verdict = "cheapest_option_failed_pricing"
+                    bump(ver["plan_checks"], verdict)
             if args.verify:
                 sf = ver["sf_p2_15_default_routing"]
                 sf["chain_distance_ratio_default_over_table"] = summary(ratios)
                 sf["chains_longer_than_1pct"] = sum(r > 1.01 for r in ratios)
             entry = {"config": name, "drivers": n_drivers, "open_plans": n_plans, "requests": len(requests),
+                     "world": world_stats or {},
                      "errors": errors, "generation_total_ms": summary(totals),
                      "generation_plus_persist_ms": summary(with_persist),
                      # The three acceptance scopes, each its own measurement (owner directive III).

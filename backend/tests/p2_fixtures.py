@@ -35,6 +35,18 @@ def setup_reference_data(session: Session) -> None:
     session.commit()
 
 
+def _baseline() -> dict:
+    return yaml.safe_load((REPO_ROOT / "config" / "mvp_config_baseline_v1.yaml").read_text(encoding="utf-8"))
+
+
+def private_fare_of(direct_m: float, direct_s: float) -> int:
+    """P_i of a synthetic rider, from the baseline tariff (Section 12.1)."""
+    from app.modules.pricing.params import CarUrbanParams
+    from app.modules.pricing.tariff import private_fare
+
+    return private_fare(CarUrbanParams.from_section(_baseline()["car_urban"]), direct_m, direct_s)
+
+
 def user(session: Session, role: str = "PASSENGER") -> uuid.UUID:
     uid = uuid.uuid4()
     session.execute(text("INSERT INTO users (id, email, password_hash, role) VALUES (:i, :e, 'x', :r)"),
@@ -87,19 +99,26 @@ def trip(session: Session, rider: uuid.UUID, pickup: tuple[float, float], dropof
 def onboard_plan(session: Session, driver_id: uuid.UUID, vehicle_id: uuid.UUID, rider_trip: uuid.UUID,
                  rider: uuid.UUID, pickup: tuple[float, float], dropoff: tuple[float, float], boarded: datetime,
                  *, direct_m: float, direct_s: float, traveled_km: float, cap_vnd: int) -> uuid.UUID:
-    """An open plan with one rider already on board (pickup COMPLETED, dropoff ahead)."""
+    """An open plan with one rider already on board since S_0 (pickup COMPLETED, dropoff ahead).
+    Pricing state (Phase 3): the plan and the booking carry the baseline pricing_version, P_i is set,
+    started_at = boarding time, the distance driven since S_0 = the rider's traveled distance; no
+    allocation exists yet (one booking)."""
     plan, booking = uuid.uuid4(), uuid.uuid4()
+    version = _baseline()["pricing_version"]
     session.execute(text("INSERT INTO ride_plans (id, driver_id, vehicle_id, service_code, status, completed_stop_index, "
-                         "plan_version) VALUES (:p, :d, :v, 'CAR_URBAN_POOL', 'PLAN_OPEN_SEARCHING', 0, 3)"),
-                    {"p": plan, "d": driver_id, "v": vehicle_id})
+                         "plan_version, pricing_version, started_at, driven_m_since_start) VALUES (:p, :d, :v, "
+                         "'CAR_URBAN_POOL', 'PLAN_OPEN_SEARCHING', 0, 3, :pv, :at, :dm)"),
+                    {"p": plan, "d": driver_id, "v": vehicle_id, "pv": version, "at": boarded, "dm": traveled_km * 1000})
     session.execute(text("INSERT INTO bookings (id, request_id, user_id, driver_id, service_code, booking_type, "
-                         "seat_count, ride_plan_id, ride_status, price_status, quoted_price_cap_vnd) VALUES "
-                         "(:b, :r, :u, :d, 'CAR_URBAN_POOL', 'NOW', 1, :p, 'RIDE_STARTED', 'POOL_SEARCHING', :cap)"),
-                    {"b": booking, "r": rider_trip, "u": rider, "d": driver_id, "p": plan, "cap": cap_vnd})
-    session.execute(text("INSERT INTO ride_participants (ride_plan_id, booking_id, seat_count, "
+                         "seat_count, ride_plan_id, ride_status, price_status, quoted_price_cap_vnd, pricing_version) "
+                         "VALUES (:b, :r, :u, :d, 'CAR_URBAN_POOL', 'NOW', 1, :p, 'RIDE_STARTED', 'POOL_SEARCHING', "
+                         ":cap, :pv)"),
+                    {"b": booking, "r": rider_trip, "u": rider, "d": driver_id, "p": plan, "cap": cap_vnd, "pv": version})
+    session.execute(text("INSERT INTO ride_participants (ride_plan_id, booking_id, seat_count, private_fare_vnd, "
                          "traveled_km_before_last_replan, direct_distance_m, direct_duration_s) "
-                         "VALUES (:p, :b, 1, :km, :dm, :ds)"),
-                    {"p": plan, "b": booking, "km": traveled_km, "dm": direct_m, "ds": direct_s})
+                         "VALUES (:p, :b, 1, :pf, :km, :dm, :ds)"),
+                    {"p": plan, "b": booking, "pf": private_fare_of(direct_m, direct_s), "km": traveled_km,
+                     "dm": direct_m, "ds": direct_s})
     for seq, kind, pt, status, done in ((0, "PICKUP", pickup, "COMPLETED", boarded),
                                         (1, "DROPOFF", dropoff, "PLANNED", None)):
         session.execute(text("INSERT INTO ride_stops (ride_plan_id, seq, kind, booking_id, geom, status, completed_at) "
@@ -110,29 +129,43 @@ def onboard_plan(session: Session, driver_id: uuid.UUID, vehicle_id: uuid.UUID, 
 
 
 def plan(session: Session, driver_id: uuid.UUID, vehicle_id: uuid.UUID, riders: list[dict],
-         ahead: list[tuple[int, str]]) -> uuid.UUID:
+         ahead: list[tuple[int, str]], *, plan_fare_exact: str | None = None, started_at: datetime | None = None,
+         driven_m: float = 0.0) -> uuid.UUID:
     """A general open plan. riders[i]: user, trip, pickup, dropoff, onboard, boarded (onboard only),
-    direct_m, direct_s, traveled_km, cap_vnd, seats. Completed stops = pickups of the onboard
-    riders; `ahead` = the stops still to serve, as (rider index, PICKUP | DROPOFF) in driving order."""
+    direct_m, direct_s, traveled_km, cap_vnd, seats, and optionally the stored allocation
+    fare_exact ("num/den"), fare_charged, locked (MATCHED_LOCKED with final_price = fare_charged).
+    Completed stops = pickups of the onboard riders; `ahead` = the stops still to serve, as
+    (rider index, PICKUP | DROPOFF) in driving order."""
     plan_id = uuid.uuid4()
     done = [i for i, r in enumerate(riders) if r["onboard"]]
+    version = _baseline()["pricing_version"]
+    if started_at is None and done:
+        started_at = min(riders[i]["boarded"] for i in done)
     session.execute(text("INSERT INTO ride_plans (id, driver_id, vehicle_id, service_code, status, completed_stop_index, "
-                         "plan_version) VALUES (:p, :d, :v, 'CAR_URBAN_POOL', 'PLAN_OPEN_SEARCHING', :r, 1)"),
-                    {"p": plan_id, "d": driver_id, "v": vehicle_id, "r": len(done) - 1})
+                         "plan_version, pricing_version, plan_fare_exact, started_at, driven_m_since_start) VALUES "
+                         "(:p, :d, :v, 'CAR_URBAN_POOL', 'PLAN_OPEN_SEARCHING', :r, 1, :pv, :pf, :at, :dm)"),
+                    {"p": plan_id, "d": driver_id, "v": vehicle_id, "r": len(done) - 1, "pv": version,
+                     "pf": plan_fare_exact, "at": started_at, "dm": driven_m})
     bookings = []
     for r in riders:
         booking = uuid.uuid4()
         bookings.append(booking)
+        locked = r.get("locked", False)
         session.execute(text("INSERT INTO bookings (id, request_id, user_id, driver_id, service_code, booking_type, "
-                             "seat_count, ride_plan_id, ride_status, price_status, quoted_price_cap_vnd) VALUES "
-                             "(:b, :t, :u, :d, 'CAR_URBAN_POOL', 'NOW', :s, :p, :st, 'POOL_SEARCHING', :cap)"),
+                             "seat_count, ride_plan_id, ride_status, price_status, quoted_price_cap_vnd, final_price_vnd, "
+                             "pricing_version) VALUES (:b, :t, :u, :d, 'CAR_URBAN_POOL', 'NOW', :s, :p, :st, :ps, :cap, "
+                             ":fp, :pv)"),
                         {"b": booking, "t": r["trip"], "u": r["user"], "d": driver_id, "s": r.get("seats", 1), "p": plan_id,
-                         "st": "RIDE_STARTED" if r["onboard"] else "CONFIRMED", "cap": r["cap_vnd"]})
-        session.execute(text("INSERT INTO ride_participants (ride_plan_id, booking_id, seat_count, "
-                             "traveled_km_before_last_replan, direct_distance_m, direct_duration_s) "
-                             "VALUES (:p, :b, :s, :km, :dm, :ds)"),
-                        {"p": plan_id, "b": booking, "s": r.get("seats", 1), "km": r.get("traveled_km", 0.0),
-                         "dm": r["direct_m"], "ds": r["direct_s"]})
+                         "st": "RIDE_STARTED" if r["onboard"] else "CONFIRMED", "cap": r["cap_vnd"],
+                         "ps": "MATCHED_LOCKED" if locked else "POOL_SEARCHING",
+                         "fp": r.get("fare_charged") if locked else None, "pv": version})
+        session.execute(text("INSERT INTO ride_participants (ride_plan_id, booking_id, seat_count, private_fare_vnd, "
+                             "traveled_km_before_last_replan, direct_distance_m, direct_duration_s, fare_exact_rational, "
+                             "fare_charged_vnd, is_price_frozen) VALUES (:p, :b, :s, :pf, :km, :dm, :ds, :fe, :fc, :fz)"),
+                        {"p": plan_id, "b": booking, "s": r.get("seats", 1),
+                         "pf": r.get("private_fare") or private_fare_of(r["direct_m"], r["direct_s"]),
+                         "km": r.get("traveled_km", 0.0), "dm": r["direct_m"], "ds": r["direct_s"],
+                         "fe": r.get("fare_exact"), "fc": r.get("fare_charged"), "fz": locked})
     stops = [(i, "PICKUP", "COMPLETED", riders[i]["boarded"]) for i in done] + [(i, k, "PLANNED", None) for i, k in ahead]
     for seq, (i, kind, status, at) in enumerate(stops):
         pt = riders[i]["pickup" if kind == "PICKUP" else "dropoff"]

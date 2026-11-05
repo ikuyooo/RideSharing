@@ -42,3 +42,6 @@ out/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Hypothesis example database / cache (pytest property tests)
+.hypothesis/

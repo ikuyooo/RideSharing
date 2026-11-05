@@ -30,9 +30,12 @@ from app.modules.trip.service import active_service_areas, trip_snapshots
 
 ERRORS = {RoutingUnavailable: ("ROUTING_UNAVAILABLE", 503), MatrixTooLarge: ("MATRIX_TOO_LARGE", 503),
           RouteNotFound: ("ROUTE_NOT_FOUND", 422)}
-# OD-P2-04 (APPROVED): only candidates whose pricing is complete may ever be offered or booked;
-# branch-A insertions stay PENDING_P3 until the Phase 3 allocation exists. Phase 4 (offer /
-# booking) must call `offerable` before showing or holding a candidate.
+# OD-P2-04 (APPROVED): only candidates whose pricing is complete may ever be offered or booked.
+# Since Phase 3 a branch-A insertion is COMPLETE only when every P2 / P3 gate passed
+# (PoolPricingCheck); a PENDING_P3 row (written before Phase 3) is never offerable. Phase 4
+# (offer / booking) must call `offerable` before showing or holding a candidate, and must
+# re-check the plan under lock (plan_version, Section 42) and the final chain by /route
+# (SF-P2-15, APPROVED_MITIGATION_FOR_P4).
 OFFERABLE_PRICING_CHECKS = frozenset({"COMPLETE"})
 
 
@@ -78,6 +81,7 @@ def persist(session: Session, request_id: uuid.UUID, policy: RoutingPolicy, serv
             target_plan_id=c.plan_id, source_plan_version=c.plan_version, seat_count=c.seat_count, walk_m=0,
             private_fare_ref_vnd=c.private_fare_vnd, pool_quote_price_vnd=c.pool_quote_vnd,
             pool_unmatched_price_vnd=c.pool_unmatched_vnd, expected_price_vnd=c.expected_price_vnd,
+            fare_matched_est_vnd=c.fare_matched_est_vnd,
             driver_id=c.driver_id, vehicle_id=c.vehicle_id, pickup_eta_s=round(c.pickup_eta_s),
             direct_distance_m=c.direct_distance_m, direct_duration_s=c.direct_duration_s,
             pricing_check=c.pricing_check, insertion_json=c.insertion, constraint_audit_json=c.audit)

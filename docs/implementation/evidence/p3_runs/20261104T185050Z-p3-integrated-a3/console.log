@@ -1,0 +1,12 @@
+ Container ridesharing-backend-run-d999df50338f Creating 
+ Container ridesharing-backend-run-d999df50338f Created 
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, p1 core schema
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, p1 survey s1 draft storage
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, p1 service area excluded layer
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, p1 survey s1 duration
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, p2 routing candidate pooling
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, p3 pricing and fund
+50x0 | total p50/p95/p99 22.8 43.74 54.71 | postgis p95 5.86 | osrm_car p95 17.29 | step3 p95 8.45 | errors {} 
+

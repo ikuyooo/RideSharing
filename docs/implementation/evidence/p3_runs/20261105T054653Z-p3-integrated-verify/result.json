@@ -1,0 +1,1870 @@
+{
+  "run_id": "20261105T054653Z-p3-integrated-verify",
+  "mode": "bench",
+  "verify": true,
+  "analyze": true,
+  "label": "SYNTHETIC benchmark data on a throwaway database - local machine only",
+  "network": "compose network (backend container)",
+  "started_utc": "2026-11-05T05:47:05.816835+00:00",
+  "host": {
+    "platform": "Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "python": "3.12.15",
+    "cpu_count": 4
+  },
+  "parameters": {
+    "R_urban_m": 5000,
+    "N_single": 15,
+    "N_pool": 20,
+    "k_max_stops": 8,
+    "requests": 200,
+    "seed": 20261029,
+    "tolerance_per_leg": {
+      "s": 1.0,
+      "m": 1.0
+    }
+  },
+  "target": "R9 Section 77: PostGIS + 1 OSRM table p95 <= 300 ms; Section 79 P2: generation < 300 ms",
+  "configs": [
+    {
+      "config": "50x0",
+      "drivers": 50,
+      "open_plans": 0,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 24.3,
+        "p95": 49.21,
+        "p99": 74.44,
+        "max": 133.5,
+        "mean": 28.23
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 52.36,
+        "p95": 156.42,
+        "p99": 332.46,
+        "max": 479.73,
+        "mean": 69.86
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 19.86,
+          "p95": 39.52,
+          "p99": 65.79,
+          "max": 97.23,
+          "mean": 22.79
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 24.3,
+          "p95": 49.21,
+          "p99": 74.44,
+          "max": 133.5,
+          "mean": 28.23
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 52.36,
+          "p95": 156.42,
+          "p99": 332.46,
+          "max": 479.73,
+          "mean": 69.86
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 0.97,
+          "p95": 2.22,
+          "p99": 3.67,
+          "max": 4.74,
+          "mean": 1.14
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 0.4,
+          "p95": 3.49,
+          "p99": 5.71,
+          "max": 19.16,
+          "mean": 0.83
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 3.88,
+          "p95": 11.03,
+          "p99": 20.83,
+          "max": 35.89,
+          "mean": 5.25
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.06,
+          "p95": 0.13,
+          "p99": 0.22,
+          "max": 0.31,
+          "mean": 0.07
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.07,
+          "p95": 0.14,
+          "p99": 0.23,
+          "max": 0.43,
+          "mean": 0.08
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 10.8,
+          "p95": 21.47,
+          "p99": 32.78,
+          "max": 42.19,
+          "mean": 12.13
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 10.63,
+          "p95": 21.24,
+          "p99": 32.58,
+          "max": 41.85,
+          "mean": 11.96
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.1,
+          "p95": 0.17,
+          "p99": 0.22,
+          "max": 0.28,
+          "mean": 0.11
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 11.78,
+          "p95": 21.91,
+          "p99": 42.14,
+          "max": 54.43,
+          "mean": 13.26
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 14.22,
+          "p95": 26.99,
+          "p99": 43.71,
+          "max": 78.74,
+          "mean": 16.14
+        },
+        "persist": {
+          "n": 200,
+          "p50": 27.77,
+          "p95": 115.45,
+          "p99": 285.04,
+          "max": 456.27,
+          "mean": 41.63
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 1.28,
+          "p95": 2.64,
+          "p99": 5.65,
+          "max": 11.9,
+          "mean": 1.57
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.06,
+          "mean": 0.01
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 1.34,
+          "p95": 2.87,
+          "p99": 7.82,
+          "max": 12.83,
+          "mean": 1.69
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 3.64,
+          "p95": 10.26,
+          "p99": 18.41,
+          "max": 23.32,
+          "mean": 4.74
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 2.35,
+          "p95": 8.21,
+          "p99": 15.03,
+          "max": 20.68,
+          "mean": 3.17
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 18.21,
+          "p95": 36.15,
+          "p99": 55.67,
+          "max": 94.6,
+          "mean": 20.88
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.05,
+          "max": 3.25,
+          "mean": 0.02
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 19.86,
+          "p95": 39.52,
+          "p99": 65.79,
+          "max": 97.23,
+          "mean": 22.79
+        },
+        "total": {
+          "n": 200,
+          "p50": 24.19,
+          "p95": 49.09,
+          "p99": 74.24,
+          "max": 133.24,
+          "mean": 28.09
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC03": 388
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 4507,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 388
+        },
+        "plan_checks": {},
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 710,
+          "would_violate": 14,
+          "by_code": {
+            "HC03": 6,
+            "HC05": 8
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 710,
+            "p50": 1.0,
+            "p95": 1.09,
+            "p99": 1.16,
+            "max": 1.29,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 228
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "200x0",
+      "drivers": 200,
+      "open_plans": 0,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 34.52,
+        "p95": 66.22,
+        "p99": 111.78,
+        "max": 127.74,
+        "mean": 38.71
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 95.26,
+        "p95": 199.61,
+        "p99": 1021.89,
+        "max": 2488.9,
+        "mean": 134.89
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 26.34,
+          "p95": 43.71,
+          "p99": 72.58,
+          "max": 108.97,
+          "mean": 29.02
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 34.52,
+          "p95": 66.22,
+          "p99": 111.78,
+          "max": 127.74,
+          "mean": 38.71
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 95.26,
+          "p95": 199.61,
+          "p99": 1021.89,
+          "max": 2488.9,
+          "mean": 134.89
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.16,
+          "p95": 4.68,
+          "p99": 13.45,
+          "max": 26.51,
+          "mean": 2.68
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 0.78,
+          "p95": 2.96,
+          "p99": 6.04,
+          "max": 15.37,
+          "mean": 1.2
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 7.51,
+          "p95": 17.21,
+          "p99": 33.22,
+          "max": 54.71,
+          "mean": 9.41
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.1,
+          "p95": 0.33,
+          "p99": 3.46,
+          "max": 5.37,
+          "mean": 0.22
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.11,
+          "p95": 0.18,
+          "p99": 0.36,
+          "max": 4.01,
+          "mean": 0.13
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 14.83,
+          "p95": 27.98,
+          "p99": 40.49,
+          "max": 70.11,
+          "mean": 16.72
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 14.61,
+          "p95": 27.62,
+          "p99": 40.19,
+          "max": 69.88,
+          "mean": 16.47
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.15,
+          "p95": 0.28,
+          "p99": 0.52,
+          "max": 0.71,
+          "mean": 0.17
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 12.92,
+          "p95": 23.92,
+          "p99": 32.79,
+          "max": 72.16,
+          "mean": 14.6
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 18.06,
+          "p95": 34.52,
+          "p99": 47.65,
+          "max": 76.21,
+          "mean": 20.41
+        },
+        "persist": {
+          "n": 200,
+          "p50": 60.47,
+          "p95": 139.52,
+          "p99": 976.14,
+          "max": 2441.78,
+          "mean": 96.18
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 1.31,
+          "p95": 2.42,
+          "p99": 3.99,
+          "max": 5.11,
+          "mean": 1.49
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.06,
+          "mean": 0.01
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 1.34,
+          "p95": 2.33,
+          "p99": 2.82,
+          "max": 2.97,
+          "mean": 1.47
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 5.05,
+          "p95": 12.53,
+          "p99": 19.55,
+          "max": 89.11,
+          "mean": 7.02
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 3.64,
+          "p95": 11.01,
+          "p99": 17.98,
+          "max": 87.75,
+          "mean": 5.53
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 24.65,
+          "p95": 42.04,
+          "p99": 70.14,
+          "max": 107.51,
+          "mean": 27.44
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.03,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 26.34,
+          "p95": 43.71,
+          "p99": 72.58,
+          "max": 108.97,
+          "mean": 29.02
+        },
+        "total": {
+          "n": 200,
+          "p50": 34.3,
+          "p95": 65.92,
+          "p99": 111.49,
+          "max": 127.36,
+          "mean": 38.48
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC03": 432,
+        "HC02": 15
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 9949,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 440
+        },
+        "plan_checks": {},
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2722,
+          "would_violate": 32,
+          "by_code": {
+            "HC03": 10,
+            "HC05": 22
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2722,
+            "p50": 1.0,
+            "p95": 1.06,
+            "p99": 1.13,
+            "max": 1.75,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 702
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "1000x0",
+      "drivers": 1000,
+      "open_plans": 0,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 38.67,
+        "p95": 58.84,
+        "p99": 80.0,
+        "max": 147.38,
+        "mean": 41.67
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 101.62,
+        "p95": 154.44,
+        "p99": 240.04,
+        "max": 362.81,
+        "mean": 109.97
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 29.91,
+          "p95": 44.01,
+          "p99": 55.63,
+          "max": 140.18,
+          "mean": 32.4
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 38.67,
+          "p95": 58.84,
+          "p99": 80.0,
+          "max": 147.38,
+          "mean": 41.67
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 101.62,
+          "p95": 154.44,
+          "p99": 240.04,
+          "max": 362.81,
+          "mean": 109.97
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.23,
+          "p95": 4.57,
+          "p99": 7.95,
+          "max": 20.65,
+          "mean": 2.63
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 0.81,
+          "p95": 2.26,
+          "p99": 4.54,
+          "max": 5.18,
+          "mean": 1.06
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 7.75,
+          "p95": 15.21,
+          "p99": 23.79,
+          "max": 39.04,
+          "mean": 8.99
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.11,
+          "p95": 2.23,
+          "p99": 4.16,
+          "max": 106.43,
+          "mean": 0.89
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.09,
+          "p95": 0.16,
+          "p99": 0.23,
+          "max": 0.26,
+          "mean": 0.11
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 0.0,
+          "p95": 0.0,
+          "p99": 0.0,
+          "max": 0.0,
+          "mean": 0.0
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 15.16,
+          "p95": 22.25,
+          "p99": 26.78,
+          "max": 38.88,
+          "mean": 15.94
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 14.89,
+          "p95": 21.94,
+          "p99": 26.24,
+          "max": 38.42,
+          "mean": 15.69
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.15,
+          "p95": 0.27,
+          "p99": 0.33,
+          "max": 0.42,
+          "mean": 0.17
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 11.85,
+          "p95": 18.53,
+          "p99": 23.87,
+          "max": 32.61,
+          "mean": 12.78
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 17.89,
+          "p95": 27.32,
+          "p99": 32.84,
+          "max": 122.04,
+          "mean": 19.58
+        },
+        "persist": {
+          "n": 200,
+          "p50": 61.7,
+          "p95": 93.69,
+          "p99": 205.51,
+          "max": 316.99,
+          "mean": 68.29
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 1.29,
+          "p95": 1.96,
+          "p99": 2.29,
+          "max": 2.47,
+          "mean": 1.37
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.03,
+          "mean": 0.01
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 1.31,
+          "p95": 2.03,
+          "p99": 2.72,
+          "max": 8.31,
+          "mean": 1.43
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 9.9,
+          "p95": 18.25,
+          "p99": 21.48,
+          "max": 22.68,
+          "mean": 11.27
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 8.65,
+          "p95": 16.53,
+          "p99": 19.92,
+          "max": 20.72,
+          "mean": 9.9
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 28.46,
+          "p95": 41.84,
+          "p99": 51.88,
+          "max": 138.86,
+          "mean": 30.86
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.03,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 29.91,
+          "p95": 44.01,
+          "p99": 55.63,
+          "max": 140.18,
+          "mean": 32.4
+        },
+        "total": {
+          "n": 200,
+          "p50": 38.44,
+          "p95": 58.66,
+          "p99": 79.29,
+          "max": 147.18,
+          "mean": 41.45
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC03": 203,
+        "HC02": 15
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 10735,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 218
+        },
+        "plan_checks": {},
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2957,
+          "would_violate": 22,
+          "by_code": {
+            "HC03": 16,
+            "HC05": 6
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2957,
+            "p50": 1.0,
+            "p95": 1.08,
+            "p99": 1.19,
+            "max": 1.88,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 848
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "200x10",
+      "drivers": 200,
+      "open_plans": 10,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 60.59,
+        "p95": 91.92,
+        "p99": 121.36,
+        "max": 124.43,
+        "mean": 63.81
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 120.38,
+        "p95": 177.75,
+        "p99": 207.73,
+        "max": 271.07,
+        "mean": 126.35
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 44.44,
+          "p95": 68.23,
+          "p99": 94.36,
+          "max": 103.52,
+          "mean": 47.4
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 60.59,
+          "p95": 91.92,
+          "p99": 121.36,
+          "max": 124.43,
+          "mean": 63.81
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 120.38,
+          "p95": 177.75,
+          "p99": 207.73,
+          "max": 271.07,
+          "mean": 126.35
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.15,
+          "p95": 4.15,
+          "p99": 5.82,
+          "max": 12.26,
+          "mean": 2.4
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 1.01,
+          "p95": 1.82,
+          "p99": 3.32,
+          "max": 4.89,
+          "mean": 1.13
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 8.17,
+          "p95": 15.61,
+          "p99": 20.78,
+          "max": 38.78,
+          "mean": 9.27
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.16,
+          "p95": 0.56,
+          "p99": 4.21,
+          "max": 4.93,
+          "mean": 0.26
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.09,
+          "p95": 0.16,
+          "p99": 0.2,
+          "max": 0.25,
+          "mean": 0.1
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 1.07,
+          "p95": 2.48,
+          "p99": 3.0,
+          "max": 3.47,
+          "mean": 1.14
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 19.41,
+          "p95": 31.51,
+          "p99": 40.62,
+          "max": 48.15,
+          "mean": 20.35
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 19.04,
+          "p95": 30.92,
+          "p99": 40.12,
+          "max": 47.69,
+          "mean": 19.98
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.24,
+          "p95": 0.57,
+          "p99": 0.78,
+          "max": 0.81,
+          "mean": 0.28
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 12.22,
+          "p95": 20.68,
+          "p99": 26.91,
+          "max": 34.02,
+          "mean": 13.2
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 22.24,
+          "p95": 35.14,
+          "p99": 44.04,
+          "max": 56.31,
+          "mean": 23.46
+        },
+        "persist": {
+          "n": 200,
+          "p50": 59.69,
+          "p95": 88.87,
+          "p99": 110.29,
+          "max": 176.03,
+          "mean": 62.54
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 12.53,
+          "p95": 22.01,
+          "p99": 30.03,
+          "max": 34.75,
+          "mean": 13.0
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 6.83,
+          "p95": 10.92,
+          "p99": 15.1,
+          "max": 16.9,
+          "mean": 6.84
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 5.41,
+          "p95": 9.09,
+          "p99": 14.19,
+          "max": 18.95,
+          "mean": 5.79
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 17.34,
+          "p95": 30.13,
+          "p99": 37.85,
+          "max": 39.37,
+          "mean": 18.03
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 3.69,
+          "p95": 12.09,
+          "p99": 21.28,
+          "max": 23.12,
+          "mean": 5.03
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 39.17,
+          "p95": 59.55,
+          "p99": 81.17,
+          "max": 90.14,
+          "mean": 41.49
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.03,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 44.44,
+          "p95": 68.23,
+          "p99": 94.36,
+          "max": 103.52,
+          "mean": 47.4
+        },
+        "total": {
+          "n": 200,
+          "p50": 60.37,
+          "p95": 91.52,
+          "p99": 121.11,
+          "max": 124.14,
+          "mean": 63.54
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC06": 1087,
+        "HC05": 1787,
+        "P3_D1_NO_CO_RIDING_OVERLAP": 67,
+        "HC03": 943,
+        "P3_GATE1_PASSENGER_SHAREABILITY": 3,
+        "HC02": 15
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 10038,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 493
+        },
+        "plan_checks": {
+          "rejected_by_pricing_gates": 67,
+          "correct": 567
+        },
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2854,
+          "would_violate": 61,
+          "by_code": {
+            "HC05": 56,
+            "HC03": 5
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2854,
+            "p50": 1.0,
+            "p95": 1.06,
+            "p99": 1.18,
+            "max": 1.39,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 897
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "200x20",
+      "drivers": 200,
+      "open_plans": 20,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 66.29,
+        "p95": 99.74,
+        "p99": 122.97,
+        "max": 133.54,
+        "mean": 69.7
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 126.1,
+        "p95": 179.83,
+        "p99": 270.95,
+        "max": 314.17,
+        "mean": 134.14
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 48.58,
+          "p95": 72.73,
+          "p99": 83.91,
+          "max": 103.36,
+          "mean": 51.14
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 66.29,
+          "p95": 99.74,
+          "p99": 122.97,
+          "max": 133.54,
+          "mean": 69.7
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 126.1,
+          "p95": 179.83,
+          "p99": 270.95,
+          "max": 314.17,
+          "mean": 134.14
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.14,
+          "p95": 4.34,
+          "p99": 6.01,
+          "max": 8.11,
+          "mean": 2.44
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 1.2,
+          "p95": 2.47,
+          "p99": 3.64,
+          "max": 6.48,
+          "mean": 1.38
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 9.33,
+          "p95": 19.32,
+          "p99": 24.0,
+          "max": 29.61,
+          "mean": 10.51
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.24,
+          "p95": 0.94,
+          "p99": 3.01,
+          "max": 7.75,
+          "mean": 0.43
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.1,
+          "p95": 0.18,
+          "p99": 0.46,
+          "max": 1.94,
+          "mean": 0.12
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 2.28,
+          "p95": 5.17,
+          "p99": 8.01,
+          "max": 10.82,
+          "mean": 2.58
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 21.59,
+          "p95": 35.59,
+          "p99": 39.39,
+          "max": 43.53,
+          "mean": 22.76
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 20.97,
+          "p95": 35.12,
+          "p99": 38.58,
+          "max": 42.58,
+          "mean": 22.24
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.34,
+          "p95": 0.73,
+          "p99": 1.53,
+          "max": 4.15,
+          "mean": 0.42
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 11.86,
+          "p95": 18.67,
+          "p99": 21.79,
+          "max": 22.56,
+          "mean": 12.74
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 24.42,
+          "p95": 39.54,
+          "p99": 43.4,
+          "max": 51.51,
+          "mean": 25.89
+        },
+        "persist": {
+          "n": 200,
+          "p50": 59.3,
+          "p95": 90.48,
+          "p99": 137.42,
+          "max": 246.55,
+          "mean": 64.43
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 13.24,
+          "p95": 21.34,
+          "p99": 24.24,
+          "max": 26.88,
+          "mean": 13.88
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 6.87,
+          "p95": 12.11,
+          "p99": 16.6,
+          "max": 19.62,
+          "mean": 7.69
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 5.64,
+          "p95": 8.53,
+          "p99": 11.01,
+          "max": 12.99,
+          "mean": 6.1
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 18.24,
+          "p95": 27.52,
+          "p99": 41.52,
+          "max": 53.78,
+          "mean": 19.04
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 3.5,
+          "p95": 12.7,
+          "p99": 17.98,
+          "max": 36.04,
+          "mean": 5.16
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 42.59,
+          "p95": 63.79,
+          "p99": 74.25,
+          "max": 94.98,
+          "mean": 44.94
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.03,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 48.58,
+          "p95": 72.73,
+          "p99": 83.91,
+          "max": 103.36,
+          "mean": 51.14
+        },
+        "total": {
+          "n": 200,
+          "p50": 66.01,
+          "p95": 99.43,
+          "p99": 122.37,
+          "max": 133.01,
+          "mean": 69.38
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC06": 2034,
+        "HC05": 3023,
+        "HC03": 1299,
+        "P3_D1_NO_CO_RIDING_OVERLAP": 249,
+        "P3_GATE1_PASSENGER_SHAREABILITY": 34,
+        "P3_GATE2B_DRIVER_HOURLY_RATE": 4,
+        "HC02": 15
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 10009,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 491
+        },
+        "plan_checks": {
+          "correct": 997,
+          "rejected_by_pricing_gates": 263
+        },
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2894,
+          "would_violate": 25,
+          "by_code": {
+            "HC03": 13,
+            "HC05": 12
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2894,
+            "p50": 1.0,
+            "p95": 1.07,
+            "p99": 1.12,
+            "max": 1.27,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 899
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "1000x20",
+      "drivers": 1000,
+      "open_plans": 20,
+      "requests": 200,
+      "world": {},
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 70.09,
+        "p95": 111.1,
+        "p99": 133.02,
+        "max": 147.84,
+        "mean": 74.78
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 130.3,
+        "p95": 196.33,
+        "p99": 223.32,
+        "max": 240.22,
+        "mean": 137.25
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 53.49,
+          "p95": 87.01,
+          "p99": 101.94,
+          "max": 108.74,
+          "mean": 56.73
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 70.09,
+          "p95": 111.1,
+          "p99": 133.02,
+          "max": 147.84,
+          "mean": 74.78
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 130.3,
+          "p95": 196.33,
+          "p99": 223.32,
+          "max": 240.22,
+          "mean": 137.25
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.17,
+          "p95": 4.32,
+          "p99": 5.88,
+          "max": 6.53,
+          "mean": 2.39
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 1.25,
+          "p95": 2.1,
+          "p99": 3.65,
+          "max": 6.11,
+          "mean": 1.37
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 9.36,
+          "p95": 16.87,
+          "p99": 21.51,
+          "max": 26.7,
+          "mean": 10.28
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.25,
+          "p95": 0.65,
+          "p99": 0.84,
+          "max": 3.48,
+          "mean": 0.34
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.09,
+          "p95": 0.16,
+          "p99": 0.27,
+          "max": 0.55,
+          "mean": 0.11
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 2.4,
+          "p95": 4.88,
+          "p99": 6.16,
+          "max": 8.07,
+          "mean": 2.53
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 21.7,
+          "p95": 32.83,
+          "p99": 43.43,
+          "max": 61.14,
+          "mean": 22.89
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 21.23,
+          "p95": 32.29,
+          "p99": 42.34,
+          "max": 60.71,
+          "mean": 22.4
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.36,
+          "p95": 0.77,
+          "p99": 0.97,
+          "max": 1.21,
+          "mean": 0.39
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 11.63,
+          "p95": 17.87,
+          "p99": 24.53,
+          "max": 34.96,
+          "mean": 12.45
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 24.37,
+          "p95": 37.61,
+          "p99": 47.14,
+          "max": 64.39,
+          "mean": 25.92
+        },
+        "persist": {
+          "n": 200,
+          "p50": 58.45,
+          "p95": 88.39,
+          "p99": 120.12,
+          "max": 179.07,
+          "mean": 62.48
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 13.48,
+          "p95": 22.74,
+          "p99": 26.41,
+          "max": 28.92,
+          "mean": 14.11
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 6.69,
+          "p95": 11.66,
+          "p99": 14.84,
+          "max": 17.26,
+          "mean": 7.38
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 5.73,
+          "p95": 9.57,
+          "p99": 15.93,
+          "max": 27.54,
+          "mean": 6.33
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 22.76,
+          "p95": 37.17,
+          "p99": 47.19,
+          "max": 58.58,
+          "mean": 24.38
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 8.61,
+          "p95": 17.65,
+          "p99": 26.49,
+          "max": 38.89,
+          "mean": 10.28
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 47.54,
+          "p95": 76.42,
+          "p99": 86.28,
+          "max": 99.12,
+          "mean": 50.3
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.07,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 53.49,
+          "p95": 87.01,
+          "p99": 101.94,
+          "max": 108.74,
+          "mean": 56.73
+        },
+        "total": {
+          "n": 200,
+          "p50": 69.81,
+          "p95": 110.62,
+          "p99": 132.46,
+          "max": 147.35,
+          "mean": 74.44
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC06": 2217,
+        "HC05": 3295,
+        "HC03": 1156,
+        "P3_D1_NO_CO_RIDING_OVERLAP": 238,
+        "P3_GATE1_PASSENGER_SHAREABILITY": 18,
+        "P3_GATE2B_DRIVER_HOURLY_RATE": 2
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 10298,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 333
+        },
+        "plan_checks": {
+          "correct": 1068,
+          "rejected_by_pricing_gates": 245
+        },
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2937,
+          "would_violate": 27,
+          "by_code": {
+            "HC05": 20,
+            "HC03": 7
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2937,
+            "p50": 1.0,
+            "p95": 1.09,
+            "p99": 1.21,
+            "max": 2.04,
+            "mean": 1.02
+          },
+          "chains_longer_than_1pct": 812
+        },
+        "samples": []
+      }
+    },
+    {
+      "config": "200x20-hc",
+      "drivers": 200,
+      "open_plans": 20,
+      "requests": 200,
+      "world": {
+        "plans_skipped_unpriceable": 11,
+        "plans": 9,
+        "plans_with_lock": 0
+      },
+      "errors": {},
+      "generation_total_ms": {
+        "n": 200,
+        "p50": 59.44,
+        "p95": 100.13,
+        "p99": 149.49,
+        "max": 209.0,
+        "mean": 65.65
+      },
+      "generation_plus_persist_ms": {
+        "n": 200,
+        "p50": 125.3,
+        "p95": 492.11,
+        "p99": 1400.79,
+        "max": 2111.82,
+        "mean": 196.78
+      },
+      "scopes_ms": {
+        "postgis_plus_osrm_table": {
+          "n": 200,
+          "p50": 43.58,
+          "p95": 74.03,
+          "p99": 101.91,
+          "max": 156.37,
+          "mean": 47.95
+        },
+        "generation_before_persist": {
+          "n": 200,
+          "p50": 59.44,
+          "p95": 100.13,
+          "p99": 149.49,
+          "max": 209.0,
+          "mean": 65.65
+        },
+        "generation_plus_persist": {
+          "n": 200,
+          "p50": 125.3,
+          "p95": 492.11,
+          "p99": 1400.79,
+          "max": 2111.82,
+          "mean": 196.78
+        }
+      },
+      "stages_ms": {
+        "candidate_records": {
+          "n": 200,
+          "p50": 2.09,
+          "p95": 5.26,
+          "p99": 7.24,
+          "max": 14.49,
+          "mean": 2.4
+        },
+        "check_all": {
+          "n": 200,
+          "p50": 1.09,
+          "p95": 2.27,
+          "p99": 3.82,
+          "max": 12.48,
+          "mean": 1.3
+        },
+        "constraints": {
+          "n": 200,
+          "p50": 8.21,
+          "p95": 19.19,
+          "p99": 28.33,
+          "max": 54.75,
+          "mean": 9.96
+        },
+        "convert_car": {
+          "n": 200,
+          "p50": 0.16,
+          "p95": 0.5,
+          "p99": 0.99,
+          "max": 1.15,
+          "mean": 0.22
+        },
+        "convert_motorbike": {
+          "n": 200,
+          "p50": 0.09,
+          "p95": 0.19,
+          "p99": 0.3,
+          "max": 1.45,
+          "mean": 0.11
+        },
+        "insertion_pool_plans": {
+          "n": 200,
+          "p50": 1.22,
+          "p95": 3.31,
+          "p99": 5.54,
+          "max": 13.34,
+          "mean": 1.58
+        },
+        "osrm_car": {
+          "n": 200,
+          "p50": 18.59,
+          "p95": 32.48,
+          "p99": 50.84,
+          "max": 125.18,
+          "mean": 20.6
+        },
+        "osrm_car_http": {
+          "n": 200,
+          "p50": 18.15,
+          "p95": 31.98,
+          "p99": 50.41,
+          "max": 124.92,
+          "mean": 20.21
+        },
+        "osrm_car_json": {
+          "n": 200,
+          "p50": 0.24,
+          "p95": 0.5,
+          "p99": 0.68,
+          "max": 0.97,
+          "mean": 0.28
+        },
+        "osrm_motorbike": {
+          "n": 200,
+          "p50": 12.23,
+          "p95": 21.98,
+          "p99": 36.88,
+          "max": 119.08,
+          "mean": 14.45
+        },
+        "osrm_wall": {
+          "n": 200,
+          "p50": 21.57,
+          "p95": 36.14,
+          "p99": 56.54,
+          "max": 128.61,
+          "mean": 24.04
+        },
+        "persist": {
+          "n": 200,
+          "p50": 63.96,
+          "p95": 416.19,
+          "p99": 1322.29,
+          "max": 2027.27,
+          "mean": 131.13
+        },
+        "plan_lookup": {
+          "n": 200,
+          "p50": 11.13,
+          "p95": 18.26,
+          "p99": 25.65,
+          "max": 59.45,
+          "mean": 11.91
+        },
+        "plan_pricing_state": {
+          "n": 200,
+          "p50": 6.63,
+          "p95": 11.97,
+          "p99": 20.22,
+          "max": 24.83,
+          "mean": 7.39
+        },
+        "plan_riders": {
+          "n": 200,
+          "p50": 5.73,
+          "p95": 12.23,
+          "p99": 19.84,
+          "max": 30.56,
+          "mean": 6.56
+        },
+        "postgis": {
+          "n": 200,
+          "p50": 16.55,
+          "p95": 27.6,
+          "p99": 33.6,
+          "max": 65.7,
+          "mean": 17.24
+        },
+        "postgis_drivers": {
+          "n": 200,
+          "p50": 3.63,
+          "p95": 12.96,
+          "p99": 19.19,
+          "max": 20.6,
+          "mean": 5.33
+        },
+        "postgis_plus_osrm": {
+          "n": 200,
+          "p50": 37.63,
+          "p95": 60.1,
+          "p99": 81.92,
+          "max": 148.24,
+          "mean": 41.28
+        },
+        "pricing_params": {
+          "n": 200,
+          "p50": 0.01,
+          "p95": 0.01,
+          "p99": 0.02,
+          "max": 0.02,
+          "mean": 0.01
+        },
+        "scope_postgis_osrm_table": {
+          "n": 200,
+          "p50": 43.58,
+          "p95": 74.03,
+          "p99": 101.91,
+          "max": 156.37,
+          "mean": 47.95
+        },
+        "total": {
+          "n": 200,
+          "p50": 59.21,
+          "p95": 99.86,
+          "p99": 139.87,
+          "max": 208.43,
+          "mean": 65.33
+        }
+      },
+      "osrm_requests_per_run": [
+        2
+      ],
+      "rejections_by_code": {
+        "HC08": 1198,
+        "HC06": 1105,
+        "HC05": 1459,
+        "HC11": 372,
+        "HC07": 617,
+        "HC03": 829,
+        "P3_D1_NO_CO_RIDING_OVERLAP": 247,
+        "P3_GATE1_PASSENGER_SHAREABILITY": 9
+      },
+      "meets_300ms_p95_total": true,
+      "verification": {
+        "candidates_checked": 9162,
+        "with_violation": 0,
+        "violations_by_code": {},
+        "borderline_by_code": {},
+        "pending_p3": 0,
+        "pending_p3_offerable": 0,
+        "single_rejections": {
+          "correct": 1352
+        },
+        "plan_checks": {
+          "correct": 413,
+          "rejected_by_pricing_gates": 247
+        },
+        "sf_p2_15_default_routing": {
+          "pool_candidates": 2566,
+          "would_violate": 23,
+          "by_code": {
+            "HC03": 4,
+            "HC05": 19
+          },
+          "chain_distance_ratio_default_over_table": {
+            "n": 2566,
+            "p50": 1.0,
+            "p95": 1.06,
+            "p99": 1.17,
+            "max": 1.72,
+            "mean": 1.01
+          },
+          "chains_longer_than_1pct": 776
+        },
+        "samples": []
+      }
+    }
+  ],
+  "finished_utc": "2026-11-05T06:50:30.653690+00:00"
+}

@@ -236,7 +236,8 @@ def test_random_insertions_have_zero_violations_and_are_optimal(chunk: int) -> N
                              PARAMS.k_max_stops, PARAMS.location_stale_s)
         assert not bad, f"seed {seed}: reference finds {bad}"
         assert expected is not None
-        got = PARAMS.per_km_vnd * rep.best.added_distance_m / 1000 + PARAMS.per_min_vnd * rep.best.added_duration_s / 60
+        # Section 36 step 6: Delta PlanFare (D_plan / T_plan as priced, DD-P3-04) minus the 2 x STOP_FEE every option adds
+        got = rep.best.delta_cost_vnd - 2 * PARAMS.stop_fee_vnd
         assert got == pytest.approx(expected, abs=1e-6), f"seed {seed}: not the cheapest feasible insertion"
         # completed stops are never touched and S_curr stays first
         assert rep.best.evaluation.total_stops == state.completed_stops + len(rep.best.chain)

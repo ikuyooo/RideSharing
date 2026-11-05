@@ -11,8 +11,10 @@
        pooling.insertion (Section 36) and candidate.constraints.check_all: the 11 hard
        constraints for every rider, with table look-ups only.
 
-Branch A candidates carry pricing_check = PENDING_P3 (steps 4-5 of Section 36 are Phase 3;
-P2 plan OD-P2-04) and are logged, never offered.
+Branch A: steps 4-5 of Section 36 run through `pricing.pool_check.PoolPricingCheck` (Phase 3):
+PlanFare, gate 1, D1-D6, two-sided allocation, rounding, gate 2. An option is kept only when they
+all pass; the candidate then has pricing_check = COMPLETE and carries the allocation. Nothing is
+offered or booked here (Phase 4).
 """
 
 import math
@@ -32,10 +34,13 @@ from app.modules.booking import service as booking_service
 from app.modules.candidate.constraints import EXISTING_POOL_PLAN, NEW_SINGLE_VEHICLE, DriverState
 from app.modules.driver import service as driver_service
 from app.modules.identity import service as identity_service
+from app.modules.pooling import pricing_state
 from app.modules.pooling import repository as plans
 from app.modules.pooling.insertion import DROPOFF, PICKUP, InsertionReport, Params, PlanState, RiderSpec, Stop, insert
 from app.modules.pricing import service as pricing_service
-from app.modules.pricing.tariff import distance_time_fare, pool_quote
+from app.modules.pricing.money import to_rational_text
+from app.modules.pricing.pool_check import NEW_REF, PoolPricingCheck
+from app.modules.pricing.tariff import bike_fare, fare_matched_estimate, pool_quote_for, private_fare
 from app.modules.routing.provider import Lonlat, Matrix, Profile, RoutingProvider
 from app.modules.trip import rules as trip_rules
 from app.modules.trip.service import TripSnapshot, trip_snapshots
@@ -67,6 +72,7 @@ class Candidate:
     expected_price_vnd: int | None
     pool_quote_vnd: int | None
     pool_unmatched_vnd: int | None
+    fare_matched_est_vnd: int | None
     pricing_check: str
     insertion: dict[str, Any]
     audit: dict[str, Any]
@@ -85,6 +91,7 @@ class RunResult:
     # confirm that every rejection was right.
     evaluated_drivers: list[tuple[str, uuid.UUID]] = field(default_factory=list)
     evaluated_plans: list[uuid.UUID] = field(default_factory=list)
+    plan_rejections: dict[uuid.UUID, dict[str, int]] = field(default_factory=dict)
 
 
 def _state(d: driver_service.DriverCandidate) -> DriverState:
@@ -275,9 +282,14 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
     # ---- 3. constraints / insertion ----------------------------------------
     t0 = time.perf_counter()
     version = baseline["pricing_version"]
-    car_section = pricing_service.active_sections(session, "CAR_URBAN_PRIVATE", version)["car_urban"]
-    bike_section = pricing_service.active_sections(session, "BIKE_URBAN", version)["bike_urban"] if bike_m else None
+    prices = pricing_service.load_pricing(session, version)
+    car_p, bike_p = prices.car, prices.bike
     result.timings_ms["pricing_params"] = (time.perf_counter() - t0) * 1000
+    t0 = time.perf_counter()
+    plan_prices = pricing_state.plan_pricing_states(session, [rec.plan_id for rec, _ in plan_recs])
+    plan_params = {v: pricing_service.load_pricing(session, v).car
+                   for v in {st.pricing_version for st in plan_prices.values() if st.pricing_version}}
+    result.timings_ms["plan_pricing_state"] = (time.perf_counter() - t0) * 1000
     t0 = time.perf_counter()
     ins_stats: dict[str, float] = {}
     t_record = 0.0
@@ -296,13 +308,13 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
         d_m, d_s = D[p][q], T[p][q]
         direct_m, direct_s = (d_m or 0.0), (d_s or 0.0)
         if service == "BIKE_URBAN":
-            max_price = distance_time_fare(bike_section, direct_m / 1000, direct_s / 60)  # type: ignore[arg-type]
+            max_price = bike_fare(bike_p, direct_m, direct_s)
         elif service == "CAR_URBAN_PRIVATE":
             max_price = private_fare
         else:
-            max_price = pool_quote(car_section, private_fare).unmatched  # type: ignore[arg-type]
+            max_price = pool_quote_for(car_p, private_fare).unmatched  # type: ignore[arg-type]
         return RiderSpec(
-            ref="new", seats=trip.passenger_count, onboard=False, pickup_window=pickup_window(trip, service, baseline),
+            ref=NEW_REF, seats=trip.passenger_count, onboard=False, pickup_window=pickup_window(trip, service, baseline),
             actual_pickup=None, traveled_m=0.0, direct_distance_m=direct_m, direct_duration_s=direct_s,
             max_detour_ratio=trip.max_passenger_detour_ratio or DEFAULT_DETOUR_RATIO,
             max_in_vehicle_s=float(trip.max_in_vehicle_time_s) if trip.max_in_vehicle_time_s else
@@ -314,15 +326,28 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
 
     def record(service: str, source: str, d: driver_service.DriverCandidate, rep: InsertionReport,
                D: list, T: list, start: int, p: int, q: int, private_fare: int | None,
-               plan: plans.PlanRecord | None) -> None:
+               plan: plans.PlanRecord | None, check: PoolPricingCheck | None = None) -> None:
         nonlocal t_record
         t_rec = time.perf_counter()
         rej[service].update(rep.rejections)
         best = rep.best
         if best is None:
             return
-        new = next(r for r in best.evaluation.riders if r.ref == "new")
-        quote = pool_quote(car_section, private_fare) if service == "CAR_URBAN_POOL" and private_fare else None
+        new = next(r for r in best.evaluation.riders if r.ref == NEW_REF)
+        quote = pool_quote_for(car_p, private_fare) if service == "CAR_URBAN_POOL" and private_fare else None
+        matched_est, pricing = None, None
+        if service == "CAR_URBAN_POOL" and private_fare:
+            if check is not None:  # branch A: Section 20.2 case 1, the allocated Fare_charged
+                priced = check.outcomes[(best.p_idx, best.q_idx)]
+                matched_est = priced.prices[NEW_REF].fare_charged
+                pricing = {"pricing_version": check.state.pricing_version, "plan_version": check.state.plan_version,
+                           "plan_fare": to_rational_text(priced.plan_fare),  # type: ignore[arg-type]
+                           "target_fare_u": to_rational_text(priced.target_fare_u),  # type: ignore[arg-type]
+                           "driver_payout": to_rational_text(priced.gate.payout),  # type: ignore[union-attr]
+                           "riders": {ref: {"group": x.group, "fare_exact": to_rational_text(x.fare_exact),
+                                            "fare_charged": x.fare_charged} for ref, x in priced.prices.items()}}
+            else:  # branch B: Section 20.2 case 2
+                matched_est = fare_matched_estimate(car_p, private_fare)
         result.candidates.append(Candidate(
             service_code=service, source_type=source, driver_id=d.driver_id, vehicle_id=d.vehicle_id,
             plan_id=plan.plan_id if plan else None, plan_version=plan.plan_version if plan else None,
@@ -330,6 +355,7 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
             direct_distance_m=float(D[p][q] or 0.0), direct_duration_s=float(T[p][q] or 0.0),
             private_fare_vnd=private_fare, expected_price_vnd=new.max_price_vnd if service != "CAR_URBAN_POOL" else None,
             pool_quote_vnd=quote.quote if quote else None, pool_unmatched_vnd=quote.unmatched if quote else None,
+            fare_matched_est_vnd=matched_est,
             pricing_check=best.pricing_check if source == EXISTING_POOL_PLAN else "COMPLETE",
             insertion={"p_idx": best.p_idx, "q_idx": best.q_idx,
                        "chain": [[s.ref, s.kind] for s in best.chain],
@@ -338,7 +364,7 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
                        "planned_dropoff": new.planned_dropoff.isoformat(),
                        "added_distance_m": round(best.added_distance_m, 1),
                        "added_duration_s": round(best.added_duration_s, 1),
-                       "delta_cost_vnd": round(best.delta_cost_vnd, 1)},
+                       "delta_cost_vnd": round(best.delta_cost_vnd, 1)} | ({"pricing": pricing} if pricing else {}),
             audit={"checked": "HC01-HC11", "riders": [
                 {"ref": r.ref, "onboard": r.onboard, "planned_pickup": r.planned_pickup.isoformat() if r.planned_pickup else None,
                  "window": [w.isoformat() for w in r.pickup_window] if r.pickup_window else None,
@@ -362,8 +388,7 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
     if car_m is not None:
         D, T = car_m
         direct_m, direct_s = D[cp][cq], T[cp][cq]
-        private = (distance_time_fare(car_section, direct_m / 1000, direct_s / 60)
-                   if direct_m is not None and direct_s is not None else None)
+        private = private_fare(car_p, direct_m, direct_s) if direct_m is not None and direct_s is not None else None
         for d in cars.values():
             start = car_drv[d.driver_id]
             for service in ("CAR_URBAN_PRIVATE", "CAR_URBAN_POOL"):
@@ -382,10 +407,19 @@ def generate(session: Session, settings: Settings, trip: TripSnapshot, provider:
                 rej["CAR_URBAN_POOL"]["PLAN_DATA_INCOMPLETE"] += 1
                 continue
             result.evaluated_plans.append(rec.plan_id)
+            st = plan_prices.get(rec.plan_id)
+            if private is None or st is None:
+                rej["CAR_URBAN_POOL"]["P3_PLAN_PRICING_STATE"] += 1
+                continue
+            # Baseline 5.2: the plan is re-priced with the pricing_version it started with.
+            check = PoolPricingCheck(car=plan_params.get(st.pricing_version, car_p), state=st, new_private_fare=private,
+                                     new_seats=trip.passenger_count, new_direct_duration_s=T[cp][cq],
+                                     new_budget_max=trip.budget_max, now=now, completed_stops=state.completed_stops)
             rep = insert(state, new_rider("CAR_URBAN_POOL", D, T, cp, cq, private), cp, cq, D, T, "CAR_URBAN_POOL",
-                         EXISTING_POOL_PLAN, booking_time["CAR_URBAN_POOL"], params,
+                         EXISTING_POOL_PLAN, booking_time["CAR_URBAN_POOL"], params, pricing_check=check,
                          stats=ins_stats)
-            record("CAR_URBAN_POOL", EXISTING_POOL_PLAN, s, rep, D, T, curr, cp, cq, private, rec)
+            result.plan_rejections[rec.plan_id] = dict(rep.rejections)
+            record("CAR_URBAN_POOL", EXISTING_POOL_PLAN, s, rep, D, T, curr, cp, cq, private, rec, check)
         result.timings_ms["insertion_pool_plans"] = (time.perf_counter() - t_pool) * 1000
     # "constraints" = everything of step 3 (insertion + hard constraints + candidate records), kept
     # under its old name for the before / after comparison; its parts are listed beside it.

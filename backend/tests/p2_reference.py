@@ -97,6 +97,7 @@ def violations(state: PlanState, chain: tuple[Stop, ...], riders: dict[str, Ride
 
 
 def _length(state: PlanState, D, T, riders: dict[str, RiderSpec], dwell_s: float) -> tuple[float, float]:  # noqa: ANN001
+    """Total distance / elapsed time of the remaining chain (driver detour, constraint 7)."""
     clock = dist = 0.0
     node = state.current_node
     for stop in state.remaining:
@@ -109,26 +110,45 @@ def _length(state: PlanState, D, T, riders: dict[str, RiderSpec], dwell_s: float
     return dist, clock
 
 
+def _extent(state: PlanState, chain, D, T, riders: dict[str, RiderSpec], dwell_s: float) -> tuple[float, float]:  # noqa: ANN001
+    """D_plan / T_plan contribution of a chain, written independently of pooling.insertion: from the
+    vehicle's position when the plan has started, otherwise from the moment it is ready at the first
+    stop; up to the arrival at the last stop (dwell after the last stop excluded)."""
+    clock = dist = 0.0
+    node = state.current_node
+    first: tuple[float, float] | None = None
+    last = (0.0, 0.0)
+    for k, stop in enumerate(chain):
+        clock += T[node][stop.node] or 0.0
+        dist += D[node][stop.node] or 0.0
+        if stop.kind == PICKUP:
+            clock = max(clock, (riders[stop.ref].pickup_window[0] - state.now).total_seconds())
+        if k == 0:
+            first = (dist, clock)
+        last = (dist, clock)
+        clock += dwell_s
+        node = stop.node
+    if not chain:
+        return 0.0, 0.0
+    if state.completed_stops > 0:
+        return last
+    return last[0] - first[0], last[1] - first[1]  # type: ignore[index]
+
+
+
 def brute_force(state: PlanState, new: RiderSpec, p_node: int, q_node: int, D, T, service: str, source: str,  # noqa: ANN001
                 dwell_s: float, k_max: int, stale_s: float, per_km: float, per_min: float) -> float | None:
-    """Cheapest feasible insertion by enumerating every (P, Q) position pair."""
+    """Cheapest feasible insertion by enumerating every (P, Q) position pair; cost = PlanFare_new -
+    PlanFare_old without the 2 x STOP_FEE that every option adds (Section 36 step 6)."""
     riders = {r.ref: r for r in state.riders} | {new.ref: new}
     rem = list(state.remaining)
     best = None
-    old_m, old_s = _length(state, D, T, riders, dwell_s) if rem else (0.0, 0.0)
+    old_m, old_s = _extent(state, rem, D, T, riders, dwell_s)
     for i, j in itertools.combinations_with_replacement(range(len(rem) + 1), 2):
         chain = (*rem[:i], Stop(p_node, PICKUP, new.ref), *rem[i:j], Stop(q_node, "DROPOFF", new.ref), *rem[j:])
         if violations(state, chain, riders, D, T, service, source, dwell_s, k_max, stale_s):
             continue
-        clock = dist = 0.0
-        node = state.current_node
-        for stop in chain:
-            clock += T[node][stop.node]
-            dist += D[node][stop.node]
-            if stop.kind == PICKUP:
-                clock = max(clock, (riders[stop.ref].pickup_window[0] - state.now).total_seconds())
-            clock += dwell_s
-            node = stop.node
+        dist, clock = _extent(state, chain, D, T, riders, dwell_s)
         cost = per_km * (dist - old_m) / 1000 + per_min * (clock - old_s) / 60
         best = cost if best is None or cost < best else best
     return best

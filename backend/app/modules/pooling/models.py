@@ -22,6 +22,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    Text,
     UniqueConstraint,
     text,
 )
@@ -61,6 +62,14 @@ class RidePlan(Base):
     plan_fare_vnd: Mapped[int | None] = mapped_column(BigInteger)
     driver_hourly_rate_vnd: Mapped[int | None] = mapped_column(BigInteger)
     plan_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    # --- TECHNICAL ADDITIONS (Phase 3) ---------------------------------------
+    # Baseline 5.2: a plan is re-priced with the pricing_version it started with.
+    pricing_version: Mapped[str | None] = mapped_column(String(64))
+    # PlanFare of the current allocation, loss-free ("num/den"); plan_fare_vnd cannot hold fractions.
+    plan_fare_exact: Mapped[str | None] = mapped_column(Text)
+    # D_plan / T_plan of a running plan are measured from S_0 (P3 decision DD-P3-04).
+    driven_m_since_start: Mapped[float] = mapped_column(Float, nullable=False, server_default="0")
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
         in_check("service_code", SERVICE_CODES, "service_code"),
@@ -94,6 +103,8 @@ class RideParticipant(Base):
     fare_charged_vnd: Mapped[int | None] = mapped_column(BigInteger)
     rounding_absorbed_vnd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     is_price_frozen: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    # TECHNICAL ADDITION (Phase 3): Fare_exact loss-free ("num/den"); NUMERIC(12, 2) rounds to 0.01 VND.
+    fare_exact_rational: Mapped[str | None] = mapped_column(Text)
     # TECHNICAL ADDITION (Phase 2): the rider's direct trip (OSRM car) fixed at booking -
     # the reference of constraint 5 (detour) and of the default of constraint 6.
     direct_distance_m: Mapped[float | None] = mapped_column(Float)

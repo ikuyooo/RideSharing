@@ -1,0 +1,11 @@
+{
+  "run_id": "20261105T054312Z-p3-integrated-a6",
+  "started_utc": "2026-11-05T05:43:13Z",
+  "finished_utc": "2026-11-05T05:46:52Z",
+  "git_commit": "d9a2a324d7a887ceaeff52a82b8a45bcad6d0ea9",
+  "git_dirty_files": 38,
+  "arguments": "--analyze ",
+  "output": "result.json",
+  "exit_code": 0,
+  "environment": "docker compose network: backend image + osrm-car / osrm-motorbike / postgres; synthetic data, throwaway database p2_bench"
+}
