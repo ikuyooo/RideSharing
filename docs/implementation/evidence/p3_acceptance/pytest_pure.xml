@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites time="6.0879" tests="137" failures="0" skipped="2">
+  <testsuite name="p3_pure_python" tests="137" failures="0" skipped="2" time="6.0879">
+    <testcase classname="tests.test_config_baseline" name="test_config_file_matches_locked_document_exactly" time="0.0125" />
+    <testcase classname="tests.test_config_baseline" name="test_loader_rejects_missing_file" time="0.0037" />
+    <testcase classname="tests.test_config_baseline" name="test_loader_rejects_wrong_version" time="0.0014" />
+    <testcase classname="tests.test_config_baseline" name="test_loader_returns_read_only_mapping" time="0.0056" />
+    <testcase classname="tests.test_pricing_regression" name="test_10_4_three_urban_services_side_by_side" time="0.0101" />
+    <testcase classname="tests.test_pricing_regression" name="test_16_1_reference_allocations" time="0.0000" />
+    <testcase classname="tests.test_pricing_regression" name="test_18_5_row_4_corider_cancelled_late" time="0.0000" />
+    <testcase classname="tests.test_pricing_regression" name="test_19_2_fund_break_even_inputs" time="0.0001" />
+    <testcase classname="tests.test_pricing_regression" name="test_28_3_door_surcharge_and_28_4_booking_price" time="0.0001" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_1_two_riders_matched" time="0.0005" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_2_unmatched_and_anti_sabotage" time="0.0001" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_3a_floor_binds" time="0.0004" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_3b_lower_bound_infeasible" time="0.0005" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_3c_two_seat_booking" time="0.0003" />
+    <testcase classname="tests.test_pricing_regression" name="test_71_1_vector_4_insert_c_while_b_is_locked" time="0.0007" />
+    <testcase classname="tests.test_pricing_regression" name="test_72_1_fixed_fares" time="0.0002" />
+    <testcase classname="tests.test_pricing_regression" name="test_seat_price_band_validation" time="0.0001" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_bike_fee_is_below_the_cap_and_private_fee_is_capped" time="0.0001" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[BIKE_URBAN-DRIVER]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[BIKE_URBAN-SYSTEM]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_URBAN_PRIVATE-DRIVER]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_URBAN_PRIVATE-SYSTEM]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_URBAN_POOL-DRIVER]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_URBAN_POOL-SYSTEM]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_INTERCITY_PRIVATE-DRIVER]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_INTERCITY_PRIVATE-SYSTEM]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_INTERCITY_POOL-DRIVER]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_driver_or_system_cancellation_is_free_everywhere[CAR_INTERCITY_POOL-SYSTEM]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_fee_never_exceeds_the_deposit" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_intercity_pool_windows" time="0.0001" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_intercity_private" time="0.0001" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_urban_pool" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_urban_single[BIKE_URBAN]" time="0.0000" />
+    <testcase classname="tests.test_pricing_cancellation" name="test_urban_single[CAR_URBAN_PRIVATE]" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_allocation_feasibility_conditions" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_baseline_parameters_load_and_validate" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_d1_each_condition" time="0.0009" />
+    <testcase classname="tests.test_pricing_pool" name="test_d3_upper_bound" time="0.0005" />
+    <testcase classname="tests.test_pricing_pool" name="test_d4_lower_bound" time="0.0002" />
+    <testcase classname="tests.test_pricing_pool" name="test_d5_frozen_group_and_no_increase" time="0.0004" />
+    <testcase classname="tests.test_pricing_pool" name="test_d5_gate2_after_rounding_on_the_whole_plan" time="0.0003" />
+    <testcase classname="tests.test_pricing_pool" name="test_d6_budget_of_the_new_rider" time="0.0006" />
+    <testcase classname="tests.test_pricing_pool" name="test_final_price_at_lock" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_first_match_uses_cap_and_no_previous_price" time="0.0002" />
+    <testcase classname="tests.test_pricing_pool" name="test_floor_cap_and_seat_factor" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_gate1_boundary_is_inclusive" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_gate1_rejects_a_plan_that_saves_too_little" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_gate2a_payout_and_2b_hourly_rate_boundaries" time="0.0002" />
+    <testcase classname="tests.test_pricing_pool" name="test_hourly_gate_rejects_a_plan_in_price_new_plan" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_inconsistent_stored_state_is_rejected" time="0.0002" />
+    <testcase classname="tests.test_pricing_pool" name="test_invalid_rider_input" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_money_is_exact" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_one_rider_at_cap_and_one_at_floor_at_the_same_time" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[d_min-0.65]" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[d_max-0.2]" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[commission_pool_total-0.16]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[on_lower_bound_infeasible-CLAMP]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[rounding_step_vnd-500]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[party_seat_surcharge_gamma-0.6]" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[base_vnd-20500]" time="0.0000" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[d_matched_typical-0.7]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[enforce_driver_hourly_rate_gate-yes]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_out_of_domain_parameters_are_refused[max_party_seats_pool-3]" time="0.0001" />
+    <testcase classname="tests.test_pricing_pool" name="test_rounding_never_rounds_up" time="0.0002" />
+    <testcase classname="tests.test_pricing_pool" name="test_two_seat_quote_unmatched_below_private" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_boundaries_are_feasible" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_detour_and_driver_limits_apply_to_the_pool_only" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('8d6945a3-c392-4d2f-83de-01c2a16de8b6'), availability='OFFLINE', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('947a7436-0259-461c-84b8-af6e2422169c'), vehicle_type='CAR4', capacity=4, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('103db168-7c51-49a9-8841-f9c83c0192ed'), availability='BUSY', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('ee823b2c-a82d-4dea-8aa3-7cf783c669a5'), vehicle_type='CAR4', capacity=4, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('eeb09420-c1c7-4c7e-9b4e-ab50d93efac6'), availability='IDLE', location_age_s=121, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('1bd988b2-18e4-45bf-8adb-3c130e8b10ab'), vehicle_type='CAR4', capacity=4, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('f679ab13-2280-4724-ad0f-4bc15b9657c0'), availability='IDLE', location_age_s=10, kyc_status='PENDING', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('89805caa-529b-4138-ba3b-12b3a893bd21'), vehicle_type='CAR4', capacity=4, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('ec3362ab-128f-4ea8-ab80-704405b8b560'), availability='IDLE', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=False, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('b658d255-199b-4721-b25a-e442d5ad6425'), vehicle_type='CAR4', capacity=4, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('92f846a5-dbba-44d3-a0b4-ac5bc4c6a039'), availability='IDLE', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('6e913d8e-f4fa-4b6b-85b1-1c0eb8eee8a3'), vehicle_type='BIKE', capacity=1, vehicle_active=True)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'driver': DriverState(driver_id=UUID('8c6b2796-4801-4992-b854-af6b76656c69'), availability='IDLE', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('fd9972bb-80d1-48d2-8b29-dba1760f33b4'), vehicle_type='CAR4', capacity=4, vehicle_active=False)}-HC01]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'unroutable_legs': ('0-&gt;1',)}-HC02]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 15, 1, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.0, max_in_vehicle_s=1500.0, ride_distance_m=13000.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=None, max_price_vnd=174000, budget_max_vnd=174000, walk_m=0, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC03]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'segment_loads': (4, 5)}-HC04]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 5, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.0, max_in_vehicle_s=1500.0, ride_distance_m=13001.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=None, max_price_vnd=174000, budget_max_vnd=174000, walk_m=0, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC05]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 5, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.5, max_in_vehicle_s=1500.0, ride_distance_m=13000.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=None, max_price_vnd=174000, budget_max_vnd=174000, walk_m=0, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC06]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 5, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.0, max_in_vehicle_s=1500.0, ride_distance_m=13000.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=datetime.datetime(2026, 10, 29, 8, 29, tzinfo=datetime.timezone.utc), max_price_vnd=174000, budget_max_vnd=174000, walk_m=0, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC06]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'source_type': 'EXISTING_POOL_PLAN', 'added_distance_m': 3001.0}-HC07]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'source_type': 'EXISTING_POOL_PLAN', 'added_duration_s': 601.0}-HC07]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'source_type': 'EXISTING_POOL_PLAN', 'driver': DriverState(driver_id=UUID('66702e1f-cfa8-4dfb-b472-386d510434fc'), availability='BUSY', location_age_s=10, kyc_status='VERIFIED', accepts_urban=True, pool_enabled=True, accepts_intercity=False, max_additional_pickups=2, max_driver_detour_km=3.0, max_driver_detour_min=10.0, vehicle_id=UUID('f72e485d-540b-4bb0-8215-9076aafa4435'), vehicle_type='CAR4', capacity=4, vehicle_active=True), 'added_pickups': 3}-HC07]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'total_stops': 9}-HC07]" time="0.0001" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 5, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.0, max_in_vehicle_s=1500.0, ride_distance_m=13000.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=None, max_price_vnd=174000, budget_max_vnd=173999, walk_m=0, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC08]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'booking_time_ok': False}-HC09]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_each_violation[{'riders': (RiderOutcome(ref='new', seats=1, onboard=False, span=(1, 2), pickup_window=(datetime.datetime(2026, 10, 29, 8, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 10, 29, 8, 15, tzinfo=datetime.timezone.utc)), planned_pickup=datetime.datetime(2026, 10, 29, 8, 5, tzinfo=datetime.timezone.utc), planned_dropoff=datetime.datetime(2026, 10, 29, 8, 30, tzinfo=datetime.timezone.utc), in_vehicle_s=1500.0, max_in_vehicle_s=1500.0, ride_distance_m=13000.0, direct_distance_m=10000.0, max_detour_ratio=0.3, latest_arrival=None, max_price_vnd=174000, budget_max_vnd=174000, walk_m=1, max_walk_m=0, same_gender=False, verified_gender=None),)}-HC10]" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_existing_plan_driver_may_be_busy_but_not_offline" time="0.0000" />
+    <testcase classname="tests.test_candidate_constraints" name="test_null_detour_limit_is_not_zero" time="0.0001" />
+    <testcase classname="tests.test_candidate_constraints" name="test_pending_p3_candidates_are_never_offerable" time="0.0040">
+      <skipped message="Skipped due to uninstalled dependency or partial stub: No module named 'fastapi'" />
+    </testcase>
+    <testcase classname="tests.test_candidate_constraints" name="test_same_gender_only_on_overlapping_segments" time="0.0002" />
+    <testcase classname="tests.test_pooling_insertion" name="test_booking_time_and_unroutable_leg_and_budget" time="0.0001" />
+    <testcase classname="tests.test_pooling_insertion" name="test_exactly_eleven_hard_constraints" time="0.0000" />
+    <testcase classname="tests.test_pooling_insertion" name="test_insertion_reads_only_stop_destinations[0]" time="0.3945" />
+    <testcase classname="tests.test_pooling_insertion" name="test_insertion_reads_only_stop_destinations[1]" time="0.4811" />
+    <testcase classname="tests.test_pooling_insertion" name="test_insertion_reads_only_stop_destinations[2]" time="0.3725" />
+    <testcase classname="tests.test_pooling_insertion" name="test_k_max_and_additional_pickups" time="0.0001" />
+    <testcase classname="tests.test_pooling_insertion" name="test_new_rider_goes_between_on_a_straight_line" time="0.0002" />
+    <testcase classname="tests.test_pooling_insertion" name="test_onboard_rider_constraints_block_an_insertion" time="0.0002" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[0]" time="0.3397" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[1]" time="0.3301" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[2]" time="0.3174" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[3]" time="0.3360" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[4]" time="0.4588" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[5]" time="0.5256" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[6]" time="0.5385" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[7]" time="0.5503" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[8]" time="0.5970" />
+    <testcase classname="tests.test_pooling_insertion" name="test_random_insertions_have_zero_violations_and_are_optimal[9]" time="0.7038" />
+    <testcase classname="tests.test_pooling_insertion" name="test_running_vehicle_never_inserts_before_the_current_position" time="0.0006" />
+    <testcase classname="tests.test_pooling_insertion" name="test_same_gender_needs_verified_gender_on_overlap" time="0.0004" />
+    <testcase classname="tests.test_pooling_insertion" name="test_segment_capacity" time="0.0002" />
+    <testcase classname="tests.test_pooling_insertion" name="test_single_vehicle_is_insertion_into_an_empty_plan" time="0.0002" />
+    <testcase classname="tests.test_trip_rules" name="test_bike_excluded_for_groups_and_luggage_g13" time="0.0001" />
+    <testcase classname="tests.test_trip_rules" name="test_buffer_boundary_is_inclusive_at_15_km[True-False]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_buffer_boundary_is_inclusive_at_15_km[False-True]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_buffer_comes_from_baseline" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_7_day_upper_bound" time="0.0001" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_never_offers_urban_services_g13" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_pool_71h59m_rejected_with_private_suggestion" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_pool_exactly_72h_is_valid" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_pool_suggestion_even_when_pool_preferred" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_intercity_private_now_allowed_pool_not" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_preference_filters[BIKE-ANY-['BIKE_URBAN']]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_preference_filters[CAR-ANY-['CAR_URBAN_PRIVATE', 'CAR_URBAN_POOL']]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_preference_filters[ANY-PRIVATE-['BIKE_URBAN', 'CAR_URBAN_PRIVATE']]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_preference_filters[ANY-POOL-['CAR_URBAN_POOL']]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_preference_filters[BIKE-POOL-[]]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_routing_errors_propagate" time="0.0069">
+      <skipped message="Skipped due to uninstalled dependency or partial stub: No module named 'httpx'" />
+    </testcase>
+    <testcase classname="tests.test_trip_rules" name="test_step1_outside_total_area[False-True]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_step1_outside_total_area[True-False]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_step1_outside_total_area[False-False]" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_step2_both_urban_needs_no_distance" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_step3_both_ends_outside_urban_rejected" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_urban_lead_time_12_hours_inclusive" time="0.0001" />
+    <testcase classname="tests.test_trip_rules" name="test_urban_now_any_any_single_passenger" time="0.0000" />
+    <testcase classname="tests.test_trip_rules" name="test_urban_pool_party_limit_from_baseline" time="0.0000" />
+  </testsuite>
+</testsuites>

@@ -1,0 +1,90 @@
+{
+  "manifest_version": "1.0.0",
+  "project": "Ride_Sharing",
+  "phase": "PHASE_3",
+  "purpose": "Phase 3 Acceptance Gate Closure & Reproducible Test Execution Manifest",
+  "generated_at": "2026-11-10T11:30:00Z",
+  "git_provenance": {
+    "commit_sha": "f97a5092ece737d70051d08e6e3604e6a0c6bd1d",
+    "parent_sha": "d9a2a324d7a887ceaeff52a82b8a45bcad6d0ea9",
+    "tree_sha": "2126a22d634e455e28bddf47d0d5fbf699fcc640",
+    "tracked_files_count": 463,
+    "status": "CLEAN_TREE"
+  },
+  "runtime_environment": {
+    "host_os": "Windows (win32)",
+    "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "pip_version": "25.0.1",
+    "pytest_cli_installed": false,
+    "hypothesis_installed": false,
+    "docker_installed": false,
+    "postgres_running": false,
+    "sandbox_network_isolated": true,
+    "execution_mode": "STANDALONE_CALLABLE_HARNESS",
+    "execution_rationale": "Host environment lacks pytest, hypothesis, and live PostgreSQL/PostGIS. Pip downloads are blocked by sandbox network isolation. The 137 pure-python algorithmic test cases were directly executed via standalone callable harness with module-level stubbing."
+  },
+  "test_execution_summary": {
+    "pure_python_tests": {
+      "modules_executed": [
+        "tests.test_config_baseline",
+        "tests.test_pricing_regression",
+        "tests.test_pricing_cancellation",
+        "tests.test_pricing_pool",
+        "tests.test_candidate_constraints",
+        "tests.test_pooling_insertion",
+        "tests.test_trip_rules"
+      ],
+      "total_cases": 137,
+      "passed": 135,
+      "failed": 0,
+      "skipped": 2,
+      "verdict": "PASS"
+    },
+    "property_based_tests_hypothesis": {
+      "module": "tests.test_pricing_properties",
+      "status": "ENVIRONMENT_BLOCKED",
+      "historical_status": "HISTORICAL_EVIDENCE_ONLY (32 profiles passing in compose CI)",
+      "notes": "Requires hypothesis library which is not installed on Windows host."
+    },
+    "database_integration_tests": {
+      "status": "ENVIRONMENT_BLOCKED",
+      "historical_status": "HISTORICAL_EVIDENCE_ONLY",
+      "historical_runs_referenced": [
+        "docs/implementation/evidence/p3_runs/a4_report.json",
+        "docs/implementation/evidence/p3_runs/a5_report.json",
+        "docs/implementation/evidence/p3_runs/a6_report.json",
+        "docs/implementation/evidence/p0_smoke_check_p3_20261105.json"
+      ],
+      "notes": "Requires PostgreSQL 16 + PostGIS 3.4 + pgvector container."
+    }
+  },
+  "generated_artifacts": [
+    {
+      "path": "docs/implementation/evidence/p3_acceptance/test_pure_python.log",
+      "sha256": "61c60d66af7f01f78830685288c822402bee1cbce8aef927df45a362635d4844",
+      "description": "Standard output log of 137 pure-python test cases execution"
+    },
+    {
+      "path": "docs/implementation/evidence/p3_acceptance/pytest_pure.xml",
+      "sha256": "cf38d85200149813576acb3bdfe50e07a53243e1310c61dd414aef401cbdac8a",
+      "description": "JUnit XML test report conforming to standard CI parser format"
+    }
+  ],
+  "gates_status": {
+    "gate_0_repo_integrity": "PASS",
+    "gate_1_cancellation_policy": "PASS",
+    "gate_2_reproducible_pure_tests": "PASS",
+    "gate_2_pytest_hypothesis_cli": "ENVIRONMENT_BLOCKED",
+    "gate_3_database_triggers_ledger": "HISTORICAL_EVIDENCE_ONLY",
+    "gate_4_financial_topup_review": "PASS",
+    "gate_5_benchmark_reconciliation": "PASS",
+    "gate_6_technical_debt_governance": "PASS",
+    "gate_7_dossier_standardization": "PASS"
+  },
+  "final_acceptance_status": "RECOMMENDED_FOR_CONDITIONAL_ACCEPTANCE",
+  "pending_project_owner_actions": [
+    "PO-P3-01: Approve Top-up Entry Type & Migration 0007 specification",
+    "PO-P3-02: Decide OSRM table vs route discrepancy resolution (accept 1.16% route filter or add route-recheck step in candidate pipeline)",
+    "PO-P3-03: Sign off on Phase 3 Closure based on verified pure-Python evidence and historical container runs"
+  ]
+}
